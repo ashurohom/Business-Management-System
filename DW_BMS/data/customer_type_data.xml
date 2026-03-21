@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo noupdate="1">
+    <record id="dw_customer_type_wholesaler" model="dw.customer.type">
+        <field name="name">Wholesaler</field>
+    </record>
+    <record id="dw_customer_type_retailer" model="dw.customer.type">
+        <field name="name">Retailer</field>
+    </record>
+    <record id="dw_customer_type_end_user" model="dw.customer.type">
+        <field name="name">End User</field>
+    </record>
+</odoo>

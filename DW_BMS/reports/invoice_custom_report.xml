@@ -1,0 +1,761 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- ============================================================
+         Report Action
+    ============================================================ -->
+    <record id="action_report_invoice_custom" model="ir.actions.report">
+        <field name="name">Tax Invoice</field>
+        <field name="model">account.move</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">DW_BMS.report_invoice_custom_template</field>
+        <field name="report_file">DW_BMS.report_invoice_custom_template</field>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Invoice - %s' % (object.name)</field>
+    </record>
+
+    <!-- ============================================================
+         QWeb Template
+    ============================================================ -->
+    <template id="report_invoice_custom_template">
+        <t t-call="web.html_container">
+            <meta charset="utf-8"/>
+            <t t-foreach="docs" t-as="doc">
+                <!-- Only render for customer invoices -->
+                <t t-if="doc.move_type == 'out_invoice'">
+                <t t-call="web.basic_layout">
+                <div class="page invoice-bordered-page">
+                <style>
+                    .invoice-bordered-page {
+                        position: relative;
+                        box-sizing: border-box;
+                    }
+
+                    /* ---- Page wrapper ---- */
+                    .inv-wrap {
+                        border: 2px solid #8fa0bf;
+                        width: 100%;
+                        box-sizing: border-box;
+                        font-size: 12.5px;
+                        line-height: 1.4;
+                        color: #111;
+                        font-family: "DejaVu Sans", Arial, sans-serif;
+                        padding: 0;
+                    }
+
+                    /* ---- HEADER ---- */
+                    .inv-header-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        border-spacing: 0;
+                    }
+                    .inv-header-table td {
+                        border-bottom: 1.5px solid #8fa0bf;
+                        padding: 14px 16px;
+                        vertical-align: middle;
+                    }
+                    .inv-logo-cell {
+                        width: 30%;
+                        text-align: left;
+                        padding-left: 4px !important;
+                    }
+                    .inv-logo {
+                        max-height: 90px;
+                        max-width: 160px;
+                        display: block;
+                        margin-left: 4px;
+                    }
+                    .inv-company-cell {
+                        width: 70%;
+                        text-align: right;
+                    }
+                    .inv-company-name {
+                        font-size: 22px;
+                        font-weight: 700;
+                        color: #4f648b;
+                        margin: 0 0 4px 0;
+                        line-height: 1.2;
+                    }
+                    .inv-company-detail {
+                        font-size: 11.5px;
+                        color: #333;
+                        margin: 2px 0;
+                        line-height: 1.5;
+                    }
+                    .inv-gst-text {
+                        margin-top: 5px;
+                        font-size: 11.5px;
+                        color: #333;
+                        font-weight: 700;
+                    }
+
+                    /* ---- TITLE BANNER ---- */
+                    .inv-title {
+                        text-align: center;
+                        font-size: 17px;
+                        font-weight: 700;
+                        letter-spacing: 2px;
+                        text-transform: uppercase;
+                        background: #9aaacc;
+                        color: #fff;
+                        padding: 7px 0;
+                        margin: 0;
+                    }
+
+                    /* ---- GENERAL TABLE ---- */
+                    .inv-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        border-spacing: 0;
+                        table-layout: fixed;
+                    }
+                    .inv-table td,
+                    .inv-table th {
+                        border: 1px solid #b0bcd4;
+                        padding: 6px 8px;
+                        vertical-align: top;
+                    }
+                    .inv-label {
+                        font-weight: 700;
+                        color: #4f648b;
+                        white-space: nowrap;
+                    }
+
+                    /* ---- ADDRESS SECTION ---- */
+                    .inv-addr-section {
+                        width: 100%;
+                        border-collapse: collapse;
+                        border-spacing: 0;
+                    }
+                    .inv-addr-section td {
+                        border: 1px solid #b0bcd4;
+                        padding: 8px 10px;
+                        vertical-align: top;
+                        width: 50%;
+                    }
+                    .inv-addr-heading {
+                        font-size: 10px;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        color: #4f648b;
+                        border-bottom: 1px solid #b0bcd4;
+                        padding-bottom: 4px;
+                        margin-bottom: 5px;
+                    }
+                    .inv-addr-name {
+                        font-weight: 700;
+                        font-size: 13px;
+                        margin-bottom: 3px;
+                    }
+                    .inv-addr-text {
+                        font-size: 11.5px;
+                        line-height: 1.6;
+                        color: #222;
+                    }
+
+                    /* ---- META TABLE ---- */
+                    .inv-meta td:first-child {
+                        width: 28%;
+                    }
+
+                    /* ---- PAYMENT PAID BADGE ---- */
+                    .inv-paid-row td {
+                        border: 1px solid #b0bcd4;
+                        padding: 6px 10px;
+                        background: #f3f7fc;
+                    }
+                    .inv-paid-stamp {
+                        display: inline-block;
+                        border: 2px solid #2e7d32;
+                        color: #2e7d32;
+                        border-radius: 4px;
+                        padding: 2px 12px;
+                        font-size: 13px;
+                        font-weight: 700;
+                        letter-spacing: 1.5px;
+                        text-transform: uppercase;
+                        margin-right: 10px;
+                    }
+                    .inv-paid-bank {
+                        font-size: 11.5px;
+                        color: #333;
+                    }
+
+                    /* ---- PRODUCT TABLE ---- */
+                    .inv-lines thead th {
+                        background: #9aaacc;
+                        color: #fff;
+                        font-weight: 700;
+                        text-align: center;
+                        padding: 7px 6px;
+                        border: 1px solid #9aaacc;
+                    }
+                    .inv-lines tbody td {
+                        border: 1px solid #b0bcd4;
+                        padding: 6px 7px;
+                        vertical-align: middle;
+                    }
+                    .inv-lines tbody tr:nth-child(even) td {
+                        background: #f8faff;
+                    }
+                    .inv-right  { text-align: right; }
+                    .inv-center { text-align: center; }
+
+                    /* ---- TOTALS ---- */
+                    .inv-totals {
+                        width: 44%;
+                        margin-left: auto;
+                        border-collapse: collapse;
+                        border-spacing: 0;
+                        margin-top: 0;
+                    }
+                    .inv-totals td {
+                        border: 1px solid #b0bcd4;
+                        padding: 6px 10px;
+                    }
+                    .inv-totals tr:last-child td {
+                        background: #8ea3c8;
+                        color: #fff;
+                        font-weight: 700;
+                        font-size: 13px;
+                    }
+                    .inv-section-gap {
+                        height: 0;
+                        border: none;
+                    }
+                    .inv-hsn-summary {
+                        width: 100%;
+                        border-collapse: collapse;
+                        border-spacing: 0;
+                        margin-top: 14px;
+                        page-break-inside: avoid;
+                    }
+                    .inv-hsn-summary th,
+                    .inv-hsn-summary td {
+                        border: 1px solid #b0bcd4;
+                        padding: 6px 8px;
+                    }
+                    .inv-hsn-summary thead th {
+                        background: #9aaacc;
+                        color: #fff;
+                        font-weight: 700;
+                    }
+                    .inv-hsn-title {
+                        text-align: left;
+                        font-size: 14px;
+                        font-weight: 700;
+                        color: #4f648b;
+                        background: #eef3fb;
+                    }
+                    .inv-bank-box {
+                        width: 100%;
+                        border-collapse: collapse;
+                        border-spacing: 0;
+                        margin-top: 14px;
+                    }
+                    .inv-bank-box td {
+                        border: 1px solid #b0bcd4;
+                        padding: 10px 12px;
+                        vertical-align: top;
+                    }
+                    .inv-bank-title {
+                        font-size: 13px;
+                        font-weight: 700;
+                        color: #4f648b;
+                        margin-bottom: 6px;
+                    }
+                    .inv-bank-text {
+                        line-height: 1.7;
+                        white-space: pre-line;
+                    }
+                    .inv-bank-qr {
+                        text-align: center;
+                        width: 180px;
+                    }
+                    .inv-bank-qr img {
+                        max-width: 130px;
+                        max-height: 130px;
+                    }
+                    .inv-footer {
+                        margin-top: 18px;
+                        padding-top: 10px;
+                        font-size: 12px;
+                    }
+                    .inv-terms-title {
+                        margin: 0 0 6px 0;
+                    }
+                    .inv-terms-list {
+                        margin: 0;
+                        padding-left: 18px;
+                    }
+                    .inv-terms-list li {
+                        margin: 0 0 4px 0;
+                    }
+                    .inv-terms-section {
+                        margin: 0 0 8px 0;
+                    }
+                    .inv-terms-section-title {
+                        font-weight: 700;
+                    }
+                    .inv-terms-sublist {
+                        margin: 4px 0 0 0;
+                        padding-left: 18px;
+                    }
+                    .inv-terms-sublist li {
+                        display: inline;
+                        margin: 0;
+                    }
+                </style>
+
+                <div class="inv-wrap">
+
+                    <!-- ========== 1. COMPANY HEADER ========== -->
+                    <table class="inv-header-table">
+                        <tr>
+                            <td class="inv-logo-cell">
+                                <img t-if="doc.company_id.logo"
+                                     t-att-src="image_data_uri(doc.company_id.logo)"
+                                     alt="Logo"
+                                     class="inv-logo"/>
+                            </td>
+                            <td class="inv-company-cell">
+                                <p class="inv-company-name">
+                                    <span t-field="doc.company_id.name"/>
+                                </p>
+                                <p class="inv-company-detail">
+                                    <span t-if="doc.company_id.street"
+                                          t-esc="doc.company_id.street"/><t
+                                        t-if="doc.company_id.street2">,
+                                        <span t-esc="doc.company_id.street2"/>
+                                    </t>
+                                </p>
+                                <p class="inv-company-detail">
+                                    <t t-if="doc.company_id.city">
+                                        <span t-esc="doc.company_id.city"/>
+                                    </t>
+                                    <t t-if="doc.company_id.state_id">
+                                        , <span t-esc="doc.company_id.state_id.name"/>
+                                    </t>
+                                    <t t-if="doc.company_id.zip">
+                                        - <span t-esc="doc.company_id.zip"/>
+                                    </t>
+                                    <t t-if="doc.company_id.country_id">
+                                        , <span t-esc="doc.company_id.country_id.name"/>
+                                    </t>
+                                </p>
+                                <p class="inv-company-detail">
+                                    <t t-if="doc.company_id.phone">
+                                        <strong>Ph:</strong>
+                                        <span t-esc="doc.company_id.phone"/>
+                                    </t>
+                                    <t t-if="doc.company_id.email">
+                                        &amp;nbsp;|&amp;nbsp;
+                                        <strong>Email:</strong>
+                                        <span t-esc="doc.company_id.email"/>
+                                    </t>
+                                </p>
+                                <t t-if="doc.company_id.partner_id.vat">
+                                    <p class="inv-gst-text">
+                                        GSTIN: <span t-esc="doc.company_id.partner_id.vat"/>
+                                    </p>
+                                </t>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- ========== 2. TITLE BANNER ========== -->
+                    <h2 class="inv-title">Tax Invoice</h2>
+
+                    <!-- ========== 3. CUSTOMER + BILL TO / SHIP TO ========== -->
+                    <table class="inv-addr-section">
+                        <tr>
+                            <!-- Customer Info -->
+                            <td style="width:33%; border-right: 1px solid #b0bcd4;">
+                                <div class="inv-addr-heading">Customer Details</div>
+                                <div class="inv-addr-name">
+                                    <span t-field="doc.partner_id.name"/>
+                                </div>
+                                <div class="inv-addr-text">
+                                    <t t-if="doc.partner_id.phone">
+                                        <strong>Ph:</strong>
+                                        <span t-esc="doc.partner_id.phone"/>
+                                        <br/>
+                                    </t>
+                                    <t t-if="doc.partner_id.email">
+                                        <strong>Email:</strong>
+                                        <span t-esc="doc.partner_id.email"/>
+                                        <br/>
+                                    </t>
+                                    <t t-if="doc.partner_id.vat">
+                                        <strong>GSTIN:</strong>
+                                        <span t-esc="doc.partner_id.vat"/>
+                                    </t>
+                                </div>
+                            </td>
+
+                            <!-- Bill To -->
+                            <td style="width:33%; border-right: 1px solid #b0bcd4;">
+                                <div class="inv-addr-heading">Bill To</div>
+                                <div class="inv-addr-name">
+                                    <span t-field="doc.partner_id.name"/>
+                                </div>
+                                <div class="inv-addr-text">
+                                    <t t-if="doc.bill_to_same_as_customer">
+                                        <!-- Use partner address when same as customer -->
+                                        <span t-esc="doc.partner_id.street or ''"/>
+                                        <t t-if="doc.partner_id.street2">
+                                            , <span t-esc="doc.partner_id.street2"/>
+                                        </t>
+                                        <t t-if="doc.partner_id.city">
+                                            <br/><span t-esc="doc.partner_id.city"/>
+                                        </t>
+                                        <t t-if="doc.partner_id.state_id">
+                                            , <span t-esc="doc.partner_id.state_id.name"/>
+                                        </t>
+                                        <t t-if="doc.partner_id.zip">
+                                            - <span t-esc="doc.partner_id.zip"/>
+                                        </t>
+                                    </t>
+                                    <t t-else="">
+                                        <!-- Custom bill-to address -->
+                                        <t t-if="doc.bill_to_address">
+                                            <span t-esc="doc.bill_to_address"/>
+                                        </t>
+                                        <t t-if="doc.bill_to_city">
+                                            <br/><span t-esc="doc.bill_to_city"/>
+                                        </t>
+                                        <t t-if="doc.bill_to_state_id">
+                                            , <span t-esc="doc.bill_to_state_id.name"/>
+                                        </t>
+                                        <t t-if="doc.bill_to_zip">
+                                            - <span t-esc="doc.bill_to_zip"/>
+                                        </t>
+                                    </t>
+                                </div>
+                            </td>
+
+                            <!-- Ship To -->
+                            <td style="width:34%;">
+                                <div class="inv-addr-heading">Ship To</div>
+                                <div class="inv-addr-name">
+                                    <span t-field="doc.partner_id.name"/>
+                                </div>
+                                <div class="inv-addr-text">
+                                    <t t-if="doc.ship_to_same_as_customer">
+                                        <!-- Use partner address when same as customer -->
+                                        <span t-esc="doc.partner_id.street or ''"/>
+                                        <t t-if="doc.partner_id.street2">
+                                            , <span t-esc="doc.partner_id.street2"/>
+                                        </t>
+                                        <t t-if="doc.partner_id.city">
+                                            <br/><span t-esc="doc.partner_id.city"/>
+                                        </t>
+                                        <t t-if="doc.partner_id.state_id">
+                                            , <span t-esc="doc.partner_id.state_id.name"/>
+                                        </t>
+                                        <t t-if="doc.partner_id.zip">
+                                            - <span t-esc="doc.partner_id.zip"/>
+                                        </t>
+                                    </t>
+                                    <t t-else="">
+                                        <!-- Custom ship-to address -->
+                                        <t t-if="doc.ship_to_address">
+                                            <span t-esc="doc.ship_to_address"/>
+                                        </t>
+                                        <t t-if="doc.ship_to_city">
+                                            <br/><span t-esc="doc.ship_to_city"/>
+                                        </t>
+                                        <t t-if="doc.ship_to_state_id">
+                                            , <span t-esc="doc.ship_to_state_id.name"/>
+                                        </t>
+                                        <t t-if="doc.ship_to_zip">
+                                            - <span t-esc="doc.ship_to_zip"/>
+                                        </t>
+                                    </t>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- ========== 4. INVOICE META ========== -->
+                    <table class="inv-table inv-meta" style="margin-top:0;">
+                        <tr>
+                            <td class="inv-label" style="width:25%;">Invoice Number</td>
+                            <td style="width:25%;">
+                                <span t-field="doc.name"/>
+                            </td>
+                            <td class="inv-label" style="width:25%;">Invoice Date</td>
+                            <td style="width:25%;" class="inv-center">
+                                <span t-field="doc.invoice_date"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="inv-label">Payment Terms</td>
+                            <td>
+                                <span t-field="doc.invoice_payment_term_id"/>
+                            </td>
+                            <td class="inv-label">Payment Status</td>
+                            <td class="inv-center">
+                                <t t-if="doc.payment_state == 'paid'">
+                                    Paid
+                                </t>
+                                <t t-else="">
+                                    Unpaid
+                                </t>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- ========== 5. PAYMENT DETAILS ========== -->
+                    <t t-set="payment_items" t-value="doc.invoice_payments_widget and doc.invoice_payments_widget.get('content', []) or []"/>
+                    <table t-if="doc.payment_state == 'paid' and payment_items" class="inv-table" style="margin-top:0;">
+                        <tr>
+                            <td class="inv-label">Bank / Account</td>
+                            <td>
+                                <t t-foreach="payment_items" t-as="pmt">
+                                    <span t-esc="pmt.get('journal_name') or pmt.get('payment_name') or pmt.get('move_name') or ''"/>
+                                    <t t-if="not pmt_last">, </t>
+                                </t>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- ========== 6. PRODUCT LINES ========== -->
+                    <!-- Determine GST type once -->
+                    <t t-set="is_same_state"
+                       t-value="doc.partner_id.state_id and doc.company_id.state_id and doc.partner_id.state_id == doc.company_id.state_id"/>
+
+                    <table class="inv-table inv-lines" style="margin-top:0;">
+                        <thead>
+                            <tr>
+                                <th style="width:5%;">S.No</th>
+                                <th style="width:28%;">Product</th>
+                                <th style="width:12%;">HSN Code</th>
+                                <th style="width:9%;">Qty</th>
+                                <th style="width:9%;">UOM</th>
+                                <th style="width:18%;">Unit Price</th>
+                                <th style="width:19%;">Total Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="invoice_lines"
+                               t-value="doc.invoice_line_ids.filtered(lambda l: l.display_type == 'product' or not l.display_type)"/>
+                            <t t-if="not invoice_lines">
+                                <t t-set="invoice_lines"
+                                   t-value="doc.line_ids.filtered(lambda l: (l.display_type == 'product' or not l.display_type) and not l.exclude_from_invoice_tab)"/>
+                            </t>
+                            <t t-set="line_no" t-value="0"/>
+                            <t t-foreach="invoice_lines" t-as="line">
+                                <t t-set="line_no" t-value="line_no + 1"/>
+                                <tr>
+                                    <td class="inv-center">
+                                        <span t-esc="line_no"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="line.product_id.display_name or line.name or '-'"/>
+                                        <t t-if="line.name and line.product_id and line.name != line.product_id.display_name">
+                                            <br/><small style="color:#555;"><span t-esc="line.name"/></small>
+                                        </t>
+                                    </td>
+                                    <td class="inv-center">
+                                        <span t-esc="line.hsn_code or (line.product_id and line.product_id.l10n_in_hsn_code) or ''"/>
+                                    </td>
+                                    <td class="inv-right">
+                                        <span t-field="line.quantity"/>
+                                    </td>
+                                    <td class="inv-center">
+                                        <span t-field="line.product_uom_id"/>
+                                    </td>
+                                    <td class="inv-right">
+                                        <span t-esc="line.price_unit"
+                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    </td>
+                                    <td class="inv-right">
+                                        <span t-esc="line.price_subtotal"
+                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </t>
+                            <tr t-if="not invoice_lines">
+                                <td colspan="7" class="inv-center" style="color:#666;">No product lines found for this invoice.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- ========== 7. TOTALS ========== -->
+                    <table class="inv-totals">
+                        <tr>
+                            <td><strong>Untaxed Amount</strong></td>
+                            <td class="inv-right">
+                                <span t-esc="doc.amount_untaxed"
+                                      t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <strong>
+                                    Tax Amount
+                                    (<t t-if="is_same_state">GST</t><t t-else="">IGST</t>)
+                                </strong>
+                            </td>
+                            <td class="inv-right">
+                                <span t-esc="doc.amount_tax"
+                                      t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Total (Incl. Tax)</td>
+                            <td class="inv-right">
+                                <span t-esc="doc.amount_total"
+                                      t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- ========== 8. BANK DETAILS ========== -->
+                    <table class="inv-bank-box">
+                        <tr>
+                            <td>
+                                <div class="inv-bank-title">Company Bank Details</div>
+                                <div class="inv-bank-text">K V ENTERPRISES
+Ac. 0125009300101082
+Account Type. Overdraft
+IFSC Code. PUNB0012500
+MICR Code. 110024031
+SWIFT Code. PUNBINBBISB</div>
+                            </td>
+                            <td class="inv-bank-qr">
+                                <t t-set="qr_title" t-value="'Scan to Pay'"/>
+                                <t t-set="qr_title_class" t-value="'inv-bank-title'"/>
+                                <t t-call="DW_BMS.report_bank_qr_image"/>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- ========== 9. HSN SUMMARY ========== -->
+                    <t t-set="hsn_summary" t-value="doc._dw_get_hsn_summary_table()"/>
+                    <t t-if="hsn_summary and hsn_summary.get('items')">
+                        <table class="inv-hsn-summary">
+                            <thead>
+                                <tr>
+                                    <th t-att-colspan="hsn_summary['nb_columns']" class="inv-hsn-title">HSN Summary</th>
+                                </tr>
+                                <tr>
+                                    <th>HSN/SAC</th>
+                                    <th class="inv-right">Quantity</th>
+                                    <th class="inv-right">Rate %</th>
+                                    <th class="inv-right">Taxable Value</th>
+                                    <th class="inv-right" t-if="hsn_summary['has_gst']">SGST</th>
+                                    <th class="inv-right" t-if="hsn_summary['has_gst']">CGST</th>
+                                    <th class="inv-right" t-if="hsn_summary['has_igst']">IGST</th>
+                                    <th class="inv-right" t-if="hsn_summary['has_cess']">CESS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="hsn_summary['items']" t-as="item">
+                                    <td t-esc="item['l10n_in_hsn_code']"/>
+                                    <td class="inv-right">
+                                        <span t-esc="item['quantity']"/>
+                                        <t t-if="hsn_summary['display_uom'] and item.get('uom')">
+                                            <span> </span>
+                                            <span t-esc="item['uom'].name"/>
+                                        </t>
+                                    </td>
+                                    <td class="inv-right" t-esc="item['rate']"/>
+                                    <td class="inv-right">
+                                        <span t-esc="item['amount_untaxed']"
+                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    </td>
+                                    <td class="inv-right" t-if="hsn_summary['has_gst']">
+                                        <span t-esc="item['tax_amount_sgst']"
+                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    </td>
+                                    <td class="inv-right" t-if="hsn_summary['has_gst']">
+                                        <span t-esc="item['tax_amount_cgst']"
+                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    </td>
+                                    <td class="inv-right" t-if="hsn_summary['has_igst']">
+                                        <span t-esc="item['tax_amount_igst']"
+                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    </td>
+                                    <td class="inv-right" t-if="hsn_summary['has_cess']">
+                                        <span t-esc="item['tax_amount_cess']"
+                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
+                </div><!-- end inv-wrap -->
+                <div class="inv-footer">
+                    <p class="inv-terms-title"><strong>Terms and Conditions</strong></p>
+                    <ol class="inv-terms-list">
+                        <li class="inv-terms-section">
+                            <span class="inv-terms-section-title">Prices and Taxes</span>
+                            <ul class="inv-terms-sublist">
+                                <li>All prices are quoted in INR and are exclusive or inclusive of applicable taxes (GST, VAT, customs duties, etc.), unless otherwise mentioned.</li>
+                                <li>Any quotation provided is valid only on the date on which pro forma invoice (PI) is shared.</li>
+                                <li>The buyer is responsible for any additional import duties, taxes, or charges in their country, if applicable.</li>
+                            </ul>
+                        </li>
+                        <li class="inv-terms-section">
+                            <span class="inv-terms-section-title">Payment Terms</span>
+                            <ul class="inv-terms-sublist">
+                                <li>Full payment must be made as per the terms mentioned in the invoice or pro forma invoice.</li>
+                                <li>Accepted payment methods: Bank Transfer / UPI / Credit Card / Others.</li>
+                                <li>Payments made with credit cards are charged 2% extra.</li>
+                            </ul>
+                        </li>
+                        <li class="inv-terms-section">
+                            <span class="inv-terms-section-title">Delivery and Shipping</span>
+                            <ul class="inv-terms-sublist">
+                                <li>Products will be dispatched within 3 business days after receipt of payment, or as otherwise agreed.</li>
+                                <li>Shipping costs, if applicable, will be borne by the buyer unless otherwise agreed.</li>
+                                <li>The seller is not liable for delays caused by shipping carriers or customs clearance.</li>
+                            </ul>
+                        </li>
+                        <li class="inv-terms-section">
+                            <span class="inv-terms-section-title">Returns and Refunds</span>
+                            <ul class="inv-terms-sublist">
+                                <li>Goods once sold are not returnable or refundable unless defective or wrongly supplied.</li>
+                                <li>Any claims must be reported within 2 days of delivery, along with relevant proof.</li>
+                            </ul>
+                        </li>
+                        <li class="inv-terms-section">
+                            <span class="inv-terms-section-title">Cancellation</span>
+                            <ul class="inv-terms-sublist">
+                                <li>Orders once confirmed cannot be cancelled without prior written consent from the seller.</li>
+                                <li>Any cancellation may be subject to a cancellation fee or forfeiture of advance payment.</li>
+                            </ul>
+                        </li>
+                        <li class="inv-terms-section">
+                            <span class="inv-terms-section-title">Warranty</span>
+                            <ul class="inv-terms-sublist">
+                                <li>Warranty does not cover damage due to misuse, mishandling, or unauthorized repairs.</li>
+                            </ul>
+                        </li>
+                        <li class="inv-terms-section">
+                            <span class="inv-terms-section-title">Limitation of Liability</span>
+                            <ul class="inv-terms-sublist">
+                                <li>The seller's liability is limited to the value of the goods sold.</li>
+                                <li>The seller is not liable for any indirect, incidental, or consequential damages.</li>
+                            </ul>
+                        </li>
+                        <li class="inv-terms-section">
+                            <span class="inv-terms-section-title">Governing Law</span>
+                            <ul class="inv-terms-sublist">
+                                <li>These terms are governed by the laws of the Delhi judiciary.</li>
+                                <li>Any disputes shall be subject to the jurisdiction of Delhi.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+                </div><!-- end page -->
+                </t>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

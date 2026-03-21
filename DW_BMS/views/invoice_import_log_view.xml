@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_dw_invoice_import_log_search" model="ir.ui.view">
+        <field name="name">dw.invoice.import.log.search</field>
+        <field name="model">dw.invoice.import.log</field>
+        <field name="arch" type="xml">
+            <search string="Import Logs">
+                <field name="name"/>
+                <field name="filename"/>
+                <field name="state"/>
+                <filter name="filter_done" string="Done" domain="[('state', '=', 'done')]"/>
+                <filter name="filter_partial" string="Partial" domain="[('state', '=', 'partial')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_dw_invoice_import_log_list" model="ir.ui.view">
+        <field name="name">dw.invoice.import.log.tree</field>
+        <field name="model">dw.invoice.import.log</field>
+        <field name="arch" type="xml">
+            <tree string="Invoice Import Logs"
+                  decoration-success="state == 'done'"
+                  decoration-warning="state == 'partial'">
+                <field name="name"/>
+                <field name="import_date"/>
+                <field name="filename"/>
+                <field name="state"
+                       widget="badge"
+                       decoration-success="state == 'done'"
+                       decoration-warning="state == 'partial'"/>
+                <field name="total_invoices"/>
+                <field name="created" decoration-success="created &gt; 0"/>
+                <field name="skipped" decoration-warning="skipped &gt; 0"/>
+                <field name="failed" decoration-danger="failed &gt; 0"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_dw_invoice_import_log_form" model="ir.ui.view">
+        <field name="name">dw.invoice.import.log.form</field>
+        <field name="model">dw.invoice.import.log</field>
+        <field name="arch" type="xml">
+            <form string="Import Log">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Batch">
+                            <field name="import_date" readonly="1"/>
+                            <field name="filename" readonly="1"/>
+                            <field name="state"
+                                   widget="badge"
+                                   decoration-success="state == 'done'"
+                                   decoration-warning="state == 'partial'"
+                                   readonly="1"/>
+                        </group>
+                        <group string="Summary">
+                            <field name="total_invoices" readonly="1"/>
+                            <field name="created" readonly="1"/>
+                            <field name="skipped" readonly="1"/>
+                            <field name="failed" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Invoice Results">
+                            <field name="log_line_ids" readonly="1">
+                                <tree string="Import Lines"
+                                      decoration-success="status == 'created'"
+                                      decoration-warning="status == 'skipped'"
+                                      decoration-danger="status == 'failed'">
+                                    <field name="invoice_number"/>
+                                    <field name="status"
+                                           widget="badge"
+                                           decoration-success="status == 'created'"
+                                           decoration-warning="status == 'skipped'"
+                                           decoration-danger="status == 'failed'"/>
+                                    <field name="move_id"/>
+                                    <field name="message"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_dw_invoice_import_log" model="ir.actions.act_window">
+        <field name="name">Import Logs</field>
+        <field name="res_model">dw.invoice.import.log</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_dw_invoice_import_log_search"/>
+        <field name="view_ids" eval="[
+            (5, 0, 0),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_dw_invoice_import_log_list')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_dw_invoice_import_log_form')}),
+        ]"/>
+    </record>
+
+</odoo>

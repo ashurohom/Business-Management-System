@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ========================= -->
+    <!-- PACKING TEAM -->
+    <!-- ========================= -->
+    <record id="group_packing_team" model="res.groups">
+        <field name="name">Packing Team</field>
+        <field name="category_id" ref="DW_BMS.module_category_dw_bms"/>
+        <field name="implied_ids" eval="[
+            (4, ref('stock.group_stock_user'))
+        ]"/>
+    </record>
+
+    <record id="stock.menu_stock_root" model="ir.ui.menu">
+        <field name="groups_id" eval="[
+            (6, 0, [
+                ref('DW_BMS.group_bms_admin'),
+                ref('DW_BMS.group_bms_purchase'),
+                ref('DW_BMS.group_bms_inventory'),
+                ref('DW_BMS.group_dispatch_team'),
+                ref('DW_BMS.group_sales_team'),
+                ref('DW_BMS.group_packing_team')
+            ])
+        ]"/>
+    </record>
+
+</odoo>

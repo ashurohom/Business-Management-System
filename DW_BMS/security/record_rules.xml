@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ========================= -->
+    <!-- SALES USER: OWN SALES ONLY -->
+    <!-- ========================= -->
+    <record id="rule_bms_sales_own_sales" model="ir.rule">
+        <field name="name">BMS Sales: Own Sales Only</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('DW_BMS.group_bms_sales'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- ========================= -->
+    <!-- PURCHASE USER: OWN PURCHASE ONLY -->
+    <!-- ========================= -->
+    <record id="rule_bms_purchase_own_purchase" model="ir.rule">
+        <field name="name">BMS Purchase: Own Purchase Only</field>
+        <field name="model_id" ref="purchase.model_purchase_order"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('DW_BMS.group_bms_purchase'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- ========================= -->
+    <!-- ACCOUNTS USER: SEE ALL -->
+    <!-- ========================= -->
+    <record id="rule_bms_accounts_all" model="ir.rule">
+        <field name="name">BMS Accounts: All Records</field>
+        <field name="model_id" ref="account.model_account_move"/>
+        <field name="domain_force">[(1,'=',1)]</field>
+        <field name="groups" eval="[(4, ref('DW_BMS.group_bms_accounts'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+    <!-- ========================= -->
+    <!-- REPORT USER: READ ALL -->
+    <!-- ========================= -->
+    <record id="rule_bms_report_read_all" model="ir.rule">
+        <field name="name">BMS Report: Read All</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="domain_force">[(1,'=',1)]</field>
+        <field name="groups" eval="[(4, ref('DW_BMS.group_bms_report'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <!-- ========================= -->
+    <!-- MANUFACTURING USER: OWN PRODUCTION ONLY -->
+    <!-- ========================= -->
+    <record id="rule_bms_manufacturing_own_production" model="ir.rule">
+        <field name="name">BMS Manufacturing: Own Production Only</field>
+        <field name="model_id" ref="mrp.model_mrp_production"/>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('DW_BMS.group_bms_manufacturing'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
+</odoo>

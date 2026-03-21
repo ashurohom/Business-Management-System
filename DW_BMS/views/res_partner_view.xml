@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_partner_form_bms_supplier" model="ir.ui.view">
+        <field name="name">res.partner.form.bms.supplier</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="priority" eval="99"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='category_id']" position="before">
+                <field name="customer_type" invisible="1"/>
+                <field name="customer_type_master_id" string="Customer Type"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_simple_form_bms_customer_type" model="ir.ui.view">
+        <field name="name">res.partner.simple.form.bms.customer.type</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_simple_form"/>
+        <field name="priority" eval="99"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='mobile']" position="after">
+                <field name="customer_type" invisible="1"/>
+                <field name="customer_type_master_id" string="Customer Type"/>
+            </xpath>
+        </field>
+    </record>
+
+
+    <record id="sale_order_form_inherit_hsn" model="ir.ui.view">
+        <field name="name">sale.order.form.hsn</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="after">
+                <field name="hsn_code"/>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <record id="purchase_order_form_inherit_hsn" model="ir.ui.view">
+        <field name="name">purchase.order.form.hsn</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="after">
+                <field name="hsn_code"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

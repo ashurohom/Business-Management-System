@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_packing_order" model="ir.actions.report">
+        <field name="name">Packing Slip</field>
+        <field name="model">packing.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">DW_BMS.report_packing_order_template</field>
+        <field name="report_file">DW_BMS.report_packing_order_template</field>
+        <field name="binding_model_id" ref="model_packing_order"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Packing - %s' % (object.invoice_id.name or '')</field>
+    </record>
+
+    <template id="report_packing_order_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-set="company" t-value="doc.invoice_id.company_id"/>
+                <div class="page">
+                    <div style="border: 2px solid #222; padding: 18px; box-sizing: border-box;">
+                            <div style="width: 100%; margin-bottom: 20px; overflow: hidden;">
+                                <div style="float: left; width: 30%;">
+                                    <img t-if="company.logo"
+                                         t-att-src="image_data_uri(company.logo)"
+                                         style="max-height: 80px; max-width: 100%;"/>
+                                </div>
+                                <div style="float: right; width: 68%; text-align: right;">
+                                    <div style="font-size: 20px; font-weight: 700; margin-bottom: 6px;">
+                                        <span t-esc="company.name"/>
+                                    </div>
+                                    <div t-esc="company.partner_id.contact_address or ''"/>
+                                    <t t-if="company.phone">
+                                        <div>
+                                            <strong>Phone:</strong>
+                                            <span t-esc="company.phone"/>
+                                        </div>
+                                    </t>
+                                    <t t-if="company.email">
+                                        <div>
+                                            <strong>Email:</strong>
+                                            <span t-esc="company.email"/>
+                                        </div>
+                                    </t>
+                                    <t t-if="company.partner_id.vat">
+                                        <div>
+                                            <strong>GST:</strong>
+                                            <span t-esc="company.partner_id.vat"/>
+                                        </div>
+                                    </t>
+                                </div>
+                                <div style="clear: both;"/>
+                            </div>
+
+                            <div style="border-top: 1px solid #222; margin: 0 0 20px 0;"/>
+                            <h2 style="text-align:center; margin: 0 0 20px 0; letter-spacing: 0.5px;">PACKING SLIP</h2>
+                            <p style="margin: 0 0 12px 0;">
+                                <strong>Invoice Number:</strong>
+                                <span t-esc="doc.invoice_id.name"/>
+                            </p>
+
+                            <table style="width: 100%; margin-bottom: 16px; table-layout: fixed;">
+                                <tr>
+                                    <td style="width: 50%; padding: 0 10px 0 0; vertical-align: top;">
+                                        <div style="padding: 10px;">
+                                            <strong>TO:</strong><br/>
+                                            <div class="mt16" style="margin-bottom: 8px;">
+                                                <strong>Name:</strong>
+                                                <span t-esc="doc.to_name or ''"/>
+                                            </div>
+                                            <div class="mt16" style="margin-bottom: 8px;">
+                                                <strong>Mobile:</strong>
+                                                <span t-esc="doc.to_mobile or ''"/>
+                                            </div>
+                                            <div class="mt16" style="margin-bottom: 8px;">
+                                                <strong>Address:</strong><br/>
+                                                <span t-esc="doc.to_address or ''"/>
+                                            </div>
+                                            <div>
+                                                <strong>City:</strong>
+                                                <span t-esc="doc.to_city or ''"/>
+                                                <span style="display: inline-block; width: 24px;"/>
+                                                <strong>State:</strong>
+                                                <span t-esc="doc.to_state or ''"/>
+                                            </div>
+                                            <div class="mt16" style="margin-top: 6px;">
+                                                <strong>Country:</strong>
+                                                <span t-esc="doc.to_country or ''"/>
+                                                <span style="display: inline-block; width: 24px;"/>
+                                                <strong>Pincode:</strong>
+                                                <span t-esc="doc.to_pincode or ''"/>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="width: 50%; padding: 0 0 0 10px; vertical-align: top;">
+                                        <div style="padding: 10px;">
+                                            <strong>FROM:</strong><br/>
+                                            <div class="mt16" style="margin-bottom: 8px;">
+                                                <strong>Name:</strong>
+                                                <span t-esc="doc.from_name or ''"/>
+                                            </div>
+                                            <div class="mt16" style="margin-bottom: 8px;">
+                                                <strong>Mobile:</strong>
+                                                <span t-esc="doc.from_mobile or ''"/>
+                                            </div>
+                                            <div class="mt16" style="margin-bottom: 8px;">
+                                                <strong>Address:</strong><br/>
+                                                <span t-esc="doc.from_address or ''"/>
+                                            </div>
+                                            <div>
+                                                <strong>City:</strong>
+                                                <span t-esc="doc.from_city or ''"/>
+                                                <span style="display: inline-block; width: 24px;"/>
+                                                <strong>State:</strong>
+                                                <span t-esc="doc.from_state or ''"/>
+                                            </div>
+                                            <div class="mt16" style="margin-top: 6px;">
+                                                <strong>Country:</strong>
+                                                <span t-esc="doc.from_country or ''"/>
+                                                <span style="display: inline-block; width: 24px;"/>
+                                                <strong>Pincode:</strong>
+                                                <span t-esc="doc.from_pincode or ''"/>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
+                                <tr>
+                                    <td style="width: 50%; padding: 10px 10px 10px 0; font-size: 20px;">
+                                        <strong>Dispatch Mode:</strong>
+                                        <span t-esc="doc.dispatch_mode_id.name or ''"/>
+                                    </td>
+                                    <td style="width: 50%; padding: 10px 0 10px 10px; font-size: 20px;">
+                                        <strong>Courier Company:</strong>
+                                        <span t-esc="doc.courier_company_id.name or ''"/>
+                                    </td>
+                                </tr>
+                            </table>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

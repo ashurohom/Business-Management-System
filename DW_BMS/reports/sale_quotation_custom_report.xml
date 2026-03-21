@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_saleorder_custom_quotation" model="ir.actions.report">
+        <field name="name">Quotation Report</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">DW_BMS.report_saleorder_custom_quotation</field>
+        <field name="report_file">DW_BMS.report_saleorder_custom_quotation</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Quotation - %s' % (object.name)</field>
+    </record>
+
+    <template id="report_saleorder_custom_quotation">
+        <t t-call="web.html_container">
+            <meta charset="utf-8"/>
+            <t t-foreach="docs" t-as="doc">
+                <div class="page">
+                    <style>
+                        .page {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
+                        .dw-quote-wrap {
+                            border: 2px solid #222;
+                            width: 100%;
+                            min-height: 1020px;
+                            box-sizing: border-box;
+                            padding: 0;
+                            font-size: 13px;
+                            line-height: 1.3;
+                            color: #111;
+                            font-family: "DejaVu Sans", Arial, sans-serif;
+                        }
+                        .dw-header {
+                            width: 100%;
+                            border-collapse: collapse;
+                            border-spacing: 0;
+                            table-layout: fixed;
+                        }
+                        .dw-header td {
+                            border-bottom: 1px solid #222;
+                            padding: 14px 12px;
+                            vertical-align: middle;
+                        }
+                        .dw-logo-box {
+                            width: 34%;
+                            text-align: left;
+                            padding-left: 4px !important;
+                        }
+                        .dw-logo {
+                            max-height: 100px;
+                            max-width: 180px;
+                            display: block;
+                            margin-left: 4px;
+                        }
+                        .dw-company-box {
+                            width: 66%;
+                            text-align: right;
+                        }
+                        .dw-company-name {
+                            font-size: 24px;
+                            color: #4f63b8;
+                            font-weight: 700;
+                            margin: 0;
+                            line-height: 1.2;
+                        }
+                        .dw-company-address {
+                            margin-top: 8px;
+                            font-size: 12px;
+                            line-height: 1.45;
+                        }
+                        .dw-quote-title {
+                            text-align: center;
+                            font-size: 18px;
+                            font-weight: 700;
+                            letter-spacing: 0.5px;
+                            margin: 0;
+                            border-bottom: 1px solid #222;
+                            background: #d8e1f0;
+                            padding: 8px 0;
+                        }
+                        .dw-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            border-spacing: 0;
+                            table-layout: fixed;
+                        }
+                        .dw-table td,
+                        .dw-table th {
+                            border: 1px solid #222;
+                            padding: 6px 7px;
+                            vertical-align: top;
+                        }
+                        .dw-head td {
+                            height: 92px;
+                        }
+                        .dw-meta {
+                            margin-top: 0;
+                        }
+                        .dw-meta td {
+                            font-size: 11px;
+                        }
+                        .dw-meta tr:first-child td {
+                            border-top: 0;
+                        }
+                        .dw-label {
+                            font-weight: 700;
+                            white-space: nowrap;
+                        }
+                        .dw-lines {
+                            margin-top: 0;
+                        }
+                        .dw-lines thead tr:first-child th {
+                            border-top: 0;
+                        }
+                        .dw-lines th {
+                            font-weight: 700;
+                            text-align: center;
+                            background: #f1f1f1;
+                        }
+                        .dw-right {
+                            text-align: right;
+                        }
+                        .dw-center {
+                            text-align: center;
+                        }
+                        .dw-totals {
+                            width: 42%;
+                            margin-left: auto;
+                            margin-top: 0;
+                            border-collapse: collapse;
+                            border-spacing: 0;
+                            table-layout: fixed;
+                        }
+                        .dw-totals td {
+                            border: 1px solid #222;
+                            padding: 6px 7px;
+                        }
+                        .dw-total-strong {
+                            font-size: 14px;
+                            font-weight: 700;
+                        }
+                        .dw-bank-box {
+                            width: 100%;
+                            border-collapse: collapse;
+                            border-spacing: 0;
+                            margin-top: 14px;
+                            table-layout: fixed;
+                        }
+                        .dw-bank-box td {
+                            border: 1px solid #222;
+                            padding: 10px 12px;
+                            vertical-align: top;
+                        }
+                        .dw-bank-title {
+                            font-size: 13px;
+                            font-weight: 700;
+                            margin-bottom: 6px;
+                        }
+                        .dw-bank-text {
+                            white-space: pre-line;
+                            line-height: 1.7;
+                        }
+                        .dw-bank-qr {
+                            width: 180px;
+                            text-align: center;
+                        }
+                        .dw-bank-qr img {
+                            max-width: 130px;
+                            max-height: 130px;
+                        }
+                        .dw-footer {
+                            margin-top: 40px;
+                            border-top: 1px solid #222;
+                            padding-top: 10px;
+                            font-size: 12px;
+                        }
+                        .dw-terms-title {
+                            margin: 0 0 6px 0;
+                        }
+                        .dw-terms-list {
+                            margin: 0;
+                            padding-left: 18px;
+                        }
+                        .dw-terms-list li {
+                            margin: 0 0 4px 0;
+                        }
+                        .dw-terms-section {
+                            margin: 0 0 8px 0;
+                        }
+                        .dw-terms-section-title {
+                            font-weight: 700;
+                        }
+                        .dw-terms-sublist {
+                            margin: 4px 0 0 0;
+                            padding-left: 18px;
+                        }
+                        .dw-terms-sublist li {
+                            display: inline;
+                            margin: 0;
+                        }
+                    </style>
+
+                    <div class="dw-quote-wrap">
+                        <table class="dw-header">
+                            <tr>
+                                <td class="dw-logo-box">
+                                    <img t-if="doc.company_id.logo"
+                                         t-att-src="image_data_uri(doc.company_id.logo)"
+                                         alt="Company Logo"
+                                         class="dw-logo"/>
+                                </td>
+                                <td class="dw-company-box">
+                                    <p class="dw-company-name"><span t-field="doc.company_id.name"/></p>
+                                    <div class="dw-company-address">
+                                        <span t-esc="doc.company_id.partner_id.contact_address"/>
+                                        <t t-if="doc.company_id.partner_id.vat">
+                                            <br/>GSTIN: <span t-field="doc.company_id.partner_id.vat"/>
+                                        </t>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <h2 class="dw-quote-title">Quotation</h2>
+
+                        <table class="dw-table dw-meta">
+                            <tr>
+                                <td style="width: 20%;" class="dw-label">Customer Name</td>
+                                <td style="width: 40%;"><span t-field="doc.partner_id.name"/></td>
+                                <td style="width: 20%;" class="dw-label">Date</td>
+                                <td style="width: 20%;" class="dw-center"><span t-field="doc.date_order"/></td>
+                            </tr>
+                            <tr>
+                                <td class="dw-label">Address</td>
+                                <td><span t-esc="doc.partner_id.contact_address"/></td>
+                                <td class="dw-label">Quotation Ref No</td>
+                                <td class="dw-center"><span t-field="doc.name"/></td>
+                            </tr>
+                            <tr>
+                                <td class="dw-label">Contact Person</td>
+                                <td><span t-field="doc.partner_id.name"/></td>
+                                <td class="dw-label">Payment Terms</td>
+                                <td class="dw-center"><span t-field="doc.payment_term_id"/></td>
+                            </tr>
+                            <tr>
+                                <td class="dw-label">Contact Details</td>
+                                <td><span t-field="doc.partner_id.phone"/></td>
+                                <td class="dw-label">Total Products Weight</td>
+                                <td class="dw-center"><span t-field="doc.total_products_weight"/> KG</td>
+                            </tr>
+                            <tr>
+                                <td class="dw-label">E-mail Address</td>
+                                <td><span t-field="doc.partner_id.email"/></td>
+                                <td class="dw-label">GST Type</td>
+                                <td class="dw-center">
+                                    <t t-set="is_same_state" t-value="doc.partner_id.country_id and doc.company_id.country_id and doc.partner_id.country_id == doc.company_id.country_id and doc.partner_id.state_id and doc.company_id.state_id and doc.partner_id.state_id == doc.company_id.state_id"/>
+                                    <t t-if="is_same_state">GST</t>
+                                    <t t-else="">IGST</t>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table class="dw-table dw-lines">
+                            <thead>
+                                <tr>
+                                    <th style="width: 7%;">S.No</th>
+                                    <th style="width: 25%;">Product</th>
+                                    <th style="width: 12%;">HSN No.</th>
+                                    <th style="width: 12%;">Quantity</th>
+                                    <th style="width: 10%;">UOM</th>
+                                    <th style="width: 18%;">Unit Price</th>
+                                    <th style="width: 16%;">Total Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="doc.order_line.filtered(lambda l: not l.display_type)" t-as="line">
+                                    <td class="dw-center"><span t-esc="line_index + 1"/></td>
+                                    <td><span t-field="line.product_id"/></td>
+                                    <td class="dw-center"><span t-field="line.hsn_code"/></td>
+                                    <td class="dw-right"><span t-field="line.product_uom_qty"/></td>
+                                    <td class="dw-center"><span t-field="line.product_uom"/></td>
+                                    <td class="dw-right">
+                                        <span t-esc="line.price_unit" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    </td>
+                                    <td class="dw-right">
+                                        <span t-esc="line.price_subtotal" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="dw-totals">
+                            <tr>
+                                <td><strong>Untaxed Amount</strong></td>
+                                <td class="dw-right">
+                                    <span t-esc="doc.amount_untaxed" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>
+                                        <t t-if="is_same_state">GST</t>
+                                        <t t-else="">IGST</t>
+                                    </strong>
+                                </td>
+                                <td class="dw-right">
+                                    <span t-esc="doc.amount_tax" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="dw-total-strong">Total (Incl. Taxes)</td>
+                                <td class="dw-right dw-total-strong">
+                                    <span t-esc="doc.amount_total" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table class="dw-bank-box">
+                            <tr>
+                                <td>
+                                    <div class="dw-bank-title">Company Bank Details</div>
+                                    <div class="dw-bank-text">K V ENTERPRISES
+Ac. 0125009300101082
+Account Type. Overdraft
+IFSC Code. PUNB0012500
+MICR Code. 110024031
+SWIFT Code. PUNBINBBISB</div>
+                                </td>
+                                <td class="dw-bank-qr">
+                                    <t t-set="qr_title" t-value="'Scan to Pay'"/>
+                                    <t t-set="qr_title_class" t-value="'dw-bank-title'"/>
+                                    <t t-call="DW_BMS.report_bank_qr_image"/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="dw-footer">
+                            <p class="dw-terms-title"><strong>Terms and Conditions</strong></p>
+                            <ol class="dw-terms-list">
+                                <li class="dw-terms-section">
+                                    <span class="dw-terms-section-title">Prices and Taxes</span>
+                                    <ul class="dw-terms-sublist">
+                                        <li>All prices are quoted in INR and are exclusive or inclusive of applicable taxes (GST, VAT, customs duties, etc.), unless otherwise mentioned.</li>
+                                        <li>Any quotation provided is valid only on the date on which pro forma invoice (PI) is shared.</li>
+                                        <li>The buyer is responsible for any additional import duties, taxes, or charges in their country, if applicable.</li>
+                                    </ul>
+                                </li>
+                                <li class="dw-terms-section">
+                                    <span class="dw-terms-section-title">Payment Terms</span>
+                                    <ul class="dw-terms-sublist">
+                                        <li>Full payment must be made as per the terms mentioned in the invoice or pro forma invoice.</li>
+                                        <li>Accepted payment methods: Bank Transfer / UPI / Credit Card / Others.</li>
+                                        <li>Payments made with credit cards are charged 2% extra.</li>
+                                    </ul>
+                                </li>
+                                <li class="dw-terms-section">
+                                    <span class="dw-terms-section-title">Delivery and Shipping</span>
+                                    <ul class="dw-terms-sublist">
+                                        <li>Products will be dispatched within 3 business days after receipt of payment, or as otherwise agreed.</li>
+                                        <li>Shipping costs, if applicable, will be borne by the buyer unless otherwise agreed.</li>
+                                        <li>The seller is not liable for delays caused by shipping carriers or customs clearance.</li>
+                                    </ul>
+                                </li>
+                                <li class="dw-terms-section">
+                                    <span class="dw-terms-section-title">Returns and Refunds</span>
+                                    <ul class="dw-terms-sublist">
+                                        <li>Goods once sold are not returnable or refundable unless defective or wrongly supplied.</li>
+                                        <li>Any claims must be reported within 2 days of delivery, along with relevant proof.</li>
+                                    </ul>
+                                </li>
+                                <li class="dw-terms-section">
+                                    <span class="dw-terms-section-title">Cancellation</span>
+                                    <ul class="dw-terms-sublist">
+                                        <li>Orders once confirmed cannot be cancelled without prior written consent from the seller.</li>
+                                        <li>Any cancellation may be subject to a cancellation fee or forfeiture of advance payment.</li>
+                                    </ul>
+                                </li>
+                                <li class="dw-terms-section">
+                                    <span class="dw-terms-section-title">Warranty</span>
+                                    <ul class="dw-terms-sublist">
+                                        <li>Warranty does not cover damage due to misuse, mishandling, or unauthorized repairs.</li>
+                                    </ul>
+                                </li>
+                                <li class="dw-terms-section">
+                                    <span class="dw-terms-section-title">Limitation of Liability</span>
+                                    <ul class="dw-terms-sublist">
+                                        <li>The seller's liability is limited to the value of the goods sold.</li>
+                                        <li>The seller is not liable for any indirect, incidental, or consequential damages.</li>
+                                    </ul>
+                                </li>
+                                <li class="dw-terms-section">
+                                    <span class="dw-terms-section-title">Governing Law</span>
+                                    <ul class="dw-terms-sublist">
+                                        <li>These terms are governed by the laws of the Delhi judiciary.</li>
+                                        <li>Any disputes shall be subject to the jurisdiction of Delhi.</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

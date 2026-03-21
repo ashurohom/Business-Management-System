@@ -1,0 +1,7 @@
+<odoo>
+  <template id="custom_branding_favicon" inherit_id="web.layout">
+    <xpath expr="//link[@rel='shortcut icon']" position="replace">
+      <link rel="shortcut icon" href="/custom_branding/static/src/img/favicon.ico" type="image/x-icon"/>
+    </xpath>
+  </template>
+</odoo>

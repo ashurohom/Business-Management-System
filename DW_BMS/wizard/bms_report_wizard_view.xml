@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_bms_report_wizard_form" model="ir.ui.view">
+        <field name="name">bms.report.wizard.form</field>
+        <field name="model">bms.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="BMS Report">
+                <group>
+                    <group>
+                        <field name="report_type" readonly="1"/>
+                        <field name="partner_id"/>
+                        <field name="partner_role"/>
+                        <field name="user_id"/>
+                        <field name="payment_status"/>
+                    </group>
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                        <field name="shipping_status"/>
+                    </group>
+                </group>
+                <group string="Excel File" invisible="not xlsx_file">
+                    <field name="xlsx_filename" readonly="1"/>
+                    <field name="xlsx_file" filename="xlsx_filename" readonly="1"/>
+                </group>
+                <footer>
+                    <button name="action_print_pdf" string="Print PDF" type="object" class="btn-primary"/>
+                    <button name="action_generate_xlsx" string="Generate Excel" type="object"/>
+                    <button string="Close" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_bms_report_profit_loss" model="ir.actions.act_window">
+        <field name="name">Profit / Loss Report</field>
+        <field name="res_model">bms.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_report_type': 'profit_loss'}</field>
+    </record>
+
+    <record id="action_bms_report_purchase_sales" model="ir.actions.act_window">
+        <field name="name">Purchase / Sales Report</field>
+        <field name="res_model">bms.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_report_type': 'purchase_sales'}</field>
+    </record>
+
+    <record id="action_bms_report_supplier_customer" model="ir.actions.act_window">
+        <field name="name">Supplier and Customer Report</field>
+        <field name="res_model">bms.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_report_type': 'supplier_customer'}</field>
+    </record>
+
+    <record id="action_bms_report_stock" model="ir.actions.act_window">
+        <field name="name">Stock Report</field>
+        <field name="res_model">bms.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_report_type': 'stock'}</field>
+    </record>
+
+    <record id="action_bms_report_product_purchase" model="ir.actions.act_window">
+        <field name="name">Products Purchase Report</field>
+        <field name="res_model">bms.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_report_type': 'product_purchase'}</field>
+    </record>
+
+    <record id="action_bms_report_product_sale_user" model="ir.actions.act_window">
+        <field name="name">Products Sale Report with Usernames</field>
+        <field name="res_model">bms.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_report_type': 'product_sale_user'}</field>
+    </record>
+
+    <record id="action_bms_report_purchase_payment" model="ir.actions.act_window">
+        <field name="name">Purchase Payment / Pending Report</field>
+        <field name="res_model">bms.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_report_type': 'purchase_payment'}</field>
+    </record>
+
+    <record id="action_bms_report_sales_payment" model="ir.actions.act_window">
+        <field name="name">Sales Payment Report</field>
+        <field name="res_model">bms.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_report_type': 'sales_payment'}</field>
+    </record>
+
+    <record id="action_bms_report_bank" model="ir.actions.act_window">
+        <field name="name">Bank Report</field>
+        <field name="res_model">bms.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_report_type': 'bank'}</field>
+    </record>
+</odoo>

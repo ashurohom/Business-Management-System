@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_product_form_alert_inherit" model="ir.ui.view">
+        <field name="name">product.template.form.alert.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='detailed_type']" position="after">
+                <field name="min_alert_qty"/>
+                <field name="product_storage_location_id" options="{'no_open': False}"/>
+                <field name="product_storage_location" invisible="1"/>
+                <field name="opening_stock_ref"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_product_tree_alert_inherit" model="ir.ui.view">
+        <field name="name">product.product.tree.alert.inherit</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_product_tree_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//tree" position="attributes">
+                <attribute name="editable">bottom</attribute>
+                <attribute name="multi_edit">1</attribute>
+                <attribute name="decoration-danger">alert_status == 'low'</attribute>
+            </xpath>
+
+            <xpath expr="//tree" position="inside">
+                <field name="sku" optional="hide" column_invisible="1"/>
+                <field name="min_alert_qty"/>
+                <field name="alert_status"/>
+                <field name="purchase_status"
+                       optional="show"
+                       decoration-success="purchase_status == 'stock_received'"
+                       decoration-warning="purchase_status == 'ordered'"
+                       decoration-muted="purchase_status == 'no_order'"
+                       widget="badge"/>
+                <button name="action_next_purchase_status"
+                        type="object"
+                        string="Mark as Ordered"
+                        invisible="purchase_status != 'no_order'"
+                        class="btn-sm btn-warning"/>
+                <button name="action_next_purchase_status"
+                        type="object"
+                        string="Mark as Received"
+                        invisible="purchase_status != 'ordered'"
+                        class="btn-sm btn-success"/>
+                <button name="action_next_purchase_status"
+                        type="object"
+                        string="Mark as Not Ordered"
+                        invisible="purchase_status != 'stock_received'"
+                        class="btn-sm btn-secondary"/>
+                <field name="purchase_vendor_id" optional="show"/>
+                <field name="purchase_order_date" optional="show"/>
+            </xpath>
+
+            <xpath expr="//field[@name='virtual_available']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='standard_price']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='product_template_variant_value_ids']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='default_code']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_product_search_alert_inherit" model="ir.ui.view">
+        <field name="name">product.product.search.alert.inherit</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_search_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <filter name="filter_zero_on_hand_qty" string="In Hand Qty = 0" domain="[('qty_available', '=', 0)]"/>
+                <filter name="filter_low_on_hand_qty" string="In Hand Qty &lt; 5" domain="[('qty_available', '&lt;', 5)]"/>
+                <filter name="filter_in_stock_qty" string="In Stock &gt;= 5" domain="[('qty_available', '&gt;=', 5)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_low_stock_products" model="ir.actions.act_window">
+        <field name="name">Product Stock Status</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{'search_default_filter_to_sell': 1}</field>
+        <field name="search_view_id" ref="view_product_search_alert_inherit"/>
+    </record>
+
+    <menuitem
+        id="menu_low_stock_products"
+        name="Product Stock Status"
+        parent="stock.menu_stock_inventory_control"
+        action="action_low_stock_products"
+        sequence="25"/>
+
+</odoo>

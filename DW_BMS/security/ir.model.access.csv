@@ -1,0 +1,87 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+
+access_bms_admin_partner,bms admin partner,base.model_res_partner,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_admin_product,bms admin product,product.model_product_product,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_admin_product_alias,bms admin product alias,DW_BMS.model_dw_product_name_alias,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_admin_sale,bms admin sale,sale.model_sale_order,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_admin_purchase,bms admin purchase,purchase.model_purchase_order,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_admin_account_move,bms admin account move,account.model_account_move,DW_BMS.group_bms_admin,1,1,1,1
+
+
+
+access_bms_inventory_partner,bms inventory partner read,base.model_res_partner,DW_BMS.group_bms_inventory,1,0,0,0
+access_bms_inventory_product,bms inventory product read,product.model_product_product,DW_BMS.group_bms_inventory,1,0,0,0
+access_bms_inventory_product_alias,bms inventory product alias,DW_BMS.model_dw_product_name_alias,DW_BMS.group_bms_inventory,1,0,0,0
+access_bms_inventory_report_wizard,bms inventory report wizard,DW_BMS.model_bms_report_wizard,DW_BMS.group_bms_inventory,1,1,1,0
+
+access_bms_sales_partner,bms sales partner read,base.model_res_partner,DW_BMS.group_bms_sales,1,0,0,0
+access_bms_sales_product,bms sales product read,product.model_product_product,DW_BMS.group_bms_sales,1,0,0,0
+access_bms_sales_product_alias,bms sales product alias,DW_BMS.model_dw_product_name_alias,DW_BMS.group_bms_sales,1,1,1,0
+access_bms_sales_sale,bms sales sale,sale.model_sale_order,DW_BMS.group_bms_sales,1,1,1,0
+access_bms_sales_invoice,bms sales invoice read,account.model_account_move,DW_BMS.group_bms_sales,1,0,0,0
+
+
+access_bms_purchase_partner,bms purchase partner read,base.model_res_partner,DW_BMS.group_bms_purchase,1,0,0,0
+access_bms_purchase_product,bms purchase product read,product.model_product_product,DW_BMS.group_bms_purchase,1,0,0,0
+access_bms_purchase_product_alias,bms purchase product alias,DW_BMS.model_dw_product_name_alias,DW_BMS.group_bms_purchase,1,0,0,0
+access_bms_purchase_purchase,bms purchase order,purchase.model_purchase_order,DW_BMS.group_bms_purchase,1,1,1,0
+access_bms_purchase_bill,bms purchase bill read,account.model_account_move,DW_BMS.group_bms_purchase,1,0,0,0
+access_bms_purchase_purchase_line,bms purchase line,purchase.model_purchase_order_line,DW_BMS.group_bms_purchase,1,1,1,0
+access_bms_purchase_product_template,bms purchase product template,product.model_product_template,DW_BMS.group_bms_purchase,1,0,0,0
+access_bms_purchase_supplierinfo,bms purchase supplierinfo,product.model_product_supplierinfo,DW_BMS.group_bms_purchase,1,0,0,0
+access_bms_purchase_tax,bms purchase tax,account.model_account_tax,DW_BMS.group_bms_purchase,1,0,0,0
+access_bms_purchase_fiscal_position,bms purchase fiscal position,account.model_account_fiscal_position,DW_BMS.group_bms_purchase,1,0,0,0
+
+
+access_bms_accounts_partner,bms accounts partner read,base.model_res_partner,DW_BMS.group_bms_accounts,1,0,0,0
+access_bms_accounts_product,bms accounts product read,product.model_product_product,DW_BMS.group_bms_accounts,1,0,0,0
+access_bms_accounts_product_alias,bms accounts product alias,DW_BMS.model_dw_product_name_alias,DW_BMS.group_bms_accounts,1,0,0,0
+access_bms_accounts_sale,bms accounts sale read,sale.model_sale_order,DW_BMS.group_bms_accounts,1,0,0,0
+access_bms_accounts_invoice,bms accounts invoice,account.model_account_move,DW_BMS.group_bms_accounts,1,1,1,0
+
+
+access_bms_report_partner,bms report partner read,base.model_res_partner,DW_BMS.group_bms_report,1,0,0,0
+access_bms_report_product,bms report product read,product.model_product_product,DW_BMS.group_bms_report,1,0,0,0
+access_bms_report_product_alias,bms report product alias,DW_BMS.model_dw_product_name_alias,DW_BMS.group_bms_report,1,0,0,0
+access_bms_report_sale,bms report sale read,sale.model_sale_order,DW_BMS.group_bms_report,1,0,0,0
+access_bms_report_purchase,bms report purchase read,purchase.model_purchase_order,DW_BMS.group_bms_report,1,0,0,0
+access_bms_report_account,bms report account read,account.model_account_move,DW_BMS.group_bms_report,1,0,0,0
+
+access_bms_sales_partner_full,bms sales partner full,base.model_res_partner,DW_BMS.group_bms_sales,1,1,1,1
+
+access_bms_admin_report_wizard,bms admin report wizard,DW_BMS.model_bms_report_wizard,DW_BMS.group_bms_admin,1,1,1,1
+
+access_bms_sales_report_wizard,bms sales report wizard,DW_BMS.model_bms_report_wizard,DW_BMS.group_bms_sales,1,1,1,0
+access_bms_purchase_report_wizard,bms purchase report wizard,DW_BMS.model_bms_report_wizard,DW_BMS.group_bms_purchase,1,1,1,0
+access_bms_accounts_report_wizard,bms accounts report wizard,DW_BMS.model_bms_report_wizard,DW_BMS.group_bms_accounts,1,1,1,0
+access_bms_report_report_wizard,bms report role wizard,DW_BMS.model_bms_report_wizard,DW_BMS.group_bms_report,1,1,1,0
+
+access_bms_manufacturing_partner,bms manufacturing partner read,base.model_res_partner,DW_BMS.group_bms_manufacturing,1,0,0,0
+access_bms_manufacturing_product,bms manufacturing product read,product.model_product_product,DW_BMS.group_bms_manufacturing,1,0,0,0
+access_bms_manufacturing_production,bms manufacturing production,mrp.model_mrp_production,DW_BMS.group_bms_manufacturing,1,1,1,0
+access_bms_manufacturing_bom,bms manufacturing bom,mrp.model_mrp_bom,DW_BMS.group_bms_manufacturing,1,1,1,0
+
+access_bms_admin_invoice_import_log,bms admin invoice import log,DW_BMS.model_dw_invoice_import_log,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_accounts_invoice_import_log,bms accounts invoice import log,DW_BMS.model_dw_invoice_import_log,DW_BMS.group_bms_accounts,1,1,1,0
+
+access_bms_admin_invoice_import_log_line,bms admin invoice import log line,DW_BMS.model_dw_invoice_import_log_line,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_accounts_invoice_import_log_line,bms accounts invoice import log line,DW_BMS.model_dw_invoice_import_log_line,DW_BMS.group_bms_accounts,1,1,1,0
+
+access_bms_admin_invoice_import_wizard,bms admin invoice import wizard,DW_BMS.model_dw_invoice_import_wizard,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_accounts_invoice_import_wizard,bms accounts invoice import wizard,DW_BMS.model_dw_invoice_import_wizard,DW_BMS.group_bms_accounts,1,1,1,0
+
+access_bms_admin_invoice_import_column_map,bms admin invoice import column map,DW_BMS.model_dw_invoice_import_column_map,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_accounts_invoice_import_column_map,bms accounts invoice import column map,DW_BMS.model_dw_invoice_import_column_map,DW_BMS.group_bms_accounts,1,1,1,0
+access_bms_admin_customer_type,bms admin customer type,DW_BMS.model_dw_customer_type,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_sales_customer_type,bms sales customer type,DW_BMS.model_dw_customer_type,DW_BMS.group_bms_sales,1,1,1,0
+access_bms_purchase_customer_type,bms purchase customer type read,DW_BMS.model_dw_customer_type,DW_BMS.group_bms_purchase,1,0,0,0
+access_bms_accounts_customer_type,bms accounts customer type read,DW_BMS.model_dw_customer_type,DW_BMS.group_bms_accounts,1,0,0,0
+access_bms_report_customer_type,bms report customer type read,DW_BMS.model_dw_customer_type,DW_BMS.group_bms_report,1,0,0,0
+access_bms_inventory_customer_type,bms inventory customer type read,DW_BMS.model_dw_customer_type,DW_BMS.group_bms_inventory,1,0,0,0
+access_bms_manufacturing_customer_type,bms manufacturing customer type read,DW_BMS.model_dw_customer_type,DW_BMS.group_bms_manufacturing,1,0,0,0
+access_dw_product_storage_location_user,dw product storage location user,DW_BMS.model_dw_product_storage_location,base.group_user,1,1,1,0
+access_packing_order_all,packing order all,DW_BMS.model_packing_order,,1,1,1,1
+access_packing_order_line_all,packing order line all,DW_BMS.model_packing_order_line,,1,1,1,1
+access_packing_dispatch_mode_all,packing dispatch mode all,DW_BMS.model_packing_dispatch_mode,,1,1,1,1
+access_packing_courier_company_all,packing courier company all,DW_BMS.model_packing_courier_company,,1,1,1,1

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_dw_bms_root"
+              name="Import Invoice"
+              parent="account.menu_finance"
+              sequence="36"
+              groups="DW_BMS.group_bms_admin,DW_BMS.group_bms_accounts"/>
+
+    <menuitem id="menu_dw_import_invoices"
+              name="Import Invoices"
+              parent="menu_dw_bms_root"
+              action="action_dw_invoice_import_wizard"
+              sequence="10"
+              groups="DW_BMS.group_bms_admin,DW_BMS.group_bms_accounts"/>
+
+    <menuitem id="menu_dw_import_logs"
+              name="Logs"
+              parent="menu_dw_bms_root"
+              action="action_dw_invoice_import_log"
+              sequence="20"
+              groups="DW_BMS.group_bms_admin,DW_BMS.group_bms_accounts"/>
+
+    <record id="view_account_move_inherit_import_btn" model="ir.ui.view">
+        <field name="name">account.move.form.import.button</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <field name="import_log_count" invisible="1"/>
+                <button name="action_open_import_log"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-cloud-upload"
+                        invisible="import_log_count == 0">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_text">Import Source</span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

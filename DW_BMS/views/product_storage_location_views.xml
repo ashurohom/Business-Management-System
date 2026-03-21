@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_dw_product_storage_location_tree" model="ir.ui.view">
+        <field name="name">dw.product.storage.location.tree</field>
+        <field name="model">dw.product.storage.location</field>
+        <field name="arch" type="xml">
+            <tree string="Product Locations" editable="bottom">
+                <field name="name"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_dw_product_storage_location_form" model="ir.ui.view">
+        <field name="name">dw.product.storage.location.form</field>
+        <field name="model">dw.product.storage.location</field>
+        <field name="arch" type="xml">
+            <form string="Product Location">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_dw_product_storage_location" model="ir.actions.act_window">
+        <field name="name">Product Locations</field>
+        <field name="res_model">dw.product.storage.location</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_dw_product_storage_location_inventory"
+        name="Product Locations"
+        parent="stock.menu_stock_inventory_control"
+        action="action_dw_product_storage_location"
+        sequence="32"/>
+
+    <menuitem
+        id="menu_dw_product_storage_location_sales"
+        name="Product Locations"
+        parent="sale.menu_sales_config"
+        action="action_dw_product_storage_location"
+        sequence="85"/>
+
+</odoo>

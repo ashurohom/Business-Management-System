@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Hide internal BMS groups from the user access form while keeping them usable -->
+    <record id="group_bms_report" model="res.groups">
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+    <record id="group_bms_accounts" model="res.groups">
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+    <record id="group_bms_inventory" model="res.groups">
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+    <record id="group_bms_purchase" model="res.groups">
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+    <record id="group_bms_manufacturing" model="res.groups">
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+    <record id="group_bms_sales" model="res.groups">
+        <field name="category_id" ref="base.module_category_hidden"/>
+    </record>
+
+</odoo>

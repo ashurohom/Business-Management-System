@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_order_form_packing_button" model="ir.ui.view">
+        <field name="name">sale.order.form.packing.button</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_open_packing_order"
+                        type="object"
+                        string="Packing"
+                        class="btn-secondary"
+                        invisible="state == 'cancel'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

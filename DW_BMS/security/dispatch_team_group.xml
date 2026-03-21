@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ========================= -->
+    <!-- DISPATCH TEAM -->
+    <!-- ========================= -->
+    <record id="group_dispatch_team" model="res.groups">
+        <field name="name">Dispatch Team</field>
+        <field name="category_id" ref="DW_BMS.module_category_dw_bms"/>
+        <field name="implied_ids" eval="[
+            (4, ref('purchase.group_purchase_user')),
+            (4, ref('stock.group_stock_user')),
+            (4, ref('mrp.group_mrp_user'))
+        ]"/>
+    </record>
+
+    <record id="stock.menu_stock_root" model="ir.ui.menu">
+        <field name="groups_id" eval="[
+            (6, 0, [
+                ref('DW_BMS.group_bms_admin'),
+                ref('DW_BMS.group_bms_purchase'),
+                ref('DW_BMS.group_bms_inventory'),
+                ref('DW_BMS.group_dispatch_team')
+            ])
+        ]"/>
+    </record>
+
+    <record id="mrp.menu_mrp_root" model="ir.ui.menu">
+        <field name="groups_id" eval="[
+            (6, 0, [
+                ref('DW_BMS.group_bms_admin'),
+                ref('DW_BMS.group_bms_manufacturing'),
+                ref('DW_BMS.group_dispatch_team')
+            ])
+        ]"/>
+    </record>
+
+    <record id="account.menu_finance" model="ir.ui.menu">
+        <field name="groups_id" eval="[
+            (6, 0, [
+                ref('base.group_system'),
+                ref('DW_BMS.group_bms_admin'),
+                ref('DW_BMS.group_bms_accounts'),
+                ref('DW_BMS.group_bms_purchase'),
+                ref('DW_BMS.group_bms_sales'),
+                ref('DW_BMS.group_bms_report')
+            ])
+        ]"/>
+    </record>
+
+</odoo>

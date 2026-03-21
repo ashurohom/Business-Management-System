@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_inherit_dw_bms" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.dw.bms</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='state'][@invisible=&quot;picking_type_code != 'incoming'&quot;]" position="attributes">
+                <attribute name="statusbar_visible">draft,waiting,assigned,packed,done</attribute>
+            </xpath>
+
+            <xpath expr="//header/field[@name='state'][@invisible=&quot;picking_type_code == 'incoming'&quot;]" position="attributes">
+                <attribute name="statusbar_visible">draft,waiting,assigned,packed,done</attribute>
+            </xpath>
+
+            <xpath expr="//header/button[@name='button_validate'][1]" position="attributes">
+                <attribute name="invisible">state in ('draft', 'confirmed', 'done', 'cancel')</attribute>
+            </xpath>
+
+            <xpath expr="//header/button[@name='button_validate'][2]" position="attributes">
+                <attribute name="invisible">state in ('waiting', 'assigned', 'packed', 'done', 'cancel')</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="packed_by" readonly="state in ['done', 'cancel']"/>
+                <field name="delivered_by" readonly="1"/>
+            </xpath>
+
+            <xpath expr="//notebook/page[@name='note']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <xpath expr="//notebook/page[@name='note']" position="after">
+                <page string="Packing Notes">
+                    <field name="packed_notes" placeholder="Add packing notes..."/>
+                </page>
+                <page string="Delivered Notes">
+                    <field name="delivered_notes" placeholder="Add delivered notes..."/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

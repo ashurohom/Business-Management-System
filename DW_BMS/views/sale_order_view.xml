@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_order_form_total_weight_inherit" model="ir.ui.view">
+        <field name="name">sale.order.form.total.weight.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='payment_term_id']" position="after">
+                <field name="total_products_weight" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_order_form_stock_qty_inherit" model="ir.ui.view">
+        <field name="name">sale.order.form.stock.qty.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="after">
+                <field name="stock_qty" readonly="1"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="after">
+                <field name="price_incl_tax" string="Rate Incl Tax"/>
+                <field name="min_sale_price" string="Minimum Sale Price" readonly="1"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="after">
+                <field name="price_incl_tax" string="Rate Incl Tax"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="sale_order_form_hsn_position_fix" model="ir.ui.view">
+        <field name="name">sale.order.form.hsn.position.fix</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="priority" eval="99"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/tree/field[@name='product_template_id' or @name='product_id'][last()]" position="after">
+                <field name="hsn_code" position="move"/>
+            </xpath>
+        </field>
+    </record>
+
+    <template id="report_saleorder_document_total_weight" inherit_id="sale.report_saleorder_document">
+        <xpath expr="//div[@id='total']//table" position="inside">
+            <tr>
+                <td><strong>Total Products Weight(KG)</strong></td>
+                <td class="text-end">
+                    <span t-field="doc.total_products_weight"/>
+                </td>
+            </tr>
+        </xpath>
+    </template>
+
+    <record id="view_order_form_print_quotation_inherit" model="ir.ui.view">
+        <field name="name">sale.order.form.print.quotation.inherit</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="%(DW_BMS.action_report_saleorder_custom_quotation)d" string="Print Quotation" type="action" class="btn-primary"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

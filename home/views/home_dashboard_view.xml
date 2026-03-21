@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="home_dashboard_main" model="home.dashboard">
+        <field name="name">Home Dashboard</field>
+    </record>
+
+    <record id="view_home_dashboard_form" model="ir.ui.view">
+        <field name="name">home.dashboard.form</field>
+        <field name="model">home.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Home" create="false" delete="false">
+                <header>
+                    <button name="action_apply_filters" string="Apply Filters" type="object" class="btn-primary"/>
+                    <button name="action_clear_filters" string="Clear Filters" type="object"/>
+                    <button name="action_refresh_dashboard" string="Refresh" type="object"/>
+                </header>
+                <sheet>
+                    <group string="Filters">
+                        <group>
+                            <field name="filter_date_from"/>
+                            <field name="filter_date_to"/>
+                        </group>
+                        <group>
+                            <field name="filter_partner_id"/>
+                            <field name="filter_user_id"/>
+                        </group>
+                    </group>
+
+                    <group string="User Panel (Only User)">
+                        <group>
+                            <field name="user_total_sale"/>
+                            <field name="user_total_purchase"/>
+                            <field name="user_sale_payment_due"/>
+                            <field name="user_purchase_payment_due"/>
+                        </group>
+                        <group>
+                            <field name="user_stock_alert_ordered"/>
+                            <field name="user_pending_shipment"/>
+                            <field name="user_pending_job_work"/>
+                        </group>
+                    </group>
+
+                    <group string="Admin Panel (All)" groups="DW_BMS.group_bms_admin,base.group_system">
+                        <group>
+                            <field name="admin_total_sale"/>
+                            <field name="admin_total_purchase"/>
+                            <field name="admin_sale_payment_due"/>
+                            <field name="admin_purchase_payment_due"/>
+                        </group>
+                        <group>
+                            <field name="admin_stock_alert_ordered"/>
+                            <field name="admin_pending_shipment"/>
+                            <field name="admin_pending_job_work"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_home_dashboard" model="ir.actions.act_window">
+        <field name="name">Home</field>
+        <field name="res_model">home.dashboard</field>
+        <field name="view_mode">form</field>
+        <field name="res_id" ref="home_dashboard_main"/>
+        <field name="target">current</field>
+    </record>
+
+    <menuitem id="menu_home_root" name="Home" sequence="1"/>
+    <menuitem id="menu_home_dashboard" name="Dashboard" parent="menu_home_root" action="action_home_dashboard" sequence="1"/>
+</odoo>

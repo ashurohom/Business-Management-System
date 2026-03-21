@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_packing_order_tree" model="ir.ui.view">
+        <field name="name">packing.order.tree</field>
+        <field name="model">packing.order</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="invoice_id"/>
+                <field name="from_name"/>
+                <field name="to_name"/>
+                <field name="dispatch_mode_id"/>
+                <field name="courier_company_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_packing_order_form" model="ir.ui.view">
+        <field name="name">packing.order.form</field>
+        <field name="model">packing.order</field>
+        <field name="arch" type="xml">
+            <form string="Packing Order">
+                <header>
+                    <button name="action_print_packing_slip"
+                            type="object"
+                            string="Print Packing Slip"
+                            class="btn-primary"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="invoice_id" string="Invoice Number"/>
+                    </group>
+                    <group col="2">
+                        <group string="TO" col="2">
+                            <field name="to_name" string="Name" readonly="1"/>
+                            <field name="to_mobile" string="Mobile" readonly="1"/>
+                            <field name="to_address" string="Address" widget="text" colspan="2" readonly="1"/>
+                            <field name="to_city" string="City" readonly="1"/>
+                            <field name="to_state" string="State" readonly="1"/>
+                            <field name="to_country" string="Country" readonly="1"/>
+                            <field name="to_pincode" string="Pincode" readonly="1"/>
+                        </group>
+                        <group string="FROM" col="2">
+                            <field name="from_name" string="Name" readonly="1"/>
+                            <field name="from_mobile" string="Mobile" readonly="1"/>
+                            <field name="from_address" string="Address" widget="text" colspan="2" readonly="1"/>
+                            <field name="from_city" string="City" readonly="1"/>
+                            <field name="from_state" string="State" readonly="1"/>
+                            <field name="from_country" string="Country" readonly="1"/>
+                            <field name="from_pincode" string="Pincode" readonly="1"/>
+                        </group>
+                    </group>
+                    <separator string="Dispatch Details"/>
+                    <group col="2">
+                        <field name="dispatch_mode_id"/>
+                        <field name="courier_company_id"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_packing_dispatch_mode_tree" model="ir.ui.view">
+        <field name="name">packing.dispatch.mode.tree</field>
+        <field name="model">packing.dispatch.mode</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_packing_dispatch_mode_form" model="ir.ui.view">
+        <field name="name">packing.dispatch.mode.form</field>
+        <field name="model">packing.dispatch.mode</field>
+        <field name="arch" type="xml">
+            <form string="Dispatch Mode">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_packing_courier_company_tree" model="ir.ui.view">
+        <field name="name">packing.courier.company.tree</field>
+        <field name="model">packing.courier.company</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_packing_courier_company_form" model="ir.ui.view">
+        <field name="name">packing.courier.company.form</field>
+        <field name="model">packing.courier.company</field>
+        <field name="arch" type="xml">
+            <form string="Courier Company">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_packing_order" model="ir.actions.act_window">
+        <field name="name">Packing Orders</field>
+        <field name="res_model">packing.order</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_packing_order"
+              name="Packing Orders"
+              parent="sale.sale_order_menu"
+              action="action_packing_order"
+              sequence="40"/>
+</odoo>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_dw_invoice_import_wizard_form" model="ir.ui.view">
+        <field name="name">dw.invoice.import.wizard.form</field>
+        <field name="model">dw.invoice.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Invoice Import Wizard">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="upload,mapping"/>
+                </header>
+                <sheet>
+                    <group invisible="state != 'upload'" col="1">
+                        <separator string="Step 1: Upload XLSX"/>
+                        <group col="2">
+                            <field name="xlsx_file" widget="binary" filename="xlsx_filename"/>
+                            <field name="xlsx_filename" placeholder="invoice_import.xlsx"/>
+                        </group>
+                        <div class="alert alert-secondary" role="alert">
+                            <strong>How It Works</strong>
+                            <ol style="margin: 8px 0 0 20px;">
+                                <li>Upload your XLSX file.</li>
+                                <li>Click <b>Read File</b> to detect columns.</li>
+                                <li>Review mapping in Step 2, then import.</li>
+                            </ol>
+                        </div>
+                    </group>
+
+                    <group invisible="state != 'mapping'" col="1">
+                        <separator string="Step 2: Review Column Mapping"/>
+                        <div class="alert alert-info" role="alert">
+                            <p style="margin: 0;">
+                                Confirm each XLSX header maps to the correct Software field.
+                                Set any unused column to <em>Skip this column</em>.
+                            </p>
+                            <p style="margin: 8px 0 0 0;">
+                                Review the auto-detected mappings below. Change any dropdown to correct it, then click <b>Import Now</b>.
+                            </p>
+                        </div>
+                    </group>
+
+                    <field name="column_map_ids" invisible="state != 'mapping'" nolabel="1">
+                        <tree editable="top" string="Column Mapping" create="false" delete="false">
+                            <field name="sequence" widget="handle"/>
+                            <field name="xlsx_column" readonly="1" string="XLSX Header"/>
+                            <field name="sample_value" readonly="1" string="Sample Value"/>
+                            <field name="odoo_field" string="Map To"/>
+                        </tree>
+                    </field>
+
+                    <field name="state" invisible="1"/>
+                </sheet>
+
+                <footer>
+                    <button name="action_read_headers"
+                            type="object"
+                            string="Read File"
+                            class="btn-primary"
+                            invisible="state != 'upload'"/>
+                    <button name="action_import"
+                            type="object"
+                            string="Import Now"
+                            class="btn-primary"
+                            invisible="state != 'mapping'"
+                            confirm="This will create sale orders, confirm them, and post invoices. Continue?"/>
+                    <button name="action_back"
+                            type="object"
+                            string="Back"
+                            class="btn-secondary"
+                            invisible="state != 'mapping'"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_dw_invoice_import_wizard" model="ir.actions.act_window">
+        <field name="name">Import Invoices</field>
+        <field name="res_model">dw.invoice.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="views">[(False, 'form')]</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

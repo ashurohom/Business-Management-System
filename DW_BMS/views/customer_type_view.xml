@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_dw_customer_type_tree" model="ir.ui.view">
+        <field name="name">dw.customer.type.tree</field>
+        <field name="model">dw.customer.type</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_dw_customer_type_form" model="ir.ui.view">
+        <field name="name">dw.customer.type.form</field>
+        <field name="model">dw.customer.type</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_dw_customer_type" model="ir.actions.act_window">
+        <field name="name">Customer Types</field>
+        <field name="res_model">dw.customer.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem
+        id="menu_dw_customer_type"
+        name="Customer Types"
+        parent="contacts.menu_contacts"
+        action="action_dw_customer_type"
+        sequence="90"
+    />
+
+</odoo>

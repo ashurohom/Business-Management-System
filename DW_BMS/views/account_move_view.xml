@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_move_form_custom_ship_bill_address" model="ir.ui.view">
+        <field name="name">account.move.form.custom.ship.bill.address</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Print Invoice Button -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="%(DW_BMS.action_report_invoice_custom)d"
+                        type="action"
+                        string="Print Invoice"
+                        class="btn-secondary"
+                        icon="fa-print"
+                        invisible="move_type != 'out_invoice'"/>
+            </xpath>
+
+            <xpath expr="//header" position="inside">
+                <button name="action_open_packing_order"
+                        type="object"
+                        string="Packing"
+                        class="btn-secondary"
+                        invisible="move_type != 'out_invoice' or state == 'cancel'"/>
+            </xpath>
+
+            <xpath expr="//field[@name='l10n_in_state_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Keep Payment Terms selectable on customer invoices (draft) -->
+            <xpath expr="//group[@id='header_right_group']//field[@name='invoice_payment_term_id']" position="attributes">
+                <attribute name="invisible">move_type not in ('out_invoice', 'out_refund')</attribute>
+                <attribute name="readonly">state != 'draft'</attribute>
+                <attribute name="placeholder">Payment Terms</attribute>
+                <attribute name="options">{'no_quick_create': True}</attribute>
+            </xpath>
+
+            <xpath expr="//group[@id='header_right_group']" position="after">
+                <group col="1" colspan="2" invisible="move_type not in ('out_invoice', 'out_refund')">
+                    <group>
+                        <field name="delivery_type"/>
+                    </group>
+                    <group col="2">
+                        <group col="1" string="Billing Address">
+                            <group col="2">
+                                <label for="bill_to_same_as_customer" string="Same As Customer Address"/>
+                                <field name="bill_to_same_as_customer" nolabel="1"/>
+                            </group>
+                            <group col="2">
+                                <label for="billing_partner_id" string="Name"/>
+                                <field name="billing_partner_id"
+                                       nolabel="1"
+                                       readonly="bill_to_same_as_customer"
+                                       invisible="id and state != 'draft'"/>
+                                <field name="billing_customer_name"
+                                       nolabel="1"
+                                       invisible="not id or state == 'draft'"/>
+                            </group>
+                            <group col="2">
+                                <label for="billing_mobile" string="Mobile Number"/>
+                                <field name="billing_mobile" nolabel="1" readonly="bill_to_same_as_customer"/>
+                            </group>
+                            <group col="2">
+                                <label for="bill_to_address" string="Address"/>
+                                <field name="bill_to_address"
+                                       nolabel="1"
+                                       widget="text"
+                                       placeholder="Flat/Building, Street, Area"
+                                       readonly="bill_to_same_as_customer"/>
+                            </group>
+                            <group col="4">
+                                <label for="bill_to_city" string="City"/>
+                                <field name="bill_to_city" nolabel="1" placeholder="City" readonly="bill_to_same_as_customer"/>
+                                <label for="bill_to_state_id" string="State"/>
+                                <field name="bill_to_state_id" nolabel="1" placeholder="State" readonly="bill_to_same_as_customer"/>
+                            </group>
+                            <group col="4">
+                                <label for="bill_to_country" string="Country"/>
+                                <field name="bill_to_country" nolabel="1" placeholder="Country" readonly="bill_to_same_as_customer"/>
+                                <label for="bill_to_zip" string="Pincode"/>
+                                <field name="bill_to_zip" nolabel="1" placeholder="PIN Code" readonly="bill_to_same_as_customer"/>
+                            </group>
+                        </group>
+                        <group col="1" string="Shipping Address">
+                            <group col="2">
+                                <label for="ship_to_same_as_customer" string="Same As Customer Address"/>
+                                <field name="ship_to_same_as_customer" nolabel="1"/>
+                            </group>
+                            <group col="2">
+                                <label for="shipping_partner_id" string="Name"/>
+                                <field name="shipping_partner_id"
+                                       nolabel="1"
+                                       readonly="ship_to_same_as_customer"
+                                       invisible="id and state != 'draft'"/>
+                                <field name="shipping_customer_name"
+                                       nolabel="1"
+                                       invisible="not id or state == 'draft'"/>
+                            </group>
+                            <group col="2">
+                                <label for="shipping_mobile" string="Mobile Number"/>
+                                <field name="shipping_mobile" nolabel="1" readonly="ship_to_same_as_customer"/>
+                            </group>
+                            <group col="2">
+                                <label for="ship_to_address" string="Address"/>
+                                <field name="ship_to_address"
+                                       nolabel="1"
+                                       widget="text"
+                                       placeholder="Flat/Building, Street, Area"
+                                       readonly="ship_to_same_as_customer"/>
+                            </group>
+                            <group col="4">
+                                <label for="ship_to_city" string="City"/>
+                                <field name="ship_to_city" nolabel="1" placeholder="City" readonly="ship_to_same_as_customer"/>
+                                <label for="ship_to_state_id" string="State"/>
+                                <field name="ship_to_state_id" nolabel="1" placeholder="State" readonly="ship_to_same_as_customer"/>
+                            </group>
+                            <group col="4">
+                                <label for="ship_to_country" string="Country"/>
+                                <field name="ship_to_country" nolabel="1" placeholder="Country" readonly="ship_to_same_as_customer"/>
+                                <label for="ship_to_zip" string="Pincode"/>
+                                <field name="ship_to_zip" nolabel="1" placeholder="PIN Code" readonly="ship_to_same_as_customer"/>
+                            </group>
+                        </group>
+                    </group>
+                </group>
+            </xpath>
+
+            <!-- HSN + SKU + GST columns on Invoice Lines -->
+            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='product_id']" position="after">
+                <field name="hsn_code" string="HSN" readonly="1" optional="show"/>
+                <field name="product_sku" string="SKU" readonly="1" optional="show"/>
+                <field name="dw_cgst_amount" string="CGST Amt" optional="show"/>
+                <field name="dw_sgst_amount" string="SGST Amt" optional="show"/>
+                <field name="dw_igst_amount" string="IGST Amt" optional="show"/>
+            </xpath>
+
+
+            <!-- Import Data tab -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Import Data" invisible="move_type not in ('out_invoice', 'out_refund')">
+                    <group col="2">
+                        <group string="Customer &amp; Contact">
+                            <field name="dw_customer_gstin"/>
+                            <field name="dw_contact_id"/>
+                            <field name="dw_contact_number"/>
+                        </group>
+                        <group string="Payment Info">
+                            <field name="dw_payment_mode"/>
+                            <field name="dw_bank_name"/>
+                            <field name="dw_payment_reference"/>
+                            <field name="dw_payment_date_imported"/>
+                        </group>
+                    </group>
+                    <group col="2">
+                        <group string="E-Invoice Details">
+                            <field name="dw_ack_number"/>
+                            <field name="dw_ack_date"/>
+                            <field name="dw_irn_number"/>
+                            <field name="dw_e_invoice_amount"/>
+                        </group>
+                        <group string="Additional Import Info">
+                            <field name="dw_eway_bill_number"/>
+                            <field name="dw_eway_bill_date"/>
+                            <field name="dw_eway_bill_amount"/>
+                            <field name="dw_place_of_supply"/>
+                            <field name="dw_ecommerce_platform"/>
+                            <field name="dw_platform_order_id"/>
+                            <field name="dw_grand_total_imported"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_out_invoice_tree_export_xlsx" model="ir.ui.view">
+        <field name="name">account.move.tree.export.invoice.xlsx</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_out_invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree/header" position="inside">
+                <button name="action_export_invoice_xlsx"
+                        type="object"
+                        string="Export Invoice XLSX"
+                        class="btn-secondary"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

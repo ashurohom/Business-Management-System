@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_bank_qr_image">
+        <div t-if="qr_title" t-att-class="qr_title_class or ''">
+            <t t-esc="qr_title"/>
+        </div>
+        <img t-att-src="'%s/DW_BMS/static/src/img/Vaastu_Bank_QR.jpeg' % (web_base_url.rstrip('/'),)"
+             alt="Bank QR Code"
+             t-att-class="qr_img_class or ''"/>
+        <div style="margin-top: 6px; font-size: 11px; line-height: 1.4;">
+            <strong>UPI ID:</strong> 9151517170m@pnb
+        </div>
+    </template>
+</odoo>

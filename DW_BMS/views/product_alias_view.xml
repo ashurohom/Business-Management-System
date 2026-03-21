@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="product_template_form_inherit_alias_names" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.alias.names</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Alternate Names">
+                    <field name="alias_ids" context="{'default_product_tmpl_id': id}">
+                        <tree editable="bottom">
+                            <field name="name" placeholder="Type alternate product name"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_template_search_view_inherit_alias_names" model="ir.ui.view">
+        <field name="name">product.template.search.inherit.alias.names</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <field name="name" position="replace">
+                <field name="name"
+                       string="Product"
+                       filter_domain="['|', '|', '|', '|', ('default_code', 'ilike', self), ('product_variant_ids.default_code', 'ilike', self), ('name', 'ilike', self), ('barcode', 'ilike', self), ('alias_ids.name', 'ilike', self)]"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="product_search_form_view_inherit_alias_names" model="ir.ui.view">
+        <field name="name">product.product.search.inherit.alias.names</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_search_form_view"/>
+        <field name="arch" type="xml">
+            <field name="name" position="replace">
+                <field name="name"
+                       string="Product"
+                       filter_domain="['|', '|', '|', ('default_code', 'ilike', self), ('name', 'ilike', self), ('barcode', 'ilike', self), ('product_tmpl_id.alias_ids.name', 'ilike', self)]"/>
+            </field>
+        </field>
+    </record>
+
+
+
+
+</odoo>

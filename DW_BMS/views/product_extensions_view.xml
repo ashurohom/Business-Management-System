@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         1. Stat-button on product form (single product)
+         ============================================================ -->
+    <record id="view_product_template_only_form_inherit_dw_bms_add_products_btn" model="ir.ui.view">
+        <field name="name">product.template.only.form.inherit.dw.bms.add.products.btn</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_add_products_stock" type="object"
+                        class="oe_stat_button" icon="fa-plus-square">
+                    <field name="opening_stock_pending_qty" string="Add Products" widget="statinfo"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         2. Header button in product list view (kept for convenience)
+         ============================================================ -->
+    <record id="view_product_template_tree_inherit_dw_bms_add_products_btn" model="ir.ui.view">
+        <field name="name">product.template.tree.inherit.dw.bms.add.products.btn</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree/header" position="inside">
+                <button name="action_add_products_stock" type="object"
+                        string="Add Products" class="btn-primary"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         3. Extra fields on product form (SKU + Minimum Sale Price)
+         ============================================================ -->
+    <record id="view_product_template_form_inherit_dw_bms_unit" model="ir.ui.view">
+        <field name="name">product.template.form.inherit.dw.bms.unit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='group_standard_price']/div[@name='pricing']" position="after">
+                <label for="min_sale_price"/>
+                <div class="o_row">
+                    <field name="min_sale_price" string="Minimum Sale Price" class="oe_inline"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         4. Dedicated tree view: "Opening Stock Import" (pending only)
+         ============================================================ -->
+    <record id="view_product_template_tree_opening_stock_import" model="ir.ui.view">
+        <field name="name">product.template.tree.opening.stock.import</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <tree string="Opening Stock Import"
+                  decoration-warning="opening_stock_pending_qty &gt; 0"
+                  create="false" delete="false">
+                <field name="name" string="Product" readonly="1"/>
+                <field name="default_code" string="Internal Ref" optional="show" readonly="1"/>
+                <field name="sku" string="SKU" optional="show" readonly="1"/>
+                <field name="uom_id" string="UoM" readonly="1"/>
+                <field name="opening_stock_ref" string="Imported Qty"/>
+                <field name="opening_stock_added_qty" string="Already Added" readonly="1"/>
+                <field name="opening_stock_pending_qty" string="Pending Qty" readonly="1"/>
+                <field name="detailed_type" column_invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Search view for the opening-stock import screen -->
+    <record id="view_product_template_search_opening_stock_import" model="ir.ui.view">
+        <field name="name">product.template.search.opening.stock.import</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <search string="Opening Stock Import">
+                <field name="name" string="Product"/>
+                <field name="default_code" string="Internal Reference"/>
+                <field name="sku" string="SKU"/>
+                <separator/>
+                <filter name="filter_pending"
+                        string="Pending Only"
+                        domain="[('opening_stock_pending_qty', '&gt;', 0)]"/>
+                <filter name="filter_done"
+                        string="Already Processed"
+                        domain="[('opening_stock_pending_qty', '=', 0),
+                                  ('opening_stock_added_qty', '&gt;', 0)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         5. Action: Opening Stock Import menu screen
+         ============================================================ -->
+    <record id="action_opening_stock_import" model="ir.actions.act_window">
+        <field name="name">Opening Stock Import</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">tree,form</field>
+        <!-- Only show products that were imported (opening_stock_ref > 0) -->
+        <field name="domain">[('opening_stock_ref', '&gt;', 0)]</field>
+        <field name="context">{'search_default_filter_pending': 1}</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'tree',
+                    'view_id': ref('view_product_template_tree_opening_stock_import')})]"/>
+        <field name="search_view_id" ref="view_product_template_search_opening_stock_import"/>
+    </record>
+
+    <!-- ============================================================
+         6.  Server action bound to list view
+             Shows in Action ▼ dropdown when records are selected
+         ============================================================ -->
+    <record id="action_server_add_all_to_stock" model="ir.actions.server">
+        <field name="name">Add All To Stock</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = model.action_add_all_pending_to_stock()</field>
+    </record>
+
+    <!-- ============================================================
+         7.  Server action for DIRECT menu use — no record selection
+             needed. Called via separate menuitem below.
+         ============================================================ -->
+    <record id="action_server_add_all_to_stock_menu" model="ir.actions.server">
+        <field name="name">Add All To Stock</field>
+        <field name="model_id" ref="product.model_product_template"/>
+        <field name="state">code</field>
+        <field name="code">action = env['product.template'].action_add_all_pending_to_stock()</field>
+    </record>
+
+    <!-- ============================================================
+         8. Menu item: Inventory > Products > Opening Stock Import
+         ============================================================ -->
+    <menuitem
+        id="menu_opening_stock_import"
+        name="Opening Stock Import"
+        parent="stock.menu_stock_inventory_control"
+        action="action_opening_stock_import"
+        sequence="30"/>
+
+    <!-- ============================================================
+         9. Menu item: Inventory > Products > Add All To Stock
+             — triggers immediately, no record selection needed
+         ============================================================ -->
+    <menuitem
+        id="menu_add_all_to_stock_direct"
+        name="Add All To Stock"
+        parent="stock.menu_stock_inventory_control"
+        action="action_server_add_all_to_stock_menu"
+        sequence="31"/>
+
+</odoo>
