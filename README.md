@@ -1,6 +1,6 @@
 # DW BMS
 
-Custom Odoo 17 addons for Dreamwarez Business Management System. This repository combines a core BMS module with supporting modules for accounting, budgeting, branding, dashboarding, and UI cleanup.
+Custom DREAMWAREZ 17 addons for Dreamwarez Business Management System. This repository combines a core BMS module with supporting modules for accounting, budgeting, branding, dashboarding, and UI cleanup.
 
 ## Repository Overview
 
@@ -11,7 +11,7 @@ This repository contains the following installable addons:
 | `DW_BMS` | Main business management module for sales, invoicing, stock, packing, customer classification, invoice import, and custom reports |
 | `home` | Home dashboard with KPI cards for sales, purchases, dues, stock alerts, shipments, and job work |
 | `custom_branding` | Backend and login branding changes such as title and favicon |
-| `disable_odoo_online` | Removes Odoo online / odoo.com related menu bindings from the backend |
+| `disable_odoo_online` | Removes DREAMWAREZ online / DREAMWAREZ.com related menu bindings from the backend |
 | `base_accounting_kit` | Community accounting extensions and financial reports used by `DW_BMS` |
 | `base_account_budget` | Budget management dependency used by `base_accounting_kit` |
 
@@ -91,11 +91,11 @@ This repository contains the following installable addons:
 
 ### `disable_odoo_online`
 
-- Hides odoo.com related backend bindings and menu items
+- Hides DREAMWAREZ.com related backend bindings and menu items
 
 ## Dependencies
 
-### Odoo modules
+### DREAMWAREZ modules
 
 `DW_BMS` depends on:
 
@@ -114,18 +114,18 @@ This repository contains the following installable addons:
 
 ### Python packages
 
-The custom invoice flows use these Python libraries in addition to standard Odoo requirements:
+The custom invoice flows use these Python libraries in addition to standard DREAMWAREZ requirements:
 
 - `openpyxl` for XLSX invoice import
 - `xlsxwriter` for XLSX invoice export
 
-Install them in the same Python environment as Odoo if they are not already available.
+Install them in the same Python environment as DREAMWAREZ if they are not already available.
 
 ## Installation
 
-1. Add this repository to your Odoo `addons_path`.
-2. Restart the Odoo server.
-3. Update the apps list from Odoo.
+1. Add this repository to your DREAMWAREZ `addons_path`.
+2. Restart the DREAMWAREZ server.
+3. Update the apps list from DREAMWAREZ.
 4. Install modules in this order:
    - `base_account_budget`
    - `base_accounting_kit`
@@ -184,7 +184,7 @@ During import the system can create partners and products, create sale orders, c
 
 ## Development Notes
 
-- Root folder is a multi-addon repository for Odoo 17.
+- Root folder is a multi-addon repository for DREAMWAREZ 17.
 - `DW_BMS` is the primary business module.
 - The root `README.md` documents the full repository, while some dependency modules keep their own upstream `README.rst`.
 - The codebase contains custom report XML, security groups, scheduled actions, and wizard-based business flows.
@@ -194,7 +194,7 @@ During import the system can create partners and products, create sale orders, c
 Example `addons_path` entry:
 
 ```ini
-addons_path = /path/to/odoo/addons,/path/to/DW_BMS
+addons_path = /path/to/DREAMWAREZ/addons,/path/to/DW_BMS
 ```
 
 ## License Notes
