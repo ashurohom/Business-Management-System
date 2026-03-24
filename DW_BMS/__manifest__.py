@@ -22,8 +22,8 @@
         "security/security.xml",
         "security/hide_bms_reports_groups.xml",
         "security/dispatch_team_group.xml",
-        "security/packing_team_group.xml",
         "security/sales_team_group.xml",
+        "security/packing_team_group.xml",
         "security/record_rules.xml",
         "security/ir.model.access.csv",
 

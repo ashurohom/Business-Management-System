@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <menuitem
+        id="menu_home_daily_activities"
+        name="Activities"
+        parent="home.menu_home_root"
+        action="home.action_home_dashboard_activities_refresh"
+        sequence="2"/>
+
+    <menuitem
         id="menu_home_reports_root"
         name="Reports"
         parent="home.menu_home_root"

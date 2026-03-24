@@ -23,24 +23,18 @@
             <t t-foreach="docs" t-as="doc">
                 <!-- Only render for customer invoices -->
                 <t t-if="doc.move_type == 'out_invoice'">
-                <t t-call="web.basic_layout">
-                <div class="page invoice-bordered-page">
+                <div class="page">
                 <style>
-                    .invoice-bordered-page {
-                        position: relative;
-                        box-sizing: border-box;
-                    }
-
                     /* ---- Page wrapper ---- */
                     .inv-wrap {
-                        border: 2px solid #8fa0bf;
+                        border: 1.5px solid #8fa0bf;
                         width: 100%;
+                        min-height: 1050px;
                         box-sizing: border-box;
                         font-size: 12.5px;
                         line-height: 1.4;
                         color: #111;
                         font-family: "DejaVu Sans", Arial, sans-serif;
-                        padding: 0;
                     }
 
                     /* ---- HEADER ---- */
@@ -279,6 +273,7 @@
                     }
                     .inv-footer {
                         margin-top: 18px;
+                        border-top: 1px solid #222;
                         padding-top: 10px;
                         font-size: 12px;
                     }
@@ -688,72 +683,72 @@ SWIFT Code. PUNBINBBISB</div>
                         </table>
                     </t>
 
+                    <div class="inv-footer">
+                        <p class="inv-terms-title"><strong>Terms and Conditions</strong></p>
+                        <ol class="inv-terms-list">
+                            <li class="inv-terms-section">
+                                <span class="inv-terms-section-title">Prices and Taxes</span>
+                                <ul class="inv-terms-sublist">
+                                    <li>All prices are quoted in INR and are exclusive or inclusive of applicable taxes (GST, VAT, customs duties, etc.), unless otherwise mentioned.</li>
+                                    <li>Any quotation provided is valid only on the date on which pro forma invoice (PI) is shared.</li>
+                                    <li>The buyer is responsible for any additional import duties, taxes, or charges in their country, if applicable.</li>
+                                </ul>
+                            </li>
+                            <li class="inv-terms-section">
+                                <span class="inv-terms-section-title">Payment Terms</span>
+                                <ul class="inv-terms-sublist">
+                                    <li>Full payment must be made as per the terms mentioned in the invoice or pro forma invoice.</li>
+                                    <li>Accepted payment methods: Bank Transfer / UPI / Credit Card / Others.</li>
+                                    <li>Payments made with credit cards are charged 2% extra.</li>
+                                </ul>
+                            </li>
+                            <li class="inv-terms-section">
+                                <span class="inv-terms-section-title">Delivery and Shipping</span>
+                                <ul class="inv-terms-sublist">
+                                    <li>Products will be dispatched within 3 business days after receipt of payment, or as otherwise agreed.</li>
+                                    <li>Shipping costs, if applicable, will be borne by the buyer unless otherwise agreed.</li>
+                                    <li>The seller is not liable for delays caused by shipping carriers or customs clearance.</li>
+                                </ul>
+                            </li>
+                            <li class="inv-terms-section">
+                                <span class="inv-terms-section-title">Returns and Refunds</span>
+                                <ul class="inv-terms-sublist">
+                                    <li>Goods once sold are not returnable or refundable unless defective or wrongly supplied.</li>
+                                    <li>Any claims must be reported within 2 days of delivery, along with relevant proof.</li>
+                                </ul>
+                            </li>
+                            <li class="inv-terms-section">
+                                <span class="inv-terms-section-title">Cancellation</span>
+                                <ul class="inv-terms-sublist">
+                                    <li>Orders once confirmed cannot be cancelled without prior written consent from the seller.</li>
+                                    <li>Any cancellation may be subject to a cancellation fee or forfeiture of advance payment.</li>
+                                </ul>
+                            </li>
+                            <li class="inv-terms-section">
+                                <span class="inv-terms-section-title">Warranty</span>
+                                <ul class="inv-terms-sublist">
+                                    <li>Warranty does not cover damage due to misuse, mishandling, or unauthorized repairs.</li>
+                                </ul>
+                            </li>
+                            <li class="inv-terms-section">
+                                <span class="inv-terms-section-title">Limitation of Liability</span>
+                                <ul class="inv-terms-sublist">
+                                    <li>The seller's liability is limited to the value of the goods sold.</li>
+                                    <li>The seller is not liable for any indirect, incidental, or consequential damages.</li>
+                                </ul>
+                            </li>
+                            <li class="inv-terms-section">
+                                <span class="inv-terms-section-title">Governing Law</span>
+                                <ul class="inv-terms-sublist">
+                                    <li>These terms are governed by the laws of the Delhi judiciary.</li>
+                                    <li>Any disputes shall be subject to the jurisdiction of Delhi.</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+
                 </div><!-- end inv-wrap -->
-                <div class="inv-footer">
-                    <p class="inv-terms-title"><strong>Terms and Conditions</strong></p>
-                    <ol class="inv-terms-list">
-                        <li class="inv-terms-section">
-                            <span class="inv-terms-section-title">Prices and Taxes</span>
-                            <ul class="inv-terms-sublist">
-                                <li>All prices are quoted in INR and are exclusive or inclusive of applicable taxes (GST, VAT, customs duties, etc.), unless otherwise mentioned.</li>
-                                <li>Any quotation provided is valid only on the date on which pro forma invoice (PI) is shared.</li>
-                                <li>The buyer is responsible for any additional import duties, taxes, or charges in their country, if applicable.</li>
-                            </ul>
-                        </li>
-                        <li class="inv-terms-section">
-                            <span class="inv-terms-section-title">Payment Terms</span>
-                            <ul class="inv-terms-sublist">
-                                <li>Full payment must be made as per the terms mentioned in the invoice or pro forma invoice.</li>
-                                <li>Accepted payment methods: Bank Transfer / UPI / Credit Card / Others.</li>
-                                <li>Payments made with credit cards are charged 2% extra.</li>
-                            </ul>
-                        </li>
-                        <li class="inv-terms-section">
-                            <span class="inv-terms-section-title">Delivery and Shipping</span>
-                            <ul class="inv-terms-sublist">
-                                <li>Products will be dispatched within 3 business days after receipt of payment, or as otherwise agreed.</li>
-                                <li>Shipping costs, if applicable, will be borne by the buyer unless otherwise agreed.</li>
-                                <li>The seller is not liable for delays caused by shipping carriers or customs clearance.</li>
-                            </ul>
-                        </li>
-                        <li class="inv-terms-section">
-                            <span class="inv-terms-section-title">Returns and Refunds</span>
-                            <ul class="inv-terms-sublist">
-                                <li>Goods once sold are not returnable or refundable unless defective or wrongly supplied.</li>
-                                <li>Any claims must be reported within 2 days of delivery, along with relevant proof.</li>
-                            </ul>
-                        </li>
-                        <li class="inv-terms-section">
-                            <span class="inv-terms-section-title">Cancellation</span>
-                            <ul class="inv-terms-sublist">
-                                <li>Orders once confirmed cannot be cancelled without prior written consent from the seller.</li>
-                                <li>Any cancellation may be subject to a cancellation fee or forfeiture of advance payment.</li>
-                            </ul>
-                        </li>
-                        <li class="inv-terms-section">
-                            <span class="inv-terms-section-title">Warranty</span>
-                            <ul class="inv-terms-sublist">
-                                <li>Warranty does not cover damage due to misuse, mishandling, or unauthorized repairs.</li>
-                            </ul>
-                        </li>
-                        <li class="inv-terms-section">
-                            <span class="inv-terms-section-title">Limitation of Liability</span>
-                            <ul class="inv-terms-sublist">
-                                <li>The seller's liability is limited to the value of the goods sold.</li>
-                                <li>The seller is not liable for any indirect, incidental, or consequential damages.</li>
-                            </ul>
-                        </li>
-                        <li class="inv-terms-section">
-                            <span class="inv-terms-section-title">Governing Law</span>
-                            <ul class="inv-terms-sublist">
-                                <li>These terms are governed by the laws of the Delhi judiciary.</li>
-                                <li>Any disputes shall be subject to the jurisdiction of Delhi.</li>
-                            </ul>
-                        </li>
-                    </ol>
-                </div>
                 </div><!-- end page -->
-                </t>
                 </t>
             </t>
         </t>

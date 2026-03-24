@@ -4,6 +4,10 @@
         <field name="name">Home Dashboard</field>
     </record>
 
+    <record id="home_dashboard_activities_main" model="home.dashboard">
+        <field name="name">Home Activities</field>
+    </record>
+
     <record id="view_home_dashboard_form" model="ir.ui.view">
         <field name="name">home.dashboard.form</field>
         <field name="model">home.dashboard</field>
@@ -58,12 +62,160 @@
         </field>
     </record>
 
+    <record id="view_home_dashboard_activity_tree" model="ir.ui.view">
+        <field name="name">home.dashboard.activity.tree</field>
+        <field name="model">home.dashboard.activity</field>
+        <field name="arch" type="xml">
+            <tree create="false" edit="false" delete="false">
+                <field name="type"/>
+                <field name="name"/>
+                <field name="user"/>
+                <field name="partner"/>
+                <field name="packed_by"/>
+                <field name="delivered_by"/>
+                <field name="packing_notes"/>
+                <field name="delivered_notes"/>
+                <field name="status"/>
+                <field name="date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_home_dashboard_activity_search" model="ir.ui.view">
+        <field name="name">home.dashboard.activity.search</field>
+        <field name="model">home.dashboard.activity</field>
+        <field name="arch" type="xml">
+            <search string="Activities">
+                <field name="type"/>
+                <field name="name"/>
+                <field name="user"/>
+                <field name="partner"/>
+                <field name="status"/>
+                <field name="date"/>
+                <filter name="filter_today" string="Today" domain="[('date', '&gt;=', context_today().strftime('%%Y-%%m-%%d 00:00:00')), ('date', '&lt;=', context_today().strftime('%%Y-%%m-%%d 23:59:59'))]"/>
+                <filter name="filter_receipts" string="Receipts" domain="[('type', '=', 'Receipt')]"/>
+                <filter name="filter_sales" string="Sales" domain="[('type', '=', 'Sale')]"/>
+                <filter name="filter_invoices" string="Invoices" domain="[('type', '=', 'Invoice')]"/>
+                <filter name="filter_purchases" string="Purchases" domain="[('type', '=', 'Purchase')]"/>
+                <filter name="filter_manufacturing" string="Manufacturing" domain="[('type', '=', 'Manufacturing')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_by_type" string="Type" context="{'group_by': 'type'}"/>
+                    <filter name="group_by_user" string="User" context="{'group_by': 'user'}"/>
+                    <filter name="group_by_partner" string="Customer/Vendor" context="{'group_by': 'partner'}"/>
+                    <filter name="group_by_status" string="Status" context="{'group_by': 'status'}"/>
+                    <filter name="group_by_date" string="Date" context="{'group_by': 'date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_home_dashboard_activity_form" model="ir.ui.view">
+        <field name="name">home.dashboard.activity.form</field>
+        <field name="model">home.dashboard.activity</field>
+        <field name="arch" type="xml">
+            <form string="Activity" create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="type"/>
+                            <field name="name"/>
+                            <field name="user"/>
+                            <field name="partner"/>
+                            <field name="status"/>
+                            <field name="date"/>
+                        </group>
+                        <group>
+                            <field name="packed_by"/>
+                            <field name="delivered_by"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="packing_notes"/>
+                        <field name="delivered_notes"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_home_dashboard_activities_form" model="ir.ui.view">
+        <field name="name">home.dashboard.activities.form</field>
+        <field name="model">home.dashboard</field>
+        <field name="arch" type="xml">
+            <form string="Activities" create="false" delete="false">
+                <header>
+                    <button name="action_apply_activity_filters" string="Apply Filters" type="object" class="btn-primary"/>
+                    <button name="action_clear_activity_filters" string="Clear Filters" type="object"/>
+                    <button name="action_refresh_activities" string="Refresh" type="object"/>
+                </header>
+                <sheet>
+                    <group string="Filters">
+                        <group>
+                            <field name="activity_date_from"/>
+                            <field name="activity_date_to"/>
+                        </group>
+                    </group>
+                    <group string="Activities">
+                        <field name="activity_line_ids" nolabel="1" readonly="1">
+                            <tree>
+                                <field name="type"/>
+                                <field name="name"/>
+                                <field name="user"/>
+                                <field name="partner"/>
+                                <field name="packed_by"/>
+                                <field name="delivered_by"/>
+                                <field name="packing_notes"/>
+                                <field name="delivered_notes"/>
+                                <field name="status"/>
+                                <field name="date"/>
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
     <record id="action_home_dashboard" model="ir.actions.act_window">
         <field name="name">Home</field>
         <field name="res_model">home.dashboard</field>
         <field name="view_mode">form</field>
+        <field name="view_id" ref="view_home_dashboard_form"/>
         <field name="res_id" ref="home_dashboard_main"/>
         <field name="target">current</field>
+    </record>
+
+    <record id="action_home_dashboard_activities" model="ir.actions.act_window">
+        <field name="name">Activities</field>
+        <field name="res_model">home.dashboard.activity</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_home_dashboard_activity_tree"/>
+        <field name="search_view_id" ref="view_home_dashboard_activity_search"/>
+        <field name="domain">[('dashboard_id', '=', ref('home.home_dashboard_activities_main'))]</field>
+        <field name="context">{'search_default_filter_today': 0}</field>
+        <field name="target">current</field>
+    </record>
+
+    <record id="action_home_dashboard_activities_refresh" model="ir.actions.server">
+        <field name="name">Activities</field>
+        <field name="model_id" ref="home.model_home_dashboard"/>
+        <field name="state">code</field>
+        <field name="code">dashboard = env.ref('home.home_dashboard_activities_main')
+dashboard._refresh_activity_lines()
+tree_view_id = env.ref('home.view_home_dashboard_activity_tree').id
+form_view_id = env.ref('home.view_home_dashboard_activity_form').id
+search_view_id = env.ref('home.view_home_dashboard_activity_search').id
+action = {
+    'type': 'ir.actions.act_window',
+    'name': 'Activities',
+    'res_model': 'home.dashboard.activity',
+    'view_mode': 'list,form',
+    'views': [(tree_view_id, 'list'), (form_view_id, 'form')],
+    'search_view_id': [search_view_id, 'search'],
+    'domain': [('dashboard_id', '=', dashboard.id)],
+    'target': 'current',
+}
+</field>
     </record>
 
     <menuitem id="menu_home_root" name="Home" sequence="1"/>

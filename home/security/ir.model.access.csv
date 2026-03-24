@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_home_dashboard_user,access.home.dashboard.user,home.model_home_dashboard,base.group_user,1,0,0,0
 access_home_dashboard_bms_admin,access.home.dashboard.bms.admin,home.model_home_dashboard,DW_BMS.group_bms_admin,1,1,0,0
+access_home_dashboard_activity_user,access.home.dashboard.activity.user,home.model_home_dashboard_activity,base.group_user,1,0,0,0
+access_home_dashboard_activity_bms_admin,access.home.dashboard.activity.bms.admin,home.model_home_dashboard_activity,DW_BMS.group_bms_admin,1,1,1,1

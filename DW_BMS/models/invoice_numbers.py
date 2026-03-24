@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
@@ -37,6 +37,10 @@ class AccountMove(models.Model):
 
     def _skip_invoice_type_sequence(self):
         return bool(self.env.context.get('skip_invoice_type_sequence'))
+
+    def _uses_custom_invoice_type_sequence(self):
+        self.ensure_one()
+        return self.move_type == 'out_invoice' and bool(self.invoice_type) and not self._skip_invoice_type_sequence()
 
     def _get_invoice_type_sequence_code(self):
         self.ensure_one()
@@ -96,6 +100,23 @@ class AccountMove(models.Model):
             sequence = self.env['ir.sequence'].sudo().search([('code', '=', seq_code)], limit=1)
             if not sequence:
                 raise UserError(f"No sequence is configured for code '{seq_code}'.")
+
+    @api.depends('posted_before', 'state', 'journal_id', 'date', 'move_type', 'payment_id', 'invoice_type')
+    def _compute_name(self):
+        custom_moves = self.filtered(lambda m: m._uses_custom_invoice_type_sequence())
+        regular_moves = self - custom_moves
+
+        if regular_moves:
+            super(AccountMove, regular_moves)._compute_name()
+
+        for move in custom_moves:
+            if move.state == 'draft':
+                move.name = '/'
+            elif not move.name:
+                move.name = '/'
+
+        if custom_moves:
+            custom_moves._inverse_name()
 
     def action_post(self):
         self._assign_invoice_type_sequence_validation()

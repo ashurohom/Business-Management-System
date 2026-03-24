@@ -1,4 +1,6 @@
-from odoo import api, fields, models
+from datetime import datetime, time
+
+from odoo import Command, api, fields, models
 
 
 class HomeDashboard(models.Model):
@@ -10,6 +12,14 @@ class HomeDashboard(models.Model):
     filter_date_to = fields.Date(string="Date To")
     filter_partner_id = fields.Many2one("res.partner", string="Customer")
     filter_user_id = fields.Many2one("res.users", string="User")
+    activity_date_from = fields.Date(string="Activity Date From")
+    activity_date_to = fields.Date(string="Activity Date To")
+    activity_line_ids = fields.One2many(
+        "home.dashboard.activity",
+        "dashboard_id",
+        string="Daily Activities",
+        readonly=True,
+    )
 
     # User panel (current user only)
     user_total_sale = fields.Monetary(string="Total Sale (User)", compute="_compute_kpis", currency_field="currency_id")
@@ -35,6 +45,12 @@ class HomeDashboard(models.Model):
     def _compute_currency(self):
         for rec in self:
             rec.currency_id = self.env.company.currency_id
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        records._refresh_activity_lines()
+        return records
 
     def _company_domain(self):
         company_ids = self.env.companies.ids
@@ -104,7 +120,185 @@ class HomeDashboard(models.Model):
                 mo_domain.append(("user_id", "=", self.env.user.id))
             else:
                 mo_domain.append(("create_uid", "=", self.env.user.id))
-        return self._count_records("mrp.production", mo_domain)
+            return self._count_records("mrp.production", mo_domain)
+
+    def _activity_company_domain(self, model_name):
+        model = self.env[model_name]
+        if "company_id" not in model._fields:
+            return []
+        return [("company_id", "in", self.env.companies.ids)]
+
+    def _activity_date_domain(self, date_from, date_to):
+        domain = []
+        if date_from:
+            domain.append(("create_date", ">=", datetime.combine(fields.Date.to_date(date_from), time.min)))
+        if date_to:
+            domain.append(("create_date", "<=", datetime.combine(fields.Date.to_date(date_to), time.max)))
+        return domain
+
+    @staticmethod
+    def _m2o_name(value):
+        return value[1] if value else ""
+
+    def get_dashboard_activities(self, date_from, date_to):
+        self.ensure_one()
+
+        base_date_domain = self._activity_date_domain(date_from, date_to)
+        activities = []
+
+        sale_orders = self.env["sale.order"].search_read(
+            self._activity_company_domain("sale.order") + base_date_domain,
+            ["name", "create_uid", "partner_id", "state", "create_date"],
+            order="create_date desc",
+            limit=100,
+        )
+        activities.extend(
+            {
+                "type": "Sale",
+                "name": order.get("name") or "",
+                "user": self._m2o_name(order.get("create_uid")),
+                "partner": self._m2o_name(order.get("partner_id")),
+                "packed_by": "",
+                "delivered_by": "",
+                "packing_notes": "",
+                "delivered_notes": "",
+                "status": order.get("state") or "",
+                "date": fields.Datetime.to_string(order.get("create_date")) if order.get("create_date") else "",
+            }
+            for order in sale_orders
+        )
+
+        invoices = self.env["account.move"].search_read(
+            self._activity_company_domain("account.move") + base_date_domain + [("move_type", "=", "out_invoice")],
+            ["name", "create_uid", "partner_id", "state", "create_date"],
+            order="create_date desc",
+            limit=100,
+        )
+        activities.extend(
+            {
+                "type": "Invoice",
+                "name": invoice.get("name") or "",
+                "user": self._m2o_name(invoice.get("create_uid")),
+                "partner": self._m2o_name(invoice.get("partner_id")),
+                "packed_by": "",
+                "delivered_by": "",
+                "packing_notes": "",
+                "delivered_notes": "",
+                "status": invoice.get("state") or "",
+                "date": fields.Datetime.to_string(invoice.get("create_date")) if invoice.get("create_date") else "",
+            }
+            for invoice in invoices
+        )
+
+        receipts = self.env["stock.picking"].search_read(
+            self._activity_company_domain("stock.picking") + base_date_domain + [("picking_type_code", "in", ["incoming", "outgoing"])],
+            [
+                "name",
+                "create_uid",
+                "partner_id",
+                "packed_by",
+                "delivered_by",
+                "packed_notes",
+                "delivered_notes",
+                "state",
+                "create_date",
+            ],
+            order="create_date desc",
+            limit=100,
+        )
+        activities.extend(
+            {
+                "type": "Receipt",
+                "name": receipt.get("name") or "",
+                "user": self._m2o_name(receipt.get("create_uid")),
+                "partner": self._m2o_name(receipt.get("partner_id")),
+                "packed_by": self._m2o_name(receipt.get("packed_by")),
+                "delivered_by": self._m2o_name(receipt.get("delivered_by")),
+                "packing_notes": receipt.get("packed_notes") or "",
+                "delivered_notes": receipt.get("delivered_notes") or "",
+                "status": receipt.get("state") or "",
+                "date": fields.Datetime.to_string(receipt.get("create_date")) if receipt.get("create_date") else "",
+            }
+            for receipt in receipts
+        )
+
+        purchases = self.env["purchase.order"].search_read(
+            self._activity_company_domain("purchase.order") + base_date_domain,
+            ["name", "create_uid", "partner_id", "state", "create_date"],
+            order="create_date desc",
+            limit=100,
+        )
+        activities.extend(
+            {
+                "type": "Purchase",
+                "name": purchase.get("name") or "",
+                "user": self._m2o_name(purchase.get("create_uid")),
+                "partner": self._m2o_name(purchase.get("partner_id")),
+                "packed_by": "",
+                "delivered_by": "",
+                "packing_notes": "",
+                "delivered_notes": "",
+                "status": purchase.get("state") or "",
+                "date": fields.Datetime.to_string(purchase.get("create_date")) if purchase.get("create_date") else "",
+            }
+            for purchase in purchases
+        )
+
+        mrp_fields = ["name", "create_uid", "state", "create_date"]
+        if "partner_id" in self.env["mrp.production"]._fields:
+            mrp_fields.append("partner_id")
+        productions = self.env["mrp.production"].search_read(
+            self._activity_company_domain("mrp.production") + base_date_domain,
+            mrp_fields,
+            order="create_date desc",
+            limit=100,
+        )
+        activities.extend(
+            {
+                "type": "Manufacturing",
+                "name": production.get("name") or "",
+                "user": self._m2o_name(production.get("create_uid")),
+                "partner": self._m2o_name(production.get("partner_id")),
+                "packed_by": "",
+                "delivered_by": "",
+                "packing_notes": "",
+                "delivered_notes": "",
+                "status": production.get("state") or "",
+                "date": fields.Datetime.to_string(production.get("create_date")) if production.get("create_date") else "",
+            }
+            for production in productions
+        )
+
+        activities.sort(key=lambda item: item["date"] or "", reverse=True)
+        return activities[:100]
+
+    def _refresh_activity_lines(self):
+        for rec in self:
+            activities = rec.get_dashboard_activities(rec.activity_date_from, rec.activity_date_to)
+            rec.sudo().write(
+                {
+                    "activity_line_ids": [
+                        Command.clear(),
+                        *[
+                            Command.create(
+                                {
+                                    "type": activity["type"],
+                                    "name": activity["name"],
+                                    "user": activity["user"],
+                                    "partner": activity["partner"],
+                                    "packed_by": activity["packed_by"],
+                                    "delivered_by": activity["delivered_by"],
+                                    "packing_notes": activity["packing_notes"],
+                                    "delivered_notes": activity["delivered_notes"],
+                                    "status": activity["status"],
+                                    "date": activity["date"] or False,
+                                }
+                            )
+                            for activity in activities
+                        ],
+                    ]
+                }
+            )
 
     @api.depends(
         "filter_date_from",
@@ -267,4 +461,22 @@ class HomeDashboard(models.Model):
                 "filter_user_id": False,
             }
         )
+        return {"type": "ir.actions.client", "tag": "reload"}
+
+    def action_refresh_activities(self):
+        self._refresh_activity_lines()
+        return {"type": "ir.actions.client", "tag": "reload"}
+
+    def action_apply_activity_filters(self):
+        self._refresh_activity_lines()
+        return {"type": "ir.actions.client", "tag": "reload"}
+
+    def action_clear_activity_filters(self):
+        self.write(
+            {
+                "activity_date_from": False,
+                "activity_date_to": False,
+            }
+        )
+        self._refresh_activity_lines()
         return {"type": "ir.actions.client", "tag": "reload"}
