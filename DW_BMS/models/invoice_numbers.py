@@ -18,6 +18,7 @@ class AccountMove(models.Model):
         'kv_mh': 'invoice.kv.mh',
         'kv_wb': 'invoice.kv.wb',
         'kv_tel': 'invoice.kv.tel',
+        'test': 'invoice.test',
     }
 
     invoice_type = fields.Selection([
