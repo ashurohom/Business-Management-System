@@ -34,6 +34,7 @@ class AccountMove(models.Model):
         ('kv_mh', 'KV Enterprises (Maharashtra)'),
         ('kv_wb', 'KV Enterprises (West Bengal)'),
         ('kv_tel', 'KV Enterprises (Telangana)'),
+        ('test', 'Test'),
     ], string="Invoice Type", default='daily_sales', copy=False)
 
     def _skip_invoice_type_sequence(self):
