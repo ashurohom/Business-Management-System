@@ -107,6 +107,26 @@ class ProductProduct(models.Model):
             return [("id", "in", low_stock_ids)]
         return [("id", "not in", low_stock_ids)]
 
+    def search_fetch(self, domain, field_names, offset=0, limit=None, order=None):
+        if not self.env.context.get("product_stock_status_priority") or order:
+            return super().search_fetch(domain, field_names, offset=offset, limit=limit, order=order)
+
+        products = super().search_fetch(domain, field_names, offset=0, limit=None, order="id desc")
+        sorted_products = products.sorted(
+            key=lambda product: (
+                0 if product.type == "product" and product.qty_available < (product.min_alert_qty or 0.0) else 1,
+                product.purchase_status_sequence,
+                product.qty_available,
+                -product.id,
+            )
+        )
+
+        if offset:
+            sorted_products = sorted_products[offset:]
+        if limit is not None:
+            sorted_products = sorted_products[:limit]
+        return sorted_products
+
     def action_next_purchase_status(self):
         _cycle = {
             "no_order": "ordered",

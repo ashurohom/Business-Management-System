@@ -93,7 +93,7 @@
         <field name="res_model">product.product</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[]</field>
-        <field name="context">{'search_default_filter_to_sell': 1}</field>
+        <field name="context">{'search_default_filter_to_sell': 1, 'product_stock_status_priority': 1}</field>
         <field name="search_view_id" ref="view_product_search_alert_inherit"/>
     </record>
 
