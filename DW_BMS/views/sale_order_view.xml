@@ -63,6 +63,120 @@
         </field>
     </record>
 
+    <record id="view_order_form_packing_team_hide_sale_buttons" model="ir.ui.view">
+        <field name="name">sale.order.form.packing.team.hide.sale.buttons</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="priority" eval="101"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@id='create_invoice']" position="attributes">
+                <attribute name="groups">!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@id='create_invoice_percentage']" position="attributes">
+                <attribute name="groups">!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@id='send_by_email_primary']" position="attributes">
+                <attribute name="groups">!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@id='send_proforma_primary']" position="attributes">
+                <attribute name="groups">!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@id='action_confirm']" position="attributes">
+                <attribute name="groups">!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="(//button[@name='action_confirm'])[2]" position="attributes">
+                <attribute name="groups">!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@id='send_proforma']" position="attributes">
+                <attribute name="groups">!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@id='send_by_email']" position="attributes">
+                <attribute name="groups">!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@name='payment_action_capture']" position="attributes">
+                <attribute name="groups">!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@name='payment_action_void']" position="attributes">
+                <attribute name="groups">!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_unlock']" position="attributes">
+                <attribute name="groups">!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_preview_sale_order']" position="attributes">
+                <attribute name="groups">!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_cancel']" position="attributes">
+                <attribute name="groups">!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_draft']" position="attributes">
+                <attribute name="groups">!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_lock']" position="attributes">
+                <attribute name="groups">!DW_BMS.group_packing_team</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_order_form_packing_team_customer_readonly" model="ir.ui.view">
+        <field name="name">sale.order.form.packing.team.customer.readonly</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="priority" eval="102"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='partner_details']/field[@name='partner_id']" position="attributes">
+                <attribute name="options" groups="DW_BMS.group_packing_team">{'no_open': True, 'no_create': True, 'no_quick_create': True, 'no_create_edit': True}</attribute>
+            </xpath>
+            <xpath expr="//group[@name='partner_details']/field[@name='partner_invoice_id']" position="attributes">
+                <attribute name="options" groups="DW_BMS.group_packing_team">{'no_open': True, 'no_create': True, 'no_quick_create': True, 'no_create_edit': True}</attribute>
+            </xpath>
+            <xpath expr="//group[@name='partner_details']/field[@name='partner_shipping_id']" position="attributes">
+                <attribute name="options" groups="DW_BMS.group_packing_team">{'no_open': True, 'no_create': True, 'no_quick_create': True, 'no_create_edit': True}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_order_form_packing_team_readonly" model="ir.ui.view">
+        <field name="name">sale.order.form.packing.team.readonly</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="attributes" groups="DW_BMS.group_packing_team">
+                <attribute name="create">false</attribute>
+                <attribute name="edit">false</attribute>
+                <attribute name="delete">false</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_quotation_tree_packing_team_readonly" model="ir.ui.view">
+        <field name="name">sale.quotation.tree.packing.team.readonly</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree"/>
+        <field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes" groups="DW_BMS.group_packing_team">
+                <attribute name="create">false</attribute>
+                <attribute name="edit">false</attribute>
+                <attribute name="delete">false</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_order_tree_packing_team_readonly" model="ir.ui.view">
+        <field name="name">sale.order.tree.packing.team.readonly</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes" groups="DW_BMS.group_packing_team">
+                <attribute name="create">false</attribute>
+                <attribute name="edit">false</attribute>
+                <attribute name="delete">false</attribute>
+            </xpath>
+        </field>
+    </record>
+
     <record id="action_packing_team_quotations" model="ir.actions.act_window">
         <field name="name">Quotations</field>
         <field name="res_model">sale.order</field>

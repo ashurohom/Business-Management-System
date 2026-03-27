@@ -117,6 +117,5 @@
               name="Packing Orders"
               parent="sale.sale_order_menu"
               action="action_packing_order"
-              sequence="40"
-              groups="base.group_system,DW_BMS.group_bms_admin,DW_BMS.group_sales_team"/>
+              sequence="40"/>
 </odoo>

@@ -19,8 +19,7 @@
                 ref('DW_BMS.group_bms_purchase'),
                 ref('DW_BMS.group_bms_inventory'),
                 ref('DW_BMS.group_dispatch_team'),
-                ref('DW_BMS.group_sales_team'),
-                ref('DW_BMS.group_packing_team')
+                ref('DW_BMS.group_sales_team')
             ])
         ]"/>
     </record>
@@ -318,8 +317,7 @@
                 ref('base.group_system'),
                 ref('DW_BMS.group_bms_admin'),
                 ref('DW_BMS.group_bms_inventory'),
-                ref('DW_BMS.group_dispatch_team'),
-                ref('DW_BMS.group_packing_team')
+                ref('DW_BMS.group_dispatch_team')
             ])
         ]"/>
     </record>
@@ -330,8 +328,7 @@
                 ref('base.group_system'),
                 ref('DW_BMS.group_bms_admin'),
                 ref('DW_BMS.group_bms_inventory'),
-                ref('DW_BMS.group_dispatch_team'),
-                ref('DW_BMS.group_packing_team')
+                ref('DW_BMS.group_dispatch_team')
             ])
         ]"/>
     </record>
@@ -393,8 +390,7 @@
                 ref('base.group_system'),
                 ref('DW_BMS.group_bms_admin'),
                 ref('DW_BMS.group_bms_inventory'),
-                ref('DW_BMS.group_dispatch_team'),
-                ref('DW_BMS.group_packing_team')
+                ref('DW_BMS.group_dispatch_team')
             ])
         ]"/>
     </record>
@@ -408,5 +404,24 @@
             ])
         ]"/>
     </record>
+
+    <menuitem id="menu_packing_team_inventory_root"
+              name="Inventory"
+              sequence="7"
+              web_icon="stock,static/description/icon.png"
+              groups="DW_BMS.group_packing_team"/>
+
+    <menuitem id="menu_packing_team_inventory_operations"
+              name="Operations"
+              parent="menu_packing_team_inventory_root"
+              sequence="2"
+              groups="DW_BMS.group_packing_team"/>
+
+    <menuitem id="menu_packing_team_inventory_deliveries"
+              name="Deliveries"
+              parent="menu_packing_team_inventory_operations"
+              action="stock.action_picking_tree_outgoing"
+              sequence="1"
+              groups="DW_BMS.group_packing_team"/>
 
 </odoo>
