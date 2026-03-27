@@ -62,6 +62,18 @@ access_bms_manufacturing_product,bms manufacturing product read,product.model_pr
 access_bms_manufacturing_production,bms manufacturing production,mrp.model_mrp_production,DW_BMS.group_bms_manufacturing,1,1,1,0
 access_bms_manufacturing_bom,bms manufacturing bom,mrp.model_mrp_bom,DW_BMS.group_bms_manufacturing,1,1,1,0
 
+access_bms_packing_partner,bms packing partner read,base.model_res_partner,DW_BMS.group_packing_team,1,0,0,0
+access_bms_packing_product,bms packing product read,product.model_product_product,DW_BMS.group_packing_team,1,0,0,0
+access_bms_packing_sale,bms packing sale read,sale.model_sale_order,DW_BMS.group_packing_team,1,0,0,0
+access_bms_packing_sale_line,bms packing sale line read,sale.model_sale_order_line,DW_BMS.group_packing_team,1,0,0,0
+access_bms_packing_invoice,bms packing invoice read,account.model_account_move,DW_BMS.group_packing_team,1,0,0,0
+access_bms_packing_invoice_line,bms packing invoice line read,account.model_account_move_line,DW_BMS.group_packing_team,1,0,0,0
+access_bms_packing_account_tax,bms packing tax read,account.model_account_tax,DW_BMS.group_packing_team,1,0,0,0
+access_bms_packing_dispatch_mode,bms packing dispatch mode read,DW_BMS.model_packing_dispatch_mode,DW_BMS.group_packing_team,1,0,0,0
+access_bms_packing_courier_company,bms packing courier company read,DW_BMS.model_packing_courier_company,DW_BMS.group_packing_team,1,0,0,0
+access_bms_packing_order,bms packing order,DW_BMS.model_packing_order,DW_BMS.group_packing_team,1,1,1,0
+access_bms_packing_order_line,bms packing order line,DW_BMS.model_packing_order_line,DW_BMS.group_packing_team,1,1,1,0
+
 access_bms_admin_invoice_import_log,bms admin invoice import log,DW_BMS.model_dw_invoice_import_log,DW_BMS.group_bms_admin,1,1,1,1
 access_bms_accounts_invoice_import_log,bms accounts invoice import log,DW_BMS.model_dw_invoice_import_log,DW_BMS.group_bms_accounts,1,1,1,0
 

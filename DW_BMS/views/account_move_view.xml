@@ -190,4 +190,83 @@
             </xpath>
         </field>
     </record>
+
+    <record id="view_move_form_packing_team_readonly" model="ir.ui.view">
+        <field name="name">account.move.form.packing.team.readonly</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_invoice_sent'][1]" position="attributes">
+                <attribute name="groups">base.group_user,!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_invoice_sent'][2]" position="attributes">
+                <attribute name="groups">base.group_user,!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_register_payment' and @id='account_invoice_payment_btn']" position="attributes">
+                <attribute name="groups">account.group_account_invoice,!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="(//button[@name='action_post'])[1]" position="attributes">
+                <attribute name="groups">account.group_account_invoice,!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="(//button[@name='action_post'])[2]" position="attributes">
+                <attribute name="groups">account.group_account_invoice,!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_reverse']" position="attributes">
+                <attribute name="groups">account.group_account_invoice,!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="(//button[@name='button_cancel'])[1]" position="attributes">
+                <attribute name="groups">account.group_account_invoice,!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="(//button[@name='button_cancel'])[2]" position="attributes">
+                <attribute name="groups">account.group_account_invoice,!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@name='button_draft']" position="attributes">
+                <attribute name="groups">account.group_account_invoice,!DW_BMS.group_packing_team</attribute>
+            </xpath>
+            <xpath expr="//button[@name='button_request_cancel']" position="attributes">
+                <attribute name="groups">account.group_account_invoice,!DW_BMS.group_packing_team</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_packing_team_customer_invoices" model="ir.actions.act_window">
+        <field name="name">Invoices</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('move_type', '=', 'out_invoice')]</field>
+        <field name="context">{'default_move_type': 'out_invoice', 'create': 0, 'edit': 0, 'delete': 0}</field>
+    </record>
+
+    <record id="action_packing_team_customer_invoices_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="account.view_out_invoice_tree"/>
+        <field name="act_window_id" ref="action_packing_team_customer_invoices"/>
+    </record>
+
+    <record id="action_packing_team_customer_invoices_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="account.view_move_form"/>
+        <field name="act_window_id" ref="action_packing_team_customer_invoices"/>
+    </record>
+
+    <menuitem id="menu_packing_team_finance_root"
+              name="Accounting"
+              sequence="5"
+              web_icon="account,static/description/icon.png"
+              groups="DW_BMS.group_packing_team"/>
+
+    <menuitem id="menu_packing_team_finance_customers"
+              name="Customers"
+              parent="menu_packing_team_finance_root"
+              sequence="2"
+              groups="DW_BMS.group_packing_team"/>
+
+    <menuitem id="menu_packing_team_customer_invoices"
+              name="Invoices"
+              parent="menu_packing_team_finance_customers"
+              action="action_packing_team_customer_invoices"
+              sequence="1"
+              groups="DW_BMS.group_packing_team"/>
 </odoo>

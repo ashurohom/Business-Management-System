@@ -62,4 +62,70 @@
             </xpath>
         </field>
     </record>
+
+    <record id="action_packing_team_quotations" model="ir.actions.act_window">
+        <field name="name">Quotations</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="sale.sale_order_view_search_inherit_quotation"/>
+        <field name="context">{'create': 0, 'edit': 0, 'delete': 0}</field>
+        <field name="domain">[('state', 'in', ('draft', 'sent'))]</field>
+    </record>
+
+    <record id="action_packing_team_orders" model="ir.actions.act_window">
+        <field name="name">Orders</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="sale.sale_order_view_search_inherit_sale"/>
+        <field name="context">{'create': 0, 'edit': 0, 'delete': 0}</field>
+        <field name="domain">[('state', 'not in', ('draft', 'sent', 'cancel'))]</field>
+    </record>
+
+    <record id="action_packing_team_quotations_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="sale.view_quotation_tree"/>
+        <field name="act_window_id" ref="action_packing_team_quotations"/>
+    </record>
+
+    <record id="action_packing_team_quotations_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="sale.view_order_form"/>
+        <field name="act_window_id" ref="action_packing_team_quotations"/>
+    </record>
+
+    <record id="action_packing_team_orders_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="sale.view_order_tree"/>
+        <field name="act_window_id" ref="action_packing_team_orders"/>
+    </record>
+
+    <record id="action_packing_team_orders_form" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="sale.view_order_form"/>
+        <field name="act_window_id" ref="action_packing_team_orders"/>
+    </record>
+
+    <menuitem id="menu_packing_team_sales_orders"
+              name="Orders"
+              parent="sale.sale_menu_root"
+              sequence="10"
+              groups="DW_BMS.group_packing_team"/>
+
+    <menuitem id="menu_packing_team_sale_quotations"
+              name="Quotations"
+              parent="menu_packing_team_sales_orders"
+              action="action_packing_team_quotations"
+              sequence="10"
+              groups="DW_BMS.group_packing_team"/>
+
+    <menuitem id="menu_packing_team_sale_orders"
+              name="Orders"
+              parent="menu_packing_team_sales_orders"
+              action="action_packing_team_orders"
+              sequence="20"
+              groups="DW_BMS.group_packing_team"/>
 </odoo>
