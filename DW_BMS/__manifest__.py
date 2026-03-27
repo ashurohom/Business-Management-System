@@ -24,6 +24,7 @@
         "security/dispatch_team_group.xml",
         "security/sales_team_group.xml",
         "security/packing_team_group.xml",
+        "security/dispatch_team_restrictions.xml",
         "security/record_rules.xml",
         "security/ir.model.access.csv",
 

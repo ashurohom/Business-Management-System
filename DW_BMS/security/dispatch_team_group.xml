@@ -9,8 +9,7 @@
         <field name="category_id" ref="DW_BMS.module_category_dw_bms"/>
         <field name="implied_ids" eval="[
             (4, ref('purchase.group_purchase_user')),
-            (4, ref('stock.group_stock_user')),
-            (4, ref('mrp.group_mrp_user'))
+            (4, ref('stock.group_stock_user'))
         ]"/>
     </record>
 
@@ -29,8 +28,7 @@
         <field name="groups_id" eval="[
             (6, 0, [
                 ref('DW_BMS.group_bms_admin'),
-                ref('DW_BMS.group_bms_manufacturing'),
-                ref('DW_BMS.group_dispatch_team')
+                ref('DW_BMS.group_bms_manufacturing')
             ])
         ]"/>
     </record>

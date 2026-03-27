@@ -40,8 +40,7 @@
         <field name="groups_id" eval="[
             (6, 0, [
                 ref('DW_BMS.group_bms_admin'),
-                ref('DW_BMS.group_bms_manufacturing'),
-                ref('DW_BMS.group_dispatch_team')
+                ref('DW_BMS.group_bms_manufacturing')
             ])
         ]"/>
     </record>
