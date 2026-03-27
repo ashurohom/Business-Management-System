@@ -52,7 +52,8 @@
                                 <field name="billing_partner_id"
                                        nolabel="1"
                                        readonly="bill_to_same_as_customer"
-                                       invisible="id and state != 'draft'"/>
+                                       invisible="id and state != 'draft'"
+                                       options="{'no_quick_create': True, 'no_create_edit': True}"/>
                                 <field name="billing_customer_name"
                                        nolabel="1"
                                        invisible="not id or state == 'draft'"/>
@@ -92,7 +93,8 @@
                                 <field name="shipping_partner_id"
                                        nolabel="1"
                                        readonly="ship_to_same_as_customer"
-                                       invisible="id and state != 'draft'"/>
+                                       invisible="id and state != 'draft'"
+                                       options="{'no_quick_create': True, 'no_create_edit': True}"/>
                                 <field name="shipping_customer_name"
                                        nolabel="1"
                                        invisible="not id or state == 'draft'"/>

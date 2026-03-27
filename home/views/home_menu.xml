@@ -5,6 +5,7 @@
         name="Activities"
         parent="home.menu_home_root"
         action="home.action_home_dashboard_activities_refresh"
+        groups="DW_BMS.group_bms_admin,base.group_system"
         sequence="2"/>
 
     <menuitem

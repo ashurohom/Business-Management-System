@@ -72,7 +72,6 @@ class AccountMove(models.Model):
     billing_partner_id = fields.Many2one(
         "res.partner",
         string="Billing Partner",
-        domain=[("customer_rank", ">", 0)],
         copy=False,
     )
     billing_customer_id = fields.Many2one(
@@ -96,7 +95,6 @@ class AccountMove(models.Model):
     shipping_partner_id = fields.Many2one(
         "res.partner",
         string="Shipping Partner",
-        domain=[("customer_rank", ">", 0)],
         copy=False,
     )
     shipping_customer_id = fields.Many2one(
