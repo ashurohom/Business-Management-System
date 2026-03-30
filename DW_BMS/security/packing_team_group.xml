@@ -7,9 +7,6 @@
     <record id="group_packing_team" model="res.groups">
         <field name="name">Packing Team</field>
         <field name="category_id" ref="DW_BMS.module_category_dw_bms"/>
-        <field name="implied_ids" eval="[
-            (4, ref('stock.group_stock_user'))
-        ]"/>
     </record>
 
     <record id="stock.menu_stock_root" model="ir.ui.menu">
@@ -174,7 +171,8 @@
                 ref('DW_BMS.group_bms_purchase'),
                 ref('DW_BMS.group_bms_sales'),
                 ref('DW_BMS.group_bms_report'),
-                ref('DW_BMS.group_sales_team')
+                ref('DW_BMS.group_sales_team'),
+                ref('DW_BMS.group_dispatch_team')
             ])
         ]"/>
     </record>
@@ -199,7 +197,8 @@
                 ref('DW_BMS.group_bms_purchase'),
                 ref('DW_BMS.group_bms_sales'),
                 ref('DW_BMS.group_bms_report'),
-                ref('DW_BMS.group_sales_team')
+                ref('DW_BMS.group_sales_team'),
+                ref('DW_BMS.group_dispatch_team')
             ])
         ]"/>
     </record>
@@ -240,6 +239,21 @@
     </record>
 
     <record id="account.menu_action_move_out_invoice_type" model="ir.ui.menu">
+        <field name="groups_id" eval="[
+            (6, 0, [
+                ref('base.group_system'),
+                ref('DW_BMS.group_bms_admin'),
+                ref('DW_BMS.group_bms_accounts'),
+                ref('DW_BMS.group_bms_purchase'),
+                ref('DW_BMS.group_bms_sales'),
+                ref('DW_BMS.group_bms_report'),
+                ref('DW_BMS.group_sales_team'),
+                ref('DW_BMS.group_dispatch_team')
+            ])
+        ]"/>
+    </record>
+
+    <record id="account.menu_action_move_out_refund_type" model="ir.ui.menu">
         <field name="groups_id" eval="[
             (6, 0, [
                 ref('base.group_system'),
@@ -417,10 +431,24 @@
               sequence="2"
               groups="DW_BMS.group_packing_team"/>
 
+    <record id="action_packing_team_deliveries" model="ir.actions.act_window">
+        <field name="name">Deliveries</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">tree,kanban,form,calendar,activity</field>
+        <field name="domain"></field>
+        <field name="context">{'contact_display': 'partner_address', 'default_company_id': allowed_company_ids[0], 'restricted_picking_type_code': 'outgoing', 'search_default_delivery': 1, 'create': 0, 'delete': 0}</field>
+        <field name="search_view_id" ref="stock.view_picking_internal_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No delivery orders found.
+            </p>
+        </field>
+    </record>
+
     <menuitem id="menu_packing_team_inventory_deliveries"
               name="Deliveries"
               parent="menu_packing_team_inventory_operations"
-              action="stock.action_picking_tree_outgoing"
+              action="DW_BMS.action_packing_team_deliveries"
               sequence="1"
               groups="DW_BMS.group_packing_team"/>
 

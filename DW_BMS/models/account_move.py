@@ -58,6 +58,34 @@ class AccountMove(models.Model):
         "BILLING Address",
     ]
 
+    shipping_ids = fields.One2many(
+        "shipping.management",
+        "invoice_id",
+        string="Shipments",
+    )
+    shipping_count = fields.Integer(
+        string="Shipping Count",
+        compute="_compute_shipping_count",
+    )
+
+    @api.depends("shipping_ids")
+    def _compute_shipping_count(self):
+        for move in self:
+            move.shipping_count = len(move.shipping_ids)
+
+    def action_open_shipping(self):
+        self.ensure_one()
+        shipping = self.env['shipping.management'].search([('invoice_id', '=', self.id)], limit=1)
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Shipping Management',
+            'view_mode': 'form',
+            'res_model': 'shipping.management',
+            'res_id': shipping.id if shipping else False,
+            'context': {'default_invoice_id': self.id},
+        }
+
+
     bill_to_same_as_customer = fields.Boolean(
         string="Bill To Same as Customer Address",
         default=True,
@@ -76,14 +104,13 @@ class AccountMove(models.Model):
     )
     billing_customer_id = fields.Many2one(
         "res.partner",
-        string="Billing Customer Name",
+        string="Billing Customer ID",
         related="billing_partner_id",
         readonly=False,
     )
     billing_customer_name = fields.Char(
         string="Billing Customer Name",
-        related="billing_partner_id.name",
-        readonly=True,
+        copy=False,
     )
     billing_mobile = fields.Char(string="Billing Mobile", copy=False)
     invoice_date = fields.Date(default=fields.Date.context_today)
@@ -99,14 +126,13 @@ class AccountMove(models.Model):
     )
     shipping_customer_id = fields.Many2one(
         "res.partner",
-        string="Shipping Customer Name",
+        string="Shipping Customer ID",
         related="shipping_partner_id",
         readonly=False,
     )
     shipping_customer_name = fields.Char(
         string="Shipping Customer Name",
-        related="shipping_partner_id.name",
-        readonly=True,
+        copy=False,
     )
     shipping_mobile = fields.Char(string="Shipping Mobile", copy=False)
     bill_to_address = fields.Text(
@@ -544,6 +570,7 @@ class AccountMove(models.Model):
         partner_field=None,
         mobile_field=None,
         legacy_partner_field=None,
+        name_field=None,
     ):
         vals = {
             f"{prefix}_address": False,
@@ -558,6 +585,8 @@ class AccountMove(models.Model):
             vals[mobile_field] = False
         if legacy_partner_field:
             vals[legacy_partner_field] = False
+        if name_field:
+            vals[name_field] = False
 
         if not partner:
             return vals
@@ -576,15 +605,18 @@ class AccountMove(models.Model):
             vals[mobile_field] = partner.mobile or False
         if legacy_partner_field:
             vals[legacy_partner_field] = partner.id
+        if name_field:
+            vals[name_field] = partner.name or False
         return vals
 
-    def _clear_partner_section_vals(self, prefix, partner_field, mobile_field, legacy_partner_field):
+    def _clear_partner_section_vals(self, prefix, partner_field, mobile_field, legacy_partner_field, name_field):
         return self._partner_address_vals(
             False,
             prefix,
             partner_field=partner_field,
             mobile_field=mobile_field,
             legacy_partner_field=legacy_partner_field,
+            name_field=name_field,
         )
 
     def _get_delivery_type_default_vals(self):
@@ -603,6 +635,7 @@ class AccountMove(models.Model):
                     partner_field="billing_partner_id",
                     mobile_field="billing_mobile",
                     legacy_partner_field="bill_to_partner_id",
+                    name_field="billing_customer_name",
                 )
             )
             vals.update(
@@ -612,6 +645,7 @@ class AccountMove(models.Model):
                     partner_field="shipping_partner_id",
                     mobile_field="shipping_mobile",
                     legacy_partner_field="ship_to_partner_id",
+                    name_field="shipping_customer_name",
                 )
             )
         elif self.delivery_type == "ship_to_different":
@@ -626,6 +660,7 @@ class AccountMove(models.Model):
                     partner_field="billing_partner_id",
                     mobile_field="billing_mobile",
                     legacy_partner_field="bill_to_partner_id",
+                    name_field="billing_customer_name",
                 )
             )
             if self.shipping_partner_id and self.shipping_partner_id != self.partner_id:
@@ -636,6 +671,7 @@ class AccountMove(models.Model):
                         partner_field="shipping_partner_id",
                         mobile_field="shipping_mobile",
                         legacy_partner_field="ship_to_partner_id",
+                        name_field="shipping_customer_name",
                     )
                 )
             else:
@@ -645,9 +681,10 @@ class AccountMove(models.Model):
                         "shipping_partner_id",
                         "shipping_mobile",
                         "ship_to_partner_id",
+                        "shipping_customer_name",
                     )
                 )
-        else:
+        else:  # third_party_delivery
             vals.update({
                 "bill_to_same_as_customer": False,
                 "ship_to_same_as_customer": False,
@@ -660,6 +697,7 @@ class AccountMove(models.Model):
                         partner_field="billing_partner_id",
                         mobile_field="billing_mobile",
                         legacy_partner_field="bill_to_partner_id",
+                        name_field="billing_customer_name",
                     )
                 )
             else:
@@ -669,6 +707,7 @@ class AccountMove(models.Model):
                         "billing_partner_id",
                         "billing_mobile",
                         "bill_to_partner_id",
+                        "billing_customer_name",
                     )
                 )
             if self.shipping_partner_id and self.shipping_partner_id != self.partner_id:
@@ -679,6 +718,7 @@ class AccountMove(models.Model):
                         partner_field="shipping_partner_id",
                         mobile_field="shipping_mobile",
                         legacy_partner_field="ship_to_partner_id",
+                        name_field="shipping_customer_name",
                     )
                 )
             else:
@@ -688,6 +728,7 @@ class AccountMove(models.Model):
                         "shipping_partner_id",
                         "shipping_mobile",
                         "ship_to_partner_id",
+                        "shipping_customer_name",
                     )
                 )
         return vals
@@ -769,6 +810,7 @@ class AccountMove(models.Model):
                     partner_field="billing_partner_id",
                     mobile_field="billing_mobile",
                     legacy_partner_field="bill_to_partner_id",
+                    name_field="billing_customer_name",
                 )
             )
         elif self.delivery_type == "direct_delivery":
@@ -784,6 +826,7 @@ class AccountMove(models.Model):
                     partner_field="billing_partner_id",
                     mobile_field="billing_mobile",
                     legacy_partner_field="bill_to_partner_id",
+                    name_field="billing_customer_name",
                 )
             )
 
@@ -797,6 +840,7 @@ class AccountMove(models.Model):
                     partner_field="shipping_partner_id",
                     mobile_field="shipping_mobile",
                     legacy_partner_field="ship_to_partner_id",
+                    name_field="shipping_customer_name",
                 )
             )
         elif self.delivery_type == "direct_delivery":
@@ -812,6 +856,7 @@ class AccountMove(models.Model):
                     partner_field="shipping_partner_id",
                     mobile_field="shipping_mobile",
                     legacy_partner_field="ship_to_partner_id",
+                    name_field="shipping_customer_name",
                 )
             )
 

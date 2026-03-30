@@ -1,12 +1,95 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <record id="view_order_form_total_weight_inherit" model="ir.ui.view">
-        <field name="name">sale.order.form.total.weight.inherit</field>
+    <record id="view_order_form_custom_ship_bill_address" model="ir.ui.view">
+        <field name="name">sale.order.form.custom.ship.bill.address</field>
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='payment_term_id']" position="after">
                 <field name="total_products_weight" readonly="1"/>
+            </xpath>
+            <xpath expr="//group[@name='sale_header']" position="after">
+                <group col="1" colspan="2">
+                    <group>
+                        <field name="delivery_type"/>
+                    </group>
+                    <group col="2">
+                        <group col="1" string="Billing Address">
+                            <group col="2">
+                                <label for="bill_to_same_as_customer" string="Same As Customer Address"/>
+                                <field name="bill_to_same_as_customer" nolabel="1"/>
+                            </group>
+                            <group col="2">
+                                <label for="billing_customer_name" string="Name"/>
+                                <field name="billing_customer_name"
+                                       nolabel="1"
+                                       readonly="bill_to_same_as_customer"/>
+                                <field name="billing_partner_id" invisible="1"/>
+                            </group>
+                            <group col="2">
+                                <label for="billing_mobile" string="Mobile Number"/>
+                                <field name="billing_mobile" nolabel="1" readonly="bill_to_same_as_customer"/>
+                            </group>
+                            <group col="2">
+                                <label for="bill_to_address" string="Address"/>
+                                <field name="bill_to_address"
+                                       nolabel="1"
+                                       widget="text"
+                                       placeholder="Flat/Building, Street, Area"
+                                       readonly="bill_to_same_as_customer"/>
+                            </group>
+                            <group col="4">
+                                <label for="bill_to_city" string="City"/>
+                                <field name="bill_to_city" nolabel="1" placeholder="City" readonly="bill_to_same_as_customer"/>
+                                <label for="bill_to_state_id" string="State"/>
+                                <field name="bill_to_state_id" nolabel="1" placeholder="State" readonly="bill_to_same_as_customer"/>
+                            </group>
+                            <group col="4">
+                                <label for="bill_to_country" string="Country"/>
+                                <field name="bill_to_country" nolabel="1" placeholder="Country" readonly="bill_to_same_as_customer"/>
+                                <label for="bill_to_zip" string="Pincode"/>
+                                <field name="bill_to_zip" nolabel="1" placeholder="PIN Code" readonly="bill_to_same_as_customer"/>
+                            </group>
+                        </group>
+                        <group col="1" string="Shipping Address">
+                            <group col="2">
+                                <label for="ship_to_same_as_customer" string="Same As Customer Address"/>
+                                <field name="ship_to_same_as_customer" nolabel="1"/>
+                            </group>
+                            <group col="2">
+                                <label for="shipping_customer_name" string="Name"/>
+                                <field name="shipping_customer_name"
+                                       nolabel="1"
+                                       readonly="ship_to_same_as_customer"/>
+                                <field name="shipping_partner_id" invisible="1"/>
+                            </group>
+                            <group col="2">
+                                <label for="shipping_mobile" string="Mobile Number"/>
+                                <field name="shipping_mobile" nolabel="1" readonly="ship_to_same_as_customer"/>
+                            </group>
+                            <group col="2">
+                                <label for="ship_to_address" string="Address"/>
+                                <field name="ship_to_address"
+                                       nolabel="1"
+                                       widget="text"
+                                       placeholder="Flat/Building, Street, Area"
+                                       readonly="ship_to_same_as_customer"/>
+                            </group>
+                            <group col="4">
+                                <label for="ship_to_city" string="City"/>
+                                <field name="ship_to_city" nolabel="1" placeholder="City" readonly="ship_to_same_as_customer"/>
+                                <label for="ship_to_state_id" string="State"/>
+                                <field name="ship_to_state_id" nolabel="1" placeholder="State" readonly="ship_to_same_as_customer"/>
+                            </group>
+                            <group col="4">
+                                <label for="ship_to_country" string="Country"/>
+                                <field name="ship_to_country" nolabel="1" placeholder="Country" readonly="ship_to_same_as_customer"/>
+                                <label for="ship_to_zip" string="Pincode"/>
+                                <field name="ship_to_zip" nolabel="1" placeholder="PIN Code" readonly="ship_to_same_as_customer"/>
+                            </group>
+                        </group>
+                    </group>
+                </group>
             </xpath>
         </field>
     </record>
@@ -124,13 +207,13 @@
         <field name="priority" eval="102"/>
         <field name="arch" type="xml">
             <xpath expr="//group[@name='partner_details']/field[@name='partner_id']" position="attributes">
-                <attribute name="options" groups="DW_BMS.group_packing_team">{'no_open': True, 'no_create': True, 'no_quick_create': True, 'no_create_edit': True}</attribute>
+                <attribute name="options" groups="DW_BMS.group_packing_team,!DW_BMS.group_bms_admin,!DW_BMS.group_bms_sales,!DW_BMS.group_sales_team,!base.group_system">{'no_open': True, 'no_create': True, 'no_quick_create': True, 'no_create_edit': True}</attribute>
             </xpath>
             <xpath expr="//group[@name='partner_details']/field[@name='partner_invoice_id']" position="attributes">
-                <attribute name="options" groups="DW_BMS.group_packing_team">{'no_open': True, 'no_create': True, 'no_quick_create': True, 'no_create_edit': True}</attribute>
+                <attribute name="options" groups="DW_BMS.group_packing_team,!DW_BMS.group_bms_admin,!DW_BMS.group_bms_sales,!DW_BMS.group_sales_team,!base.group_system">{'no_open': True, 'no_create': True, 'no_quick_create': True, 'no_create_edit': True}</attribute>
             </xpath>
             <xpath expr="//group[@name='partner_details']/field[@name='partner_shipping_id']" position="attributes">
-                <attribute name="options" groups="DW_BMS.group_packing_team">{'no_open': True, 'no_create': True, 'no_quick_create': True, 'no_create_edit': True}</attribute>
+                <attribute name="options" groups="DW_BMS.group_packing_team,!DW_BMS.group_bms_admin,!DW_BMS.group_bms_sales,!DW_BMS.group_sales_team,!base.group_system">{'no_open': True, 'no_create': True, 'no_quick_create': True, 'no_create_edit': True}</attribute>
             </xpath>
         </field>
     </record>
@@ -141,7 +224,7 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="priority" eval="100"/>
         <field name="arch" type="xml">
-            <xpath expr="//form" position="attributes" groups="DW_BMS.group_packing_team">
+            <xpath expr="//form" position="attributes" groups="DW_BMS.group_packing_team,!DW_BMS.group_bms_admin,!DW_BMS.group_bms_sales,!DW_BMS.group_sales_team,!base.group_system">
                 <attribute name="create">false</attribute>
                 <attribute name="edit">false</attribute>
                 <attribute name="delete">false</attribute>
@@ -155,7 +238,7 @@
         <field name="inherit_id" ref="sale.view_quotation_tree"/>
         <field name="priority" eval="100"/>
         <field name="arch" type="xml">
-            <xpath expr="//tree" position="attributes" groups="DW_BMS.group_packing_team">
+            <xpath expr="//tree" position="attributes" groups="DW_BMS.group_packing_team,!DW_BMS.group_bms_admin,!DW_BMS.group_bms_sales,!DW_BMS.group_sales_team,!base.group_system">
                 <attribute name="create">false</attribute>
                 <attribute name="edit">false</attribute>
                 <attribute name="delete">false</attribute>
@@ -169,13 +252,99 @@
         <field name="inherit_id" ref="sale.view_order_tree"/>
         <field name="priority" eval="100"/>
         <field name="arch" type="xml">
-            <xpath expr="//tree" position="attributes" groups="DW_BMS.group_packing_team">
+            <xpath expr="//tree" position="attributes" groups="DW_BMS.group_packing_team,!DW_BMS.group_bms_admin,!DW_BMS.group_bms_sales,!DW_BMS.group_sales_team,!base.group_system">
                 <attribute name="create">false</attribute>
                 <attribute name="edit">false</attribute>
                 <attribute name="delete">false</attribute>
             </xpath>
         </field>
     </record>
+
+    <!-- ========================= -->
+    <!-- BMS ADMIN & SALES TEAM: ALLOW CREATE ON QUOTATION/ORDER VIEWS -->
+    <!-- Higher priority (110) to override packing_team readonly (100) -->
+    <!-- ========================= -->
+    <record id="view_quotation_tree_bms_admin_create" model="ir.ui.view">
+        <field name="name">sale.quotation.tree.bms.admin.create</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree"/>
+        <field name="priority" eval="110"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes" groups="DW_BMS.group_bms_admin">
+                <attribute name="create">true</attribute>
+                <attribute name="edit">true</attribute>
+                <attribute name="delete">true</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_quotation_tree_sales_team_create" model="ir.ui.view">
+        <field name="name">sale.quotation.tree.sales.team.create</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree"/>
+        <field name="priority" eval="110"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes" groups="DW_BMS.group_sales_team">
+                <attribute name="create">true</attribute>
+                <attribute name="edit">true</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_order_tree_bms_admin_create" model="ir.ui.view">
+        <field name="name">sale.order.tree.bms.admin.create</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="priority" eval="110"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes" groups="DW_BMS.group_bms_admin">
+                <attribute name="create">true</attribute>
+                <attribute name="edit">true</attribute>
+                <attribute name="delete">true</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_order_tree_sales_team_create" model="ir.ui.view">
+        <field name="name">sale.order.tree.sales.team.create</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_tree"/>
+        <field name="priority" eval="110"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes" groups="DW_BMS.group_sales_team">
+                <attribute name="create">true</attribute>
+                <attribute name="edit">true</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_order_form_bms_admin_create" model="ir.ui.view">
+        <field name="name">sale.order.form.bms.admin.create</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="priority" eval="110"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="attributes" groups="DW_BMS.group_bms_admin">
+                <attribute name="create">true</attribute>
+                <attribute name="edit">true</attribute>
+                <attribute name="delete">true</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_order_form_sales_team_create" model="ir.ui.view">
+        <field name="name">sale.order.form.sales.team.create</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="priority" eval="110"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="attributes" groups="DW_BMS.group_sales_team">
+                <attribute name="create">true</attribute>
+                <attribute name="edit">true</attribute>
+            </xpath>
+        </field>
+    </record>
+
 
     <record id="action_packing_team_quotations" model="ir.actions.act_window">
         <field name="name">Quotations</field>

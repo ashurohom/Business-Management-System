@@ -86,7 +86,7 @@
         <field name="groups" eval="[(4, ref('DW_BMS.group_packing_team'))]"/>
         <field name="perm_read" eval="True"/>
         <field name="perm_write" eval="True"/>
-        <field name="perm_create" eval="True"/>
+        <field name="perm_create" eval="False"/>
         <field name="perm_unlink" eval="False"/>
     </record>
     <!-- ========================= -->

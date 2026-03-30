@@ -20,10 +20,10 @@ class PackingCourierCompany(models.Model):
 class PackingOrder(models.Model):
     _name = "packing.order"
     _description = "Packing Order"
-    _rec_name = "invoice_id"
     _order = "id desc"
 
-    invoice_id = fields.Many2one("account.move", string="Invoice", required=True, ondelete="cascade")
+    invoice_id = fields.Many2one("account.move", string="Invoice", ondelete="cascade")
+    sale_order_id = fields.Many2one("sale.order", string="Sale Order", ondelete="cascade")
     from_partner_id = fields.Many2one("res.partner", string="From Partner", compute="_compute_addresses", store=True)
     from_name = fields.Char(string="From Name", compute="_compute_addresses", store=True)
     from_address = fields.Text(string="From Address", compute="_compute_addresses", store=True)
@@ -43,6 +43,17 @@ class PackingOrder(models.Model):
     dispatch_mode_id = fields.Many2one("packing.dispatch.mode", string="Dispatch Mode")
     courier_company_id = fields.Many2one("packing.courier.company", string="Courier Company")
     packing_line_ids = fields.One2many("packing.order.line", "packing_id", string="Packing Lines", copy=True)
+
+    def _get_display_name(self):
+        """Return a readable name for the packing order."""
+        if self.invoice_id:
+            return self.invoice_id.name or str(self.id)
+        if self.sale_order_id:
+            return self.sale_order_id.name or str(self.id)
+        return str(self.id)
+
+    def name_get(self):
+        return [(rec.id, rec._get_display_name()) for rec in self]
 
     def action_print_packing_slip(self):
         self.ensure_one()
@@ -86,6 +97,28 @@ class PackingOrder(models.Model):
         "invoice_id.company_id.partner_id.country_id",
         "invoice_id.company_id.partner_id.phone",
         "invoice_id.company_id.partner_id.mobile",
+        # Sale order fields
+        "sale_order_id",
+        "sale_order_id.delivery_type",
+        "sale_order_id.partner_id",
+        "sale_order_id.billing_partner_id",
+        "sale_order_id.shipping_partner_id",
+        "sale_order_id.billing_customer_name",
+        "sale_order_id.bill_to_address",
+        "sale_order_id.bill_to_city",
+        "sale_order_id.bill_to_state_id",
+        "sale_order_id.bill_to_country",
+        "sale_order_id.bill_to_zip",
+        "sale_order_id.billing_mobile",
+        "sale_order_id.shipping_customer_name",
+        "sale_order_id.ship_to_address",
+        "sale_order_id.ship_to_city",
+        "sale_order_id.ship_to_state_id",
+        "sale_order_id.ship_to_country",
+        "sale_order_id.ship_to_zip",
+        "sale_order_id.shipping_mobile",
+        "sale_order_id.company_id",
+        "sale_order_id.company_id.partner_id",
     )
     def _compute_addresses(self):
         for rec in self:
@@ -107,40 +140,70 @@ class PackingOrder(models.Model):
                 "to_country": False,
                 "to_pincode": False,
             })
-            if not rec.invoice_id:
+            if not rec.invoice_id and not rec.sale_order_id:
                 continue
 
-            invoice = rec.invoice_id
-            company_partner = invoice.company_id.partner_id
-            billing_partner = invoice.billing_partner_id or invoice.partner_id
-            shipping_partner = invoice.shipping_partner_id or invoice.partner_id
+            if rec.invoice_id:
+                # ── Invoice-based packing ────────────────────────────
+                invoice = rec.invoice_id
+                billing_partner = invoice.billing_partner_id or invoice.partner_id
+                shipping_partner = invoice.shipping_partner_id or invoice.partner_id
 
-            company_vals = rec._prepare_company_address_vals(invoice)
-            billing_vals = rec._prepare_invoice_address_vals(
-                partner=billing_partner,
-                name=invoice.billing_customer_name,
-                mobile=invoice.billing_mobile,
-                address=invoice.bill_to_address,
-                city=invoice.bill_to_city,
-                state=invoice.bill_to_state_id.name if invoice.bill_to_state_id else False,
-                country=invoice.bill_to_country,
-                pincode=invoice.bill_to_zip,
-            )
-            shipping_vals = rec._prepare_invoice_address_vals(
-                partner=shipping_partner,
-                name=invoice.shipping_customer_name,
-                mobile=invoice.shipping_mobile,
-                address=invoice.ship_to_address,
-                city=invoice.ship_to_city,
-                state=invoice.ship_to_state_id.name if invoice.ship_to_state_id else False,
-                country=invoice.ship_to_country,
-                pincode=invoice.ship_to_zip,
-            )
+                company_vals = rec._prepare_company_address_vals(invoice)
+                billing_vals = rec._prepare_invoice_address_vals(
+                    partner=billing_partner,
+                    name=invoice.billing_customer_name,
+                    mobile=invoice.billing_mobile,
+                    address=invoice.bill_to_address,
+                    city=invoice.bill_to_city,
+                    state=invoice.bill_to_state_id.name if invoice.bill_to_state_id else False,
+                    country=invoice.bill_to_country,
+                    pincode=invoice.bill_to_zip,
+                )
+                shipping_vals = rec._prepare_invoice_address_vals(
+                    partner=shipping_partner,
+                    name=invoice.shipping_customer_name,
+                    mobile=invoice.shipping_mobile,
+                    address=invoice.ship_to_address,
+                    city=invoice.ship_to_city,
+                    state=invoice.ship_to_state_id.name if invoice.ship_to_state_id else False,
+                    country=invoice.ship_to_country,
+                    pincode=invoice.ship_to_zip,
+                )
+                delivery_type = invoice.delivery_type
+            else:
+                # ── Sale-order-based packing ─────────────────────────
+                order = rec.sale_order_id
+                billing_partner = order.billing_partner_id or order.partner_id
+                shipping_partner = order.shipping_partner_id or order.partner_id
 
-            if invoice.delivery_type == "third_party_delivery":
+                company_vals = rec._prepare_company_address_vals(order)
+                billing_vals = rec._prepare_invoice_address_vals(
+                    partner=billing_partner,
+                    name=order.billing_customer_name,
+                    mobile=order.billing_mobile,
+                    address=order.bill_to_address,
+                    city=order.bill_to_city,
+                    state=order.bill_to_state_id.name if order.bill_to_state_id else False,
+                    country=order.bill_to_country,
+                    pincode=order.bill_to_zip,
+                )
+                shipping_vals = rec._prepare_invoice_address_vals(
+                    partner=shipping_partner,
+                    name=order.shipping_customer_name,
+                    mobile=order.shipping_mobile,
+                    address=order.ship_to_address,
+                    city=order.ship_to_city,
+                    state=order.ship_to_state_id.name if order.ship_to_state_id else False,
+                    country=order.ship_to_country,
+                    pincode=order.ship_to_zip,
+                )
+                delivery_type = order.delivery_type
+
+            if delivery_type == "third_party_delivery":
                 from_vals = billing_vals
                 to_vals = shipping_vals
-            elif invoice.delivery_type == "ship_to_different":
+            elif delivery_type == "ship_to_different":
                 from_vals = company_vals
                 to_vals = shipping_vals
             else:

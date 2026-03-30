@@ -16,6 +16,7 @@
     <record id="group_bms_admin" model="res.groups">
         <field name="name">BMS Admin</field>
         <field name="category_id" ref="module_category_dw_bms"/>
+        <field name="implied_ids" eval="[(4, ref('sales_team.group_sale_manager'))]"/>
     </record>
 
     <!-- ========================= -->

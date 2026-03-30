@@ -5,6 +5,7 @@ access_bms_admin_partner,bms admin partner,base.model_res_partner,DW_BMS.group_b
 access_bms_admin_product,bms admin product,product.model_product_product,DW_BMS.group_bms_admin,1,1,1,1
 access_bms_admin_product_alias,bms admin product alias,DW_BMS.model_dw_product_name_alias,DW_BMS.group_bms_admin,1,1,1,1
 access_bms_admin_sale,bms admin sale,sale.model_sale_order,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_admin_sale_line,bms admin sale order line,sale.model_sale_order_line,DW_BMS.group_bms_admin,1,1,1,1
 access_bms_admin_purchase,bms admin purchase,purchase.model_purchase_order,DW_BMS.group_bms_admin,1,1,1,1
 access_bms_admin_account_move,bms admin account move,account.model_account_move,DW_BMS.group_bms_admin,1,1,1,1
 
@@ -20,6 +21,8 @@ access_bms_sales_product,bms sales product read,product.model_product_product,DW
 access_bms_sales_product_alias,bms sales product alias,DW_BMS.model_dw_product_name_alias,DW_BMS.group_bms_sales,1,1,1,0
 access_bms_sales_sale,bms sales sale,sale.model_sale_order,DW_BMS.group_bms_sales,1,1,1,0
 access_bms_sales_invoice,bms sales invoice read,account.model_account_move,DW_BMS.group_bms_sales,1,0,0,0
+access_sales_team_sale,sales team sale,sale.model_sale_order,DW_BMS.group_sales_team,1,1,1,0
+access_sales_team_sale_line,sales team sale order line,sale.model_sale_order_line,DW_BMS.group_sales_team,1,1,1,0
 
 
 access_bms_purchase_partner,bms purchase partner read,base.model_res_partner,DW_BMS.group_bms_purchase,1,0,0,0
@@ -73,6 +76,11 @@ access_bms_packing_dispatch_mode,bms packing dispatch mode read,DW_BMS.model_pac
 access_bms_packing_courier_company,bms packing courier company read,DW_BMS.model_packing_courier_company,DW_BMS.group_packing_team,1,0,0,0
 access_bms_packing_order,bms packing order,DW_BMS.model_packing_order,DW_BMS.group_packing_team,1,1,1,0
 access_bms_packing_order_line,bms packing order line,DW_BMS.model_packing_order_line,DW_BMS.group_packing_team,1,1,1,0
+access_bms_packing_stock_picking,bms packing stock picking,stock.model_stock_picking,DW_BMS.group_packing_team,1,1,0,0
+access_bms_packing_stock_picking_type,bms packing stock picking type read,stock.model_stock_picking_type,DW_BMS.group_packing_team,1,0,0,0
+access_bms_packing_stock_move,bms packing stock move read,stock.model_stock_move,DW_BMS.group_packing_team,1,0,0,0
+access_bms_packing_stock_move_line,bms packing stock move line read,stock.model_stock_move_line,DW_BMS.group_packing_team,1,0,0,0
+access_bms_packing_stock_lot,bms packing stock lot read,stock.model_stock_lot,DW_BMS.group_packing_team,1,0,0,0
 
 access_bms_admin_invoice_import_log,bms admin invoice import log,DW_BMS.model_dw_invoice_import_log,DW_BMS.group_bms_admin,1,1,1,1
 access_bms_accounts_invoice_import_log,bms accounts invoice import log,DW_BMS.model_dw_invoice_import_log,DW_BMS.group_bms_accounts,1,1,1,0
@@ -97,3 +105,9 @@ access_packing_order_all,packing order all,DW_BMS.model_packing_order,,1,1,1,1
 access_packing_order_line_all,packing order line all,DW_BMS.model_packing_order_line,,1,1,1,1
 access_packing_dispatch_mode_all,packing dispatch mode all,DW_BMS.model_packing_dispatch_mode,,1,1,1,1
 access_packing_courier_company_all,packing courier company all,DW_BMS.model_packing_courier_company,,1,1,1,1
+access_shipping_management_system,shipping management system,DW_BMS.model_shipping_management,base.group_system,1,1,1,1
+access_shipping_management_admin,shipping management admin,DW_BMS.model_shipping_management,DW_BMS.group_bms_admin,1,1,1,1
+access_shipping_management_dispatch,shipping management dispatch,DW_BMS.model_shipping_management,DW_BMS.group_dispatch_team,1,1,1,1
+access_bms_dispatch_account_move,dispatch team account move read,account.model_account_move,DW_BMS.group_dispatch_team,1,0,0,0
+access_bms_dispatch_account_move_line,dispatch team account move line read,account.model_account_move_line,DW_BMS.group_dispatch_team,1,0,0,0
+access_bms_dispatch_res_partner,dispatch team partner read,base.model_res_partner,DW_BMS.group_dispatch_team,1,0,0,0

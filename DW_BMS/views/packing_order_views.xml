@@ -5,7 +5,8 @@
         <field name="model">packing.order</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="invoice_id"/>
+                <field name="invoice_id" optional="show"/>
+                <field name="sale_order_id" optional="show"/>
                 <field name="from_name"/>
                 <field name="to_name"/>
                 <field name="dispatch_mode_id"/>
@@ -27,7 +28,8 @@
                 </header>
                 <sheet>
                     <group>
-                        <field name="invoice_id" string="Invoice Number"/>
+                        <field name="invoice_id" string="Invoice Number" invisible="not invoice_id"/>
+                        <field name="sale_order_id" string="Sale Order / Quotation" invisible="not sale_order_id"/>
                     </group>
                     <group col="2">
                         <group string="TO" col="2">

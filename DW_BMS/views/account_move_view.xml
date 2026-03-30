@@ -14,6 +14,13 @@
                         class="btn-secondary"
                         icon="fa-print"
                         invisible="move_type != 'out_invoice'"/>
+                <button name="action_open_shipping"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-truck"
+                        invisible="move_type not in ('out_invoice', 'out_refund')">
+                    <field name="shipping_count" widget="statinfo" string="Shipping"/>
+                </button>
             </xpath>
 
             <xpath expr="//header" position="inside">
@@ -21,7 +28,7 @@
                         type="object"
                         string="Packing"
                         class="btn-secondary"
-                        invisible="move_type != 'out_invoice' or state == 'cancel'"/>
+                        invisible="1"/>
             </xpath>
 
             <xpath expr="//field[@name='l10n_in_state_id']" position="attributes">
@@ -37,7 +44,7 @@
             </xpath>
 
             <xpath expr="//group[@id='header_right_group']" position="after">
-                <group col="1" colspan="2" invisible="move_type not in ('out_invoice', 'out_refund')">
+                <group col="1" colspan="2" invisible="1">
                     <group>
                         <field name="delivery_type"/>
                     </group>
@@ -48,15 +55,11 @@
                                 <field name="bill_to_same_as_customer" nolabel="1"/>
                             </group>
                             <group col="2">
-                                <label for="billing_partner_id" string="Name"/>
-                                <field name="billing_partner_id"
-                                       nolabel="1"
-                                       readonly="bill_to_same_as_customer"
-                                       invisible="id and state != 'draft'"
-                                       options="{'no_quick_create': True, 'no_create_edit': True}"/>
+                                <label for="billing_customer_name" string="Name"/>
                                 <field name="billing_customer_name"
                                        nolabel="1"
-                                       invisible="not id or state == 'draft'"/>
+                                       readonly="bill_to_same_as_customer"/>
+                                <field name="billing_partner_id" invisible="1"/>
                             </group>
                             <group col="2">
                                 <label for="billing_mobile" string="Mobile Number"/>
@@ -89,15 +92,11 @@
                                 <field name="ship_to_same_as_customer" nolabel="1"/>
                             </group>
                             <group col="2">
-                                <label for="shipping_partner_id" string="Name"/>
-                                <field name="shipping_partner_id"
-                                       nolabel="1"
-                                       readonly="ship_to_same_as_customer"
-                                       invisible="id and state != 'draft'"
-                                       options="{'no_quick_create': True, 'no_create_edit': True}"/>
+                                <label for="shipping_customer_name" string="Name"/>
                                 <field name="shipping_customer_name"
                                        nolabel="1"
-                                       invisible="not id or state == 'draft'"/>
+                                       readonly="ship_to_same_as_customer"/>
+                                <field name="shipping_partner_id" invisible="1"/>
                             </group>
                             <group col="2">
                                 <label for="shipping_mobile" string="Mobile Number"/>
@@ -187,6 +186,9 @@
                         type="object"
                         string="Export Invoice XLSX"
                         class="btn-secondary"/>
+            </xpath>
+            <xpath expr="//tree" position="inside">
+                <button name="action_open_shipping" string="Shipping" type="object" class="btn-info" icon="fa-truck" title="Shipping Details"/>
             </xpath>
         </field>
     </record>

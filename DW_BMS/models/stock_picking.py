@@ -1,4 +1,5 @@
 from odoo import api, fields, models
+from odoo.exceptions import UserError
 
 
 class StockPicking(models.Model):
@@ -30,6 +31,9 @@ class StockPicking(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        if self.env.user.has_group("DW_BMS.group_packing_team"):
+            raise UserError("Packing Team users are not allowed to create deliveries.")
+
         pickings = super().create(vals_list)
         pickings._update_state_for_packed_by()
         return pickings
@@ -43,12 +47,12 @@ class StockPicking(models.Model):
     @api.onchange("packed_by")
     def _onchange_packed_by(self):
         for picking in self:
-            if picking.packed_by and picking.state not in ("done", "cancel"):
+            if picking.packed_by and picking.state not in ("waiting", "done", "cancel"):
                 picking.state = "packed"
 
     def _update_state_for_packed_by(self):
         pickings_to_pack = self.filtered(
-            lambda picking: picking.packed_by and picking.state not in ("done", "cancel")
+            lambda picking: picking.packed_by and picking.state not in ("waiting", "done", "cancel")
         )
         if pickings_to_pack:
             pickings_to_pack.with_context(skip_packed_state_update=True).write({"state": "packed"})
@@ -77,3 +81,8 @@ class StockPicking(models.Model):
         moved_products._auto_reset_purchase_status_for_low_stock()
 
         return res
+
+    def unlink(self):
+        if self.env.user.has_group("DW_BMS.group_packing_team"):
+            raise UserError("Packing Team users are not allowed to delete deliveries.")
+        return super().unlink()

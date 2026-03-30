@@ -56,6 +56,8 @@
         "views/invoice_numbers.xml",
         "reports/packing_order_report.xml",
         "views/packing_order_views.xml",
+        "views/sale_order_packing_views.xml",
+        "views/shipping_management_views.xml",
 
         # Wizard & reports
         "wizard/bms_report_wizard_view.xml",

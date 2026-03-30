@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_shipping_management_tree" model="ir.ui.view">
+        <field name="name">shipping.management.tree</field>
+        <field name="model">shipping.management</field>
+        <field name="arch" type="xml">
+            <tree string="Shipping Management" decoration-success="shipping_status == 'delivered'" decoration-info="shipping_status == 'out_for_delivery'" decoration-muted="shipping_status == 'cancel'" decoration-warning="shipping_status == 'in_transit'">
+                <field name="invoice_id"/>
+                <field name="tracking_id"/>
+                <field name="delivered_by"/>
+                <field name="shipping_status" 
+                       widget="badge" 
+                       decoration-success="shipping_status == 'delivered'" 
+                       decoration-info="shipping_status == 'out_for_delivery'" 
+                       decoration-muted="shipping_status == 'cancel'" 
+                       decoration-warning="shipping_status == 'in_transit'"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_shipping_management_form" model="ir.ui.view">
+        <field name="name">shipping.management.form</field>
+        <field name="model">shipping.management</field>
+        <field name="arch" type="xml">
+            <form string="Shipping Management">
+                <header>
+                    <button name="action_mark_delivered" 
+                            string="Mark Delivered" 
+                            type="object" 
+                            class="oe_highlight" 
+                            invisible="shipping_status in ('delivered', 'cancel')"/>
+                    <button name="action_cancel" 
+                            string="Cancel" 
+                            type="object" 
+                            invisible="shipping_status in ('delivered', 'cancel')"/>
+                    <field name="shipping_status" widget="statusbar" statusbar_visible="in_transit,out_for_delivery,delivered,cancel" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="invoice_id" readonly="1" options="{'no_open': True}"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="shipping_status"/>
+                            <field name="delivered_by" options="{'no_create': True}"/>
+                            <field name="tracking_id"/>
+                            <field name="tracking_link" widget="url"/>
+                        </group>
+                        <group>
+                            <field name="complaint" widget="text"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_shipping_management" model="ir.actions.act_window">
+        <field name="name">Shipping Management</field>
+        <field name="res_model">shipping.management</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No shipping records found!
+            </p>
+        </field>
+    </record>
+
+</odoo>

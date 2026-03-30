@@ -21,9 +21,63 @@
                 <attribute name="invisible">state in ('waiting', 'assigned', 'packed', 'done', 'cancel')</attribute>
             </xpath>
 
+            <xpath expr="//header/button[@name='action_confirm']" position="attributes">
+                <attribute name="groups">base.group_user,!DW_BMS.group_packing_team</attribute>
+            </xpath>
+
+            <xpath expr="//header/button[@name='action_assign']" position="attributes">
+                <attribute name="groups">base.group_user,!DW_BMS.group_packing_team</attribute>
+            </xpath>
+
+            <xpath expr="//header/button[@name='action_cancel']" position="attributes">
+                <attribute name="groups">base.group_user,!DW_BMS.group_packing_team</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='action_detailed_operations']" position="attributes">
+                <attribute name="groups">base.group_user,!DW_BMS.group_packing_team</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='partner_id' and @nolabel='1']" position="attributes">
+                <attribute name="readonly" groups="DW_BMS.group_packing_team">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='picking_type_id']" position="attributes">
+                <attribute name="readonly" groups="DW_BMS.group_packing_team">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='location_id' and @options=&quot;{'no_create': True}&quot;]" position="attributes">
+                <attribute name="readonly" groups="DW_BMS.group_packing_team">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='location_dest_id'][last()]" position="attributes">
+                <attribute name="readonly" groups="DW_BMS.group_packing_team">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='scheduled_date'][last()]" position="attributes">
+                <attribute name="readonly" groups="DW_BMS.group_packing_team">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='date_deadline']" position="attributes">
+                <attribute name="readonly" groups="DW_BMS.group_packing_team">1</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='origin']" position="attributes">
+                <attribute name="readonly" groups="DW_BMS.group_packing_team">1</attribute>
+            </xpath>
+
             <xpath expr="//field[@name='partner_id']" position="after">
-                <field name="packed_by" readonly="state in ['done', 'cancel']"/>
-                <field name="delivered_by" readonly="1"/>
+                <field name="packed_by" readonly="state in ['waiting', 'done', 'cancel']"/>
+                <field name="delivered_by" readonly="1" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//page[@name='operations']/field[@name='move_ids_without_package']" position="attributes">
+                <attribute name="readonly" groups="DW_BMS.group_packing_team">1</attribute>
+            </xpath>
+
+            <xpath expr="//page[@name='operations']/field[@name='move_ids_without_package']/tree" position="attributes">
+                <attribute name="editable" groups="DW_BMS.group_packing_team">false</attribute>
+                <attribute name="create" groups="DW_BMS.group_packing_team">false</attribute>
+                <attribute name="delete" groups="DW_BMS.group_packing_team">false</attribute>
             </xpath>
 
             <xpath expr="//notebook/page[@name='note']" position="attributes">
@@ -32,10 +86,10 @@
 
             <xpath expr="//notebook/page[@name='note']" position="after">
                 <page string="Packing Notes">
-                    <field name="packed_notes" placeholder="Add packing notes..."/>
+                    <field name="packed_notes" placeholder="Add packing notes..." readonly="state in ['done', 'cancel']"/>
                 </page>
-                <page string="Delivered Notes">
-                    <field name="delivered_notes" placeholder="Add delivered notes..."/>
+                <page string="Delivered Notes" invisible="1">
+                    <field name="delivered_notes" placeholder="Add delivered notes..." readonly="1"/>
                 </page>
             </xpath>
         </field>
