@@ -86,3 +86,23 @@ class StockPicking(models.Model):
         if self.env.user.has_group("DW_BMS.group_packing_team"):
             raise UserError("Packing Team users are not allowed to delete deliveries.")
         return super().unlink()
+
+    def action_open_packing_order(self):
+        self.ensure_one()
+        if not self.sale_id:
+            raise UserError("Only Deliveries linked to a Quotation/Sale Order have a packing order.")
+        
+        packing = self.env["packing.order"].search([("sale_order_id", "=", self.sale_id.id)], limit=1)
+        if not packing:
+            raise UserError("The Packing Order has not been generated from the Quotation yet.")
+
+        view_id = self.env.ref("DW_BMS.view_packing_order_form_readonly").id
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Packing (Read-Only)",
+            "res_model": "packing.order",
+            "res_id": packing.id,
+            "view_mode": "form",
+            "views": [(view_id, "form")],
+            "target": "current",
+        }

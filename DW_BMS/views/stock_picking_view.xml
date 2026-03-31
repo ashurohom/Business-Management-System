@@ -9,6 +9,19 @@
                 <attribute name="statusbar_visible">draft,waiting,assigned,packed,done</attribute>
             </xpath>
 
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <field name="sale_id" invisible="1"/>
+                <button name="action_open_packing_order"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-cubes"
+                        invisible="not sale_id">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Packing</span>
+                    </div>
+                </button>
+            </xpath>
+
             <xpath expr="//header/field[@name='state'][@invisible=&quot;picking_type_code == 'incoming'&quot;]" position="attributes">
                 <attribute name="statusbar_visible">draft,waiting,assigned,packed,done</attribute>
             </xpath>
@@ -91,6 +104,24 @@
                 <page string="Delivered Notes" invisible="1">
                     <field name="delivered_notes" placeholder="Add delivered notes..." readonly="1"/>
                 </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_picking_tree_inherit_dw_bms_packing" model="ir.ui.view">
+        <field name="name">stock.picking.tree.inherit.dw.bms.packing</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                <field name="sale_id" column_invisible="True"/>
+                <button name="action_open_packing_order" 
+                        string="Packing" 
+                        type="object" 
+                        class="btn-info" 
+                        icon="fa-cubes" 
+                        title="Packing Details"
+                        invisible="not sale_id"/>
             </xpath>
         </field>
     </record>

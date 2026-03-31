@@ -23,17 +23,19 @@ class ShippingManagement(models.Model):
     tracking_link = fields.Char(string='Tracking Link', copy=False)
     shipping_status = fields.Selection(
         [
+            ('shipped', 'Shipped'),
             ('in_transit', 'In Transit'),
             ('out_for_delivery', 'Out for Delivery'),
             ('delivered', 'Delivered'),
             ('cancel', 'Cancelled')
         ],
         string='Status',
-        default='in_transit',
+        default='shipped',
         required=True,
         copy=False,
     )
     complaint = fields.Char(string='Complaint', copy=False)
+    delivery_notes = fields.Char(string='Delivery Notes', copy=False)
 
     def name_get(self):
         return [(rec.id, f"Shipment - {rec.invoice_id.name or 'New'}") for rec in self]

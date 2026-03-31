@@ -518,33 +518,7 @@ class SaleOrder(models.Model):
                 )
             )
 
-    # ─────────────────────────────────────────────────────────────────
-    # Create / Write overrides
-    # ─────────────────────────────────────────────────────────────────
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        orders = super().create(vals_list)
-        for order in orders:
-            order.update(order._get_delivery_type_default_vals())
-        return orders
-
-    def write(self, vals):
-        result = super().write(vals)
-        relevant_fields = {
-            "partner_id",
-            "delivery_type",
-            "bill_to_same_as_customer",
-            "ship_to_same_as_customer",
-            "billing_partner_id",
-            "shipping_partner_id",
-        }
-        if relevant_fields & set(vals) and not self.env.context.get("skip_delivery_defaults"):
-            for order in self:
-                order.with_context(skip_delivery_defaults=True).update(
-                    order._get_delivery_type_default_vals()
-                )
-        return result
 
     # ─────────────────────────────────────────────────────────────────
     # Packing action
