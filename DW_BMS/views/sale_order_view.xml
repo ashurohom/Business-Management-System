@@ -411,4 +411,31 @@
               action="action_packing_team_orders"
               sequence="20"
               groups="DW_BMS.group_packing_team"/>
+    <record id="view_order_form_activity_timeline" model="ir.ui.view">
+        <field name="name">sale.order.form.activity.timeline</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Activity Timeline" name="activity_timeline">
+                    <field name="activity_timeline_ids" widget="list" nolabel="1">
+                        <tree string="Activities" create="0" edit="0" delete="0" decoration-info="activity_type == 'quotation'" decoration-success="activity_type in ('sale', 'delivery')" decoration-warning="activity_type == 'invoice'" decoration-primary="activity_type == 'shipping'">
+                            <field name="datetime"/>
+                            <field name="user_id"/>
+                            <field name="activity_type" widget="badge"/>
+                            <field name="description"/>
+                            <field name="notes" optional="hide"/>
+                            <field name="tracking_link" widget="url" optional="hide"/>
+                            <field name="shipping_status" optional="show" widget="badge" 
+                                   decoration-success="shipping_status == 'delivered'" 
+                                   decoration-info="shipping_status == 'shipped'" 
+                                   decoration-muted="shipping_status == 'cancelled'" 
+                                   decoration-warning="shipping_status == 'in_transit'"/>
+                            <field name="status" optional="show"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
 </odoo>

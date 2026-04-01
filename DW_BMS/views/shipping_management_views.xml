@@ -50,7 +50,10 @@
                             <field name="tracking_link" widget="url"/>
                         </group>
                         <group>
-                            <field name="complaint" widget="text"/>
+                            <field name="complaint" widget="text" invisible="1"/>
+                            <field name="vehicle_number"/>
+                            <field name="transporter_name"/>
+                            <field name="transporter_mobile"/>
                             <field name="delivery_notes"/>
                         </group>
                     </group>

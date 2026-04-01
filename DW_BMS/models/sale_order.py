@@ -206,6 +206,39 @@ class SaleOrder(models.Model):
         store=True,
     )
 
+    # ── Activity Timeline ────────────────────────────────────────────
+    activity_timeline_ids = fields.One2many(
+        'activity.timeline', 'quotation_id', string='Activity Timeline'
+    )
+    total_activities = fields.Integer(
+        string='Total Activities', compute='_compute_activity_stats'
+    )
+    latest_shipping_status = fields.Selection([
+        ('not_started', 'Not Started'),
+        ('shipped', 'Shipped'),
+        ('in_transit', 'In Transit'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled')
+    ], string='Shipping Status', compute='_compute_activity_stats')
+    overall_activity_status = fields.Char(string='Overall Status', compute='_compute_activity_stats')
+
+    @api.depends('activity_timeline_ids.shipping_status', 'activity_timeline_ids.status', 'state')
+    def _compute_activity_stats(self):
+        for order in self:
+            order.total_activities = len(order.activity_timeline_ids)
+            shipping_activities = order.activity_timeline_ids.filtered(lambda a: a.activity_type == 'shipping' and a.shipping_status)
+            if shipping_activities:
+                # order is datetime desc
+                order.latest_shipping_status = shipping_activities[0].shipping_status
+            else:
+                order.latest_shipping_status = 'not_started'
+                
+            if order.activity_timeline_ids:
+                order.overall_activity_status = order.activity_timeline_ids[0].status or dict(self._fields['state'].selection).get(order.state, order.state)
+            else:
+                order.overall_activity_status = dict(self._fields['state'].selection).get(order.state, order.state)
+
+
     @api.depends("order_line.product_id.weight", "order_line.product_uom_qty", "order_line.display_type")
     def _compute_total_products_weight(self):
         for order in self:
@@ -557,3 +590,27 @@ class SaleOrder(models.Model):
             "view_mode": "form",
             "target": "current",
         }
+
+    # ── Activity Timeline Overrides ──────────────────────────────────
+    @api.model_create_multi
+    def create(self, vals_list):
+        orders = super().create(vals_list)
+        for order in orders:
+            order.env['activity.timeline'].create({
+                'quotation_id': order.id,
+                'activity_type': 'quotation',
+                'description': f'Quotation {order.name} created.',
+                'status': 'Draft',
+            })
+        return orders
+
+    def action_confirm(self):
+        res = super().action_confirm()
+        for order in self:
+            order.env['activity.timeline'].create({
+                'quotation_id': order.id,
+                'activity_type': 'sale',
+                'description': f'Sales Order {order.name} confirmed.',
+                'status': 'Confirmed',
+            })
+        return res

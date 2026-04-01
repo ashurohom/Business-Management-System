@@ -111,3 +111,4 @@ access_shipping_management_dispatch,shipping management dispatch,DW_BMS.model_sh
 access_bms_dispatch_account_move,dispatch team account move read,account.model_account_move,DW_BMS.group_dispatch_team,1,0,0,0
 access_bms_dispatch_account_move_line,dispatch team account move line read,account.model_account_move_line,DW_BMS.group_dispatch_team,1,0,0,0
 access_bms_dispatch_res_partner,dispatch team partner read,base.model_res_partner,DW_BMS.group_dispatch_team,1,0,0,0
+access_activity_timeline_all,activity timeline all,DW_BMS.model_activity_timeline,,1,1,1,1

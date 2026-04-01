@@ -66,6 +66,15 @@ class StockPicking(models.Model):
 
         done_pickings.write({"delivered_by": self.env.user.id})
 
+        for picking in done_pickings:
+            if picking.sale_id:
+                picking.env['activity.timeline'].create({
+                    'quotation_id': picking.sale_id.id,
+                    'activity_type': 'delivery',
+                    'description': f'Delivery {picking.name} validated.',
+                    'status': 'Done',
+                })
+
         moved_products = done_pickings.move_ids_without_package.mapped("product_id").filtered(
             lambda product: product.type == "product"
         )

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Replacing Activities with Quotation Activity Tracking System -->
+    <!--
     <menuitem
         id="menu_home_daily_activities"
         name="Activities"
@@ -7,6 +9,12 @@
         action="home.action_home_dashboard_activities_refresh"
         groups="DW_BMS.group_bms_admin,base.group_system"
         sequence="2"/>
+    -->
+    <menuitem id="menu_activity_dashboard"
+              name="Activity Tracking"
+              action="DW_BMS.action_activity_dashboard"
+              parent="home.menu_home_root"
+              sequence="2"/>
 
     <menuitem
         id="menu_home_reports_root"

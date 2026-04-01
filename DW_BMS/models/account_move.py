@@ -1007,6 +1007,20 @@ class AccountMove(models.Model):
             "items": merged_items,
         }
 
+    def action_post(self):
+        res = super().action_post()
+        for move in self.filtered(lambda m: m.move_type == 'out_invoice'):
+            sale_orders = move.invoice_line_ids.sale_line_ids.order_id
+            for order in sale_orders:
+                self.env['activity.timeline'].create({
+                    'quotation_id': order.id,
+                    'activity_type': 'invoice',
+                    'description': f'Invoice {move.name} posted.',
+                    'status': 'Posted',
+                })
+        return res
+
+
 
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
