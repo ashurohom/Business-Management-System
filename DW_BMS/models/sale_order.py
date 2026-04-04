@@ -224,18 +224,20 @@ class SaleOrder(models.Model):
         ('rto', 'RTO'),
         ('rto_received', 'RTO Received'),
     ], string='Shipping Status', compute='_compute_activity_stats')
+    latest_shipping_notes = fields.Text(string='Notes', compute='_compute_activity_stats')
     overall_activity_status = fields.Char(string='Overall Status', compute='_compute_activity_stats')
 
-    @api.depends('activity_timeline_ids.shipping_status', 'activity_timeline_ids.status', 'state')
+    @api.depends('activity_timeline_ids.shipping_status', 'activity_timeline_ids.status', 'activity_timeline_ids.notes', 'state')
     def _compute_activity_stats(self):
         for order in self:
             order.total_activities = len(order.activity_timeline_ids)
             shipping_activities = order.activity_timeline_ids.filtered(lambda a: a.activity_type == 'shipping' and a.shipping_status)
             if shipping_activities:
-                # order is datetime desc
                 order.latest_shipping_status = shipping_activities[0].shipping_status
+                order.latest_shipping_notes = shipping_activities[0].notes or False
             else:
                 order.latest_shipping_status = 'not_started'
+                order.latest_shipping_notes = False
                 
             if order.activity_timeline_ids:
                 order.overall_activity_status = order.activity_timeline_ids[0].status or dict(self._fields['state'].selection).get(order.state, order.state)

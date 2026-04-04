@@ -17,7 +17,7 @@
                        decoration-muted="latest_shipping_status == 'cancelled'" 
                        decoration-warning="latest_shipping_status == 'in_transit'"/>
                 <field name="overall_activity_status" string="Overall Status"/>
-                <field name="state" invisible="1"/>
+                <field name="latest_shipping_notes" string="Notes"/>
             </tree>
         </field>
     </record>

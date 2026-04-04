@@ -71,6 +71,7 @@ class ShippingManagement(models.Model):
                     'activity_type': 'shipping',
                     'description': f'Shipping created with status {status_label}.',
                     'tracking_link': shipping.tracking_link,
+                    'notes': shipping.delivery_notes or False,
                     'shipping_status': mapped_status if mapped_status in ['shipped', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled', 'complaint', 'rto', 'rto_received'] else False,
                     'status': status_label,
                 })
@@ -93,6 +94,7 @@ class ShippingManagement(models.Model):
                         'activity_type': 'shipping',
                         'description': f'Shipping updated to status {status_label}.',
                         'tracking_link': shipping.tracking_link,
+                        'notes': shipping.delivery_notes or False,
                         'shipping_status': mapped_status if mapped_status in ['not_started', 'shipped', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled', 'complaint', 'rto', 'rto_received'] else False,
                         'status': status_label,
                     })
