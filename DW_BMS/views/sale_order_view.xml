@@ -100,7 +100,7 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='order_line']/tree/field[@name='product_uom_qty']" position="after">
-                <field name="stock_qty" readonly="1"/>
+                <field name="free_qty" string="Free Quantity" readonly="1"/>
             </xpath>
             <xpath expr="//field[@name='order_line']/tree/field[@name='price_unit']" position="after">
                 <field name="price_incl_tax" string="Rate Incl Tax"/>

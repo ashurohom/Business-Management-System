@@ -18,21 +18,22 @@ class SaleOrderLine(models.Model):
         store=False,
     )
 
-    stock_qty = fields.Float(
-        string="Stock",
-        compute="_compute_stock_qty",
+    free_qty = fields.Float(
+        string="Free Quantity",
+        compute="_compute_free_qty",
         store=False,
     )
+    stock_qty = fields.Float(related="free_qty", readonly=True)
 
-    @api.depends("product_id")
-    def _compute_stock_qty(self):
+    @api.depends("product_id", "order_id.warehouse_id")
+    def _compute_free_qty(self):
         for line in self:
             if line.product_id:
-                line.stock_qty = line.product_id.with_context(
+                line.free_qty = line.product_id.with_context(
                     warehouse=line.order_id.warehouse_id.id
-                ).qty_available
+                ).free_qty
             else:
-                line.stock_qty = 0.0
+                line.free_qty = 0.0
 
     def _get_price_incl_from_unit(self, unit_price):
         self.ensure_one()
@@ -116,23 +117,23 @@ class SaleOrderLine(models.Model):
             return
 
         for line in self:
-            if not line.product_id or line.display_type:
+            if not line.product_id or line.display_type or line.product_id.type != 'product':
                 continue
 
-            available_qty = line.product_id.with_context(
+            available_free_qty = line.product_id.with_context(
                 warehouse=line.order_id.warehouse_id.id
-            ).qty_available
+            ).free_qty
             rounding = line.product_uom.rounding or line.product_id.uom_id.rounding or 0.01
 
-            if float_compare(line.product_uom_qty or 0.0, available_qty, precision_rounding=rounding) > 0:
+            if float_compare(line.product_uom_qty or 0.0, available_free_qty, precision_rounding=rounding) > 0:
                 raise ValidationError(
-                    "Ordered quantity cannot be more than available stock.\n"
+                    "Ordered quantity cannot be more than available free stock (On Hand - Reserved).\n"
                     "Product: %s\n"
-                    "Available stock: %.2f\n"
+                    "Free stock available: %.2f\n"
                     "Entered quantity: %.2f"
                     % (
                         line.product_id.display_name,
-                        available_qty,
+                        available_free_qty,
                         line.product_uom_qty or 0.0,
                     )
                 )
