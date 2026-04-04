@@ -23,6 +23,7 @@ class ActivityTimeline(models.Model):
         ('not_started', 'Not Started'),
         ('shipped', 'Shipped'),
         ('in_transit', 'In Transit'),
+        ('out_for_delivery', 'Out for Delivery'),
         ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'),
         ('complaint', 'Complaint'),

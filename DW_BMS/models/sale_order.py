@@ -217,8 +217,12 @@ class SaleOrder(models.Model):
         ('not_started', 'Not Started'),
         ('shipped', 'Shipped'),
         ('in_transit', 'In Transit'),
+        ('out_for_delivery', 'Out for Delivery'),
         ('delivered', 'Delivered'),
-        ('cancelled', 'Cancelled')
+        ('cancelled', 'Cancelled'),
+        ('complaint', 'Complaint'),
+        ('rto', 'RTO'),
+        ('rto_received', 'RTO Received'),
     ], string='Shipping Status', compute='_compute_activity_stats')
     overall_activity_status = fields.Char(string='Overall Status', compute='_compute_activity_stats')
 
