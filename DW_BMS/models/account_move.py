@@ -56,6 +56,7 @@ class AccountMove(models.Model):
         "BILL Country",
         "BILL Pincode",
         "BILLING Address",
+        "Components",
     ]
 
     shipping_ids = fields.One2many(
@@ -372,6 +373,7 @@ class AccountMove(models.Model):
         worksheet.set_column(8, 20, 14)
         worksheet.set_column(21, 28, 18)
         worksheet.set_column(29, 36, 22)
+        worksheet.set_column(37, 37, 50)
 
         for col, header in enumerate(self._INVOICE_XLSX_HEADERS):
             worksheet.write(0, col, header, header_format)
@@ -380,15 +382,42 @@ class AccountMove(models.Model):
         for invoice in self.filtered(lambda move: move.move_type == "out_invoice"):
             invoice_lines = invoice._get_invoice_export_lines()
             for line in invoice_lines:
-                row_values = invoice._prepare_invoice_xlsx_row(line)
-                for col, value in enumerate(row_values):
-                    if col == 7 and value:
-                        worksheet.write_datetime(row, col, value, date_format)
-                    elif isinstance(value, (int, float)):
-                        worksheet.write_number(row, col, value, number_format)
-                    else:
-                        worksheet.write(row, col, value or "", text_format)
-                row += 1
+                bom = invoice._get_phantom_bom(line.product_id)
+                if bom:
+                    # Export components as separate rows
+                    kit_name = line.product_id.display_name
+                    is_first_comp = True
+                    for bom_line in bom.bom_line_ids:
+                        comp_qty = line.quantity * bom_line.product_qty
+                        # Only show financial details on the first component row
+                        row_values = invoice._prepare_invoice_xlsx_row(
+                            line,
+                            product_override=bom_line.product_id,
+                            qty_override=comp_qty,
+                            uom_override=bom_line.product_uom_id,
+                            components_override=f"Kit: {kit_name}",
+                            omit_financials=not is_first_comp
+                        )
+                        for col, value in enumerate(row_values):
+                            if col == 7 and value:
+                                worksheet.write_datetime(row, col, value, date_format)
+                            elif isinstance(value, (int, float)):
+                                worksheet.write_number(row, col, value, number_format)
+                            else:
+                                worksheet.write(row, col, value or "", text_format)
+                        row += 1
+                        is_first_comp = False
+                else:
+                    # Regular product export
+                    row_values = invoice._prepare_invoice_xlsx_row(line)
+                    for col, value in enumerate(row_values):
+                        if col == 7 and value:
+                            worksheet.write_datetime(row, col, value, date_format)
+                        elif isinstance(value, (int, float)):
+                            worksheet.write_number(row, col, value, number_format)
+                        else:
+                            worksheet.write(row, col, value or "", text_format)
+                    row += 1
 
         if row == 1:
             raise UserError("No exportable invoice lines were found for the selected customer invoices.")
@@ -410,31 +439,51 @@ class AccountMove(models.Model):
             and not line.exclude_from_invoice_tab
         )
 
-    def _prepare_invoice_xlsx_row(self, line):
+    def _prepare_invoice_xlsx_row(
+        self, line, product_override=None, qty_override=None, uom_override=None, components_override=None, omit_financials=False
+    ):
         self.ensure_one()
         tax_details = self._get_invoice_line_tax_details(line)
+        
+        product = product_override or line.product_id
+        quantity = qty_override if qty_override is not None else line.quantity or 0.0
+        uom = uom_override or line.product_uom_id
+        
+        # Financials
+        price_unit = line.price_unit if not omit_financials else 0.0
+        discount = line.discount if not omit_financials else 0.0
+        cgst_amount = tax_details["cgst_amount"] if not omit_financials else 0.0
+        sgst_amount = tax_details["sgst_amount"] if not omit_financials else 0.0
+        igst_amount = tax_details["igst_amount"] if not omit_financials else 0.0
+        cgst_rate = tax_details["cgst_rate"] if not omit_financials else 0.0
+        sgst_rate = tax_details["sgst_rate"] if not omit_financials else 0.0
+        igst_rate = tax_details["igst_rate"] if not omit_financials else 0.0
+        tax_names = ", ".join(line.tax_ids.mapped("name")) if not omit_financials else ""
+        unit_price_inc_tax = tax_details["unit_price_included"] if not omit_financials else 0.0
+        total_inc_tax = tax_details["line_total_included"] if not omit_financials else 0.0
+
         return [
-            line.product_id.name or line.name or "",
-            line.product_id.default_code or "",
+            product.display_name or product.name or line.name or "",
+            product.default_code or "",
             self.partner_id.name or "",
             self.partner_id.vat or "",
             self.partner_id.phone or "",
             self.partner_id.mobile or "",
             self.name or "",
             self.invoice_date or False,
-            line.quantity or 0.0,
-            line.product_uom_id.name or "",
-            line.price_unit or 0.0,
-            line.discount or 0.0,
-            tax_details["cgst_amount"],
-            tax_details["sgst_amount"],
-            tax_details["igst_amount"],
-            tax_details["cgst_rate"],
-            tax_details["sgst_rate"],
-            tax_details["igst_rate"],
-            ", ".join(line.tax_ids.mapped("name")),
-            tax_details["unit_price_included"],
-            tax_details["line_total_included"],
+            quantity,
+            uom.name or "",
+            price_unit,
+            discount,
+            cgst_amount,
+            sgst_amount,
+            igst_amount,
+            cgst_rate,
+            sgst_rate,
+            igst_rate,
+            tax_names,
+            unit_price_inc_tax,
+            total_inc_tax,
             "",
             "",
             "",
@@ -451,7 +500,34 @@ class AccountMove(models.Model):
             self.billing_country or "",
             self.billing_pincode or "",
             self.billing_address or "",
+            components_override if components_override is not None else self._get_kit_components(line.product_id),
         ]
+
+    def _get_phantom_bom(self, product):
+        """Find a Kit-type BoM for the given product."""
+        if not product:
+            return False
+        return self.env['mrp.bom'].search([
+            ('type', '=', 'phantom'),
+            ('active', '=', True),
+            '|',
+            ('product_id', '=', product.id),
+            ('product_tmpl_id', '=', product.product_tmpl_id.id),
+        ], limit=1)
+
+    def _get_kit_components(self, product):
+        """Return a formatted string of BoM Kit components for the given product.
+        Returns empty string if the product has no Kit-type BoM."""
+        bom = self._get_phantom_bom(product)
+        if not bom:
+            return ""
+        parts = []
+        for bom_line in bom.bom_line_ids:
+            comp_name = bom_line.product_id.name or ""
+            qty = bom_line.product_qty
+            uom = bom_line.product_uom_id.name or ""
+            parts.append(f"{comp_name} ({qty:g} {uom})".strip())
+        return ", ".join(parts)
 
     def _get_invoice_line_tax_details(self, line):
         self.ensure_one()
