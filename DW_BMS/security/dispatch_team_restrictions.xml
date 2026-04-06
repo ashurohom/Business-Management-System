@@ -70,7 +70,8 @@
             (6, 0, [
                 ref('base.group_system'),
                 ref('DW_BMS.group_bms_admin'),
-                ref('DW_BMS.group_bms_inventory')
+                ref('DW_BMS.group_bms_inventory'),
+                ref('DW_BMS.group_dispatch_team')
             ])
         ]"/>
     </record>
@@ -110,7 +111,7 @@
     <record id="rule_dispatch_team_delivery_only" model="ir.rule">
         <field name="name">Dispatch Team: Deliveries Only</field>
         <field name="model_id" ref="stock.model_stock_picking"/>
-        <field name="domain_force">[('picking_type_code', '=', 'outgoing')]</field>
+        <field name="domain_force">[('picking_type_code', 'in', ('incoming', 'outgoing'))]</field>
         <field name="groups" eval="[(4, ref('DW_BMS.group_dispatch_team'))]"/>
         <field name="perm_read" eval="True"/>
         <field name="perm_write" eval="True"/>
