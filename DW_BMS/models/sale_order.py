@@ -227,6 +227,19 @@ class SaleOrder(models.Model):
     ], string='Shipping Status', compute='_compute_activity_stats')
     latest_shipping_notes = fields.Text(string='Notes', compute='_compute_activity_stats')
     overall_activity_status = fields.Char(string='Overall Status', compute='_compute_activity_stats')
+    invoice_number = fields.Char(
+        string="Invoice Number",
+        compute="_compute_invoice_number",
+        help="Concatenated names of all posted invoices related to this quotation.",
+    )
+
+    @api.depends("invoice_ids.state", "invoice_ids.name")
+    def _compute_invoice_number(self):
+        for order in self:
+            invoices = order.invoice_ids.filtered(
+                lambda m: m.move_type == "out_invoice" and m.state == "posted"
+            )
+            order.invoice_number = ", ".join(invoices.mapped("name")) if invoices else False
 
     @api.depends('activity_timeline_ids.shipping_status', 'activity_timeline_ids.status', 'activity_timeline_ids.notes', 'state')
     def _compute_activity_stats(self):

@@ -8,14 +8,15 @@
             <!-- This acts as the level 1 view as requested, grouping activities practically by showing sale_orders that have activities -->
             <tree string="Quotation Activity Tracking" create="0" edit="0" delete="0">
                 <field name="name" string="Quotation"/>
+                <field name="invoice_number"/>
                 <field name="partner_id" string="Customer"/>
                 <field name="total_activities"/>
-                <field name="latest_shipping_status"
+                <!-- <field name="latest_shipping_status"
                        widget="badge" 
                        decoration-success="latest_shipping_status == 'delivered'" 
                        decoration-info="latest_shipping_status == 'shipped'" 
                        decoration-muted="latest_shipping_status == 'cancelled'" 
-                       decoration-warning="latest_shipping_status == 'in_transit'"/>
+                       decoration-warning="latest_shipping_status == 'in_transit'"/> -->
                 <field name="overall_activity_status" string="Overall Status"/>
                 <field name="latest_shipping_notes" string="Notes"/>
             </tree>
