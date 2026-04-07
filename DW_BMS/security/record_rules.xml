@@ -43,6 +43,17 @@
         <field name="perm_unlink" eval="False"/>
     </record>
 
+    <record id="rule_sales_team_customer_invoices_all" model="ir.rule">
+        <field name="name">Sales Team: Customer Invoices Only</field>
+        <field name="model_id" ref="account.model_account_move"/>
+        <field name="domain_force">[('move_type', 'in', ('out_invoice', 'out_refund', 'out_receipt'))]</field>
+        <field name="groups" eval="[(4, ref('DW_BMS.group_sales_team'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+
     <!-- ========================= -->
     <!-- REPORT USER: READ ALL -->
     <!-- ========================= -->

@@ -213,6 +213,38 @@ class ProductTemplate(models.Model):
 class ProductProduct(models.Model):
     _inherit = "product.product"
 
+    def _get_display_name_without_internal_reference(self):
+        self.ensure_one()
+        return self.name or ""
+
+    @api.depends("name", "default_code", "product_tmpl_id")
+    @api.depends_context(
+        "display_default_code",
+        "seller_id",
+        "company_id",
+        "partner_id",
+        "use_partner_name",
+        "show_internal_reference",
+    )
+    def _compute_display_name(self):
+        show_internal_reference = bool(self.env.context.get("show_internal_reference"))
+        for product in self:
+            name = product._get_display_name_without_internal_reference()
+            if show_internal_reference and product.default_code:
+                product.display_name = "[%s] %s" % (product.default_code, name)
+            else:
+                product.display_name = name
+
+    def name_get(self):
+        return [(product.id, product.display_name or product.name or "") for product in self]
+
+    def get_product_multiline_description_sale(self):
+        self.ensure_one()
+        name = self._get_display_name_without_internal_reference()
+        if self.description_sale:
+            name += "\n" + self.description_sale
+        return name
+
     def _check_sales_price_edit_access(self, vals, for_create=False):
         if "list_price" not in vals:
             return

@@ -2,6 +2,7 @@ from . import res_partner
 from . import customer_type
 from . import account_move
 from . import account_partner_ledger
+from . import mrp_bom
 from . import sale_order
 from . import base_import_fix
 from . import product_alias

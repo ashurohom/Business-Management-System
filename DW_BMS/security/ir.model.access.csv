@@ -123,3 +123,12 @@ access_bms_dispatch_stock_lot,dispatch team stock lot read,stock.model_stock_lot
 access_bms_sales_team_product_alias,sales team product alias read,DW_BMS.model_dw_product_name_alias,DW_BMS.group_sales_team,1,0,0,0
 access_bms_sales_team_product,sales team product read,product.model_product_product,DW_BMS.group_sales_team,1,0,0,0
 access_bms_sales_team_product_template,sales team product template read,product.model_product_template,DW_BMS.group_sales_team,1,0,0,0
+access_bms_sales_team_invoice,sales team invoice,account.model_account_move,DW_BMS.group_sales_team,1,1,1,0
+access_bms_sales_team_invoice_line,sales team invoice line,account.model_account_move_line,DW_BMS.group_sales_team,1,1,1,0
+access_bms_sales_team_payment,sales team payment,account.model_account_payment,DW_BMS.group_sales_team,1,1,1,0
+access_bms_sales_team_payment_register,sales team payment register,account.model_account_payment_register,DW_BMS.group_sales_team,1,1,1,0
+access_bms_sales_team_account_tax,sales team account tax read,account.model_account_tax,DW_BMS.group_sales_team,1,0,0,0
+access_bms_sales_team_account_journal,sales team account journal read,account.model_account_journal,DW_BMS.group_sales_team,1,0,0,0
+access_bms_sales_team_payment_term,sales team payment term read,account.model_account_payment_term,DW_BMS.group_sales_team,1,0,0,0
+access_bms_sales_team_fiscal_position,sales team fiscal position read,account.model_account_fiscal_position,DW_BMS.group_sales_team,1,0,0,0
+access_bms_sales_team_shipping_management,sales team shipping management,DW_BMS.model_shipping_management,DW_BMS.group_sales_team,1,1,1,0
