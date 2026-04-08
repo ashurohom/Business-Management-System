@@ -372,6 +372,10 @@
                                     <span t-field="doc.partner_id.name"/>
                                 </div>
                                 <div class="inv-addr-text">
+                                    <t t-if="doc.partner_id.contact_address">
+                                        <span t-esc="doc.partner_id.contact_address"/>
+                                        <br/>
+                                    </t>
                                     <t t-if="doc.partner_id.phone">
                                         <strong>Ph:</strong>
                                         <span t-esc="doc.partner_id.phone"/>
@@ -385,6 +389,11 @@
                                     <t t-if="doc.partner_id.vat">
                                         <strong>GSTIN:</strong>
                                         <span t-esc="doc.partner_id.vat"/>
+                                        <br/>
+                                    </t>
+                                    <t t-if="doc.partner_id.customer_type_master_id or doc.partner_id.customer_type">
+                                        <strong>Customer Type:</strong>
+                                        <span t-esc="doc.partner_id.customer_type_master_id.name or dict(doc.partner_id._fields['customer_type'].selection).get(doc.partner_id.customer_type, '')"/>
                                     </t>
                                 </div>
                             </td>
@@ -473,6 +482,9 @@
                         </tr>
                     </table>
 
+                    <t t-set="payment_items" t-value="doc.invoice_payments_widget and doc.invoice_payments_widget.get('content', []) or []"/>
+                    <t t-set="first_payment" t-value="payment_items and payment_items[0] or {}"/>
+
                     <!-- ========== 4. INVOICE META ========== -->
                     <table class="inv-table inv-meta" style="margin-top:0;">
                         <tr>
@@ -486,9 +498,19 @@
                             </td>
                         </tr>
                         <tr>
-                            <td class="inv-label">Payment Terms</td>
+                           <td class="inv-label">Payment Mode</td>
                             <td>
-                                <span t-field="doc.invoice_payment_term_id"/>
+                                <t t-if="doc.invoice_payments_widget and doc.invoice_payments_widget.get('content')">
+                                    <t t-foreach="doc.invoice_payments_widget.get('content')" t-as="pmt">
+
+                                        <t t-set="payment" t-value="env['account.payment'].browse(pmt.get('account_payment_id'))"/>
+
+                                        <span t-esc="dict(payment._fields['custom_payment_method'].selection).get(payment.custom_payment_method) or '-'"/>
+
+                                        <t t-if="not pmt_last">, </t>
+                                    </t>
+                                </t>
+                                <t t-else="">-</t>
                             </td>
                             <td class="inv-label">Payment Status</td>
                             <td class="inv-center">
@@ -500,23 +522,22 @@
                                 </t>
                             </td>
                         </tr>
-                    </table>
-
-                    <!-- ========== 5. PAYMENT DETAILS ========== -->
-                    <t t-set="payment_items" t-value="doc.invoice_payments_widget and doc.invoice_payments_widget.get('content', []) or []"/>
-                    <table t-if="doc.payment_state == 'paid' and payment_items" class="inv-table" style="margin-top:0;">
                         <tr>
-                            <td class="inv-label">Bank / Account</td>
+                            <td class="inv-label">Customer Type</td>
                             <td>
-                                <t t-foreach="payment_items" t-as="pmt">
-                                    <span t-esc="pmt.get('journal_name') or pmt.get('payment_name') or pmt.get('move_name') or ''"/>
-                                    <t t-if="not pmt_last">, </t>
+                                <span t-esc="doc.partner_id.customer_type_master_id.name or dict(doc.partner_id._fields['customer_type'].selection).get(doc.partner_id.customer_type, '')"/>
+                            </td>
+                            <td class="inv-label">Payment Date</td>
+                            <td class="inv-center">
+                                <t t-if="doc.payment_state == 'paid' and first_payment.get('date')">
+                                    <span t-esc="first_payment.get('date')"/>
                                 </t>
+                                <t t-else="">-</t>
                             </td>
                         </tr>
                     </table>
 
-                    <!-- ========== 6. PRODUCT LINES ========== -->
+                    <!-- ========== 5. PRODUCT LINES ========== -->
                     <!-- Determine GST type once -->
                     <t t-set="is_same_state"
                        t-value="doc.partner_id.state_id and doc.company_id.state_id and doc.partner_id.state_id == doc.company_id.state_id"/>
@@ -578,7 +599,7 @@
                         </tbody>
                     </table>
 
-                    <!-- ========== 7. TOTALS ========== -->
+                    <!-- ========== 6. TOTALS ========== -->
                     <table class="inv-totals">
                         <tr>
                             <td><strong>Untaxed Amount</strong></td>
@@ -608,7 +629,7 @@
                         </tr>
                     </table>
 
-                    <!-- ========== 8. BANK DETAILS ========== -->
+                    <!-- ========== 7. BANK DETAILS ========== -->
                     <table class="inv-bank-box">
                         <tr>
                             <td>
@@ -628,7 +649,7 @@ SWIFT Code. PUNBINBBISB</div>
                         </tr>
                     </table>
 
-                    <!-- ========== 9. HSN SUMMARY ========== -->
+                    <!-- ========== 8. HSN SUMMARY ========== -->
                     <t t-set="hsn_summary" t-value="doc._dw_get_hsn_summary_table()"/>
                     <t t-if="hsn_summary and hsn_summary.get('items')">
                         <table class="inv-hsn-summary">

@@ -27,6 +27,12 @@ class ProductProduct(models.Model):
         readonly=False,
     )
 
+    is_bom_kit = fields.Boolean(
+        string="Is BoM Kit",
+        compute="_compute_is_bom_kit",
+        search="_search_is_bom_kit",
+    )
+
     alert_status = fields.Selection(
         [
             ("normal", "Normal"),
@@ -92,6 +98,31 @@ class ProductProduct(models.Model):
             else:
                 product.alert_status = "normal"
                 product.is_low_stock = False
+
+    def _compute_is_bom_kit(self):
+        phantom_tmpl_ids = set(
+            self.env["mrp.bom"].search([
+                ("type", "=", "phantom"),
+                ("product_tmpl_id", "in", self.product_tmpl_id.ids),
+            ]).mapped("product_tmpl_id").ids
+        )
+        for product in self:
+            product.is_bom_kit = product.product_tmpl_id.id in phantom_tmpl_ids
+
+    def _search_is_bom_kit(self, operator, value):
+        if operator not in ["=", "!="]:
+            raise NotImplementedError(_("Operation %s not implemented.") % operator)
+
+        phantom_tmpl_ids = self.env["mrp.bom"].search([
+            ("type", "=", "phantom"),
+        ]).mapped("product_tmpl_id").ids
+
+        in_kit = [("product_tmpl_id", "in", phantom_tmpl_ids)]
+        not_in_kit = [("product_tmpl_id", "not in", phantom_tmpl_ids)]
+
+        if (operator == "=" and value is True) or (operator == "!=" and value is False):
+            return in_kit
+        return not_in_kit
 
     def _search_low_stock(self, operator, value):
         if operator not in ["=", "!="]:

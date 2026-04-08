@@ -20,6 +20,7 @@ class AccountMove(models.Model):
 
     _INVOICE_XLSX_HEADERS = [
         "Product",
+        "HSN/SAC Code",
         "SKU",
         "Customer Name",
         "GST Number",
@@ -366,14 +367,14 @@ class AccountMove(models.Model):
         worksheet.freeze_panes(1, 0)
         worksheet.set_row(0, 28)
         worksheet.set_column(0, 0, 24)
-        worksheet.set_column(1, 1, 18)
-        worksheet.set_column(2, 3, 24)
-        worksheet.set_column(4, 5, 20)
-        worksheet.set_column(6, 7, 16)
-        worksheet.set_column(8, 20, 14)
-        worksheet.set_column(21, 28, 18)
-        worksheet.set_column(29, 36, 22)
-        worksheet.set_column(37, 37, 50)
+        worksheet.set_column(1, 2, 18)
+        worksheet.set_column(3, 4, 24)
+        worksheet.set_column(5, 6, 20)
+        worksheet.set_column(7, 8, 16)
+        worksheet.set_column(9, 21, 14)
+        worksheet.set_column(22, 29, 18)
+        worksheet.set_column(30, 37, 22)
+        worksheet.set_column(38, 38, 50)
 
         for col, header in enumerate(self._INVOICE_XLSX_HEADERS):
             worksheet.write(0, col, header, header_format)
@@ -384,34 +385,30 @@ class AccountMove(models.Model):
             for line in invoice_lines:
                 bom = invoice._get_phantom_bom(line.product_id)
                 if bom:
-                    # Export components as separate rows
                     kit_name = line.product_id.display_name
-                    is_first_comp = True
-                    for bom_line in bom.bom_line_ids:
-                        comp_qty = line.quantity * bom_line.product_qty
-                        # Only show financial details on the first component row
+                    component_rows = invoice._get_kit_component_export_rows(line, bom)
+                    for component_row in component_rows:
                         row_values = invoice._prepare_invoice_xlsx_row(
                             line,
-                            product_override=bom_line.product_id,
-                            qty_override=comp_qty,
-                            uom_override=bom_line.product_uom_id,
+                            product_override=component_row["product"],
+                            qty_override=component_row["quantity"],
+                            uom_override=component_row["uom"],
                             components_override=f"Kit: {kit_name}",
-                            omit_financials=not is_first_comp
+                            financial_override=component_row["financials"],
                         )
                         for col, value in enumerate(row_values):
-                            if col == 7 and value:
+                            if col == 8 and value:
                                 worksheet.write_datetime(row, col, value, date_format)
                             elif isinstance(value, (int, float)):
                                 worksheet.write_number(row, col, value, number_format)
                             else:
                                 worksheet.write(row, col, value or "", text_format)
                         row += 1
-                        is_first_comp = False
                 else:
                     # Regular product export
                     row_values = invoice._prepare_invoice_xlsx_row(line)
                     for col, value in enumerate(row_values):
-                        if col == 7 and value:
+                        if col == 8 and value:
                             worksheet.write_datetime(row, col, value, date_format)
                         elif isinstance(value, (int, float)):
                             worksheet.write_number(row, col, value, number_format)
@@ -440,30 +437,49 @@ class AccountMove(models.Model):
         )
 
     def _prepare_invoice_xlsx_row(
-        self, line, product_override=None, qty_override=None, uom_override=None, components_override=None, omit_financials=False
+        self,
+        line,
+        product_override=None,
+        qty_override=None,
+        uom_override=None,
+        components_override=None,
+        financial_override=None,
     ):
         self.ensure_one()
         tax_details = self._get_invoice_line_tax_details(line)
-        
+
         product = product_override or line.product_id
         quantity = qty_override if qty_override is not None else line.quantity or 0.0
         uom = uom_override or line.product_uom_id
-        
-        # Financials
-        price_unit = line.price_unit if not omit_financials else 0.0
-        discount = line.discount if not omit_financials else 0.0
-        cgst_amount = tax_details["cgst_amount"] if not omit_financials else 0.0
-        sgst_amount = tax_details["sgst_amount"] if not omit_financials else 0.0
-        igst_amount = tax_details["igst_amount"] if not omit_financials else 0.0
-        cgst_rate = tax_details["cgst_rate"] if not omit_financials else 0.0
-        sgst_rate = tax_details["sgst_rate"] if not omit_financials else 0.0
-        igst_rate = tax_details["igst_rate"] if not omit_financials else 0.0
-        tax_names = ", ".join(line.tax_ids.mapped("name")) if not omit_financials else ""
-        unit_price_inc_tax = tax_details["unit_price_included"] if not omit_financials else 0.0
-        total_inc_tax = tax_details["line_total_included"] if not omit_financials else 0.0
+
+        if financial_override:
+            price_unit = financial_override["price_unit"]
+            discount = financial_override["discount"]
+            cgst_amount = financial_override["cgst_amount"]
+            sgst_amount = financial_override["sgst_amount"]
+            igst_amount = financial_override["igst_amount"]
+            cgst_rate = financial_override["cgst_rate"]
+            sgst_rate = financial_override["sgst_rate"]
+            igst_rate = financial_override["igst_rate"]
+            tax_names = financial_override["tax_names"]
+            unit_price_inc_tax = financial_override["unit_price_included"]
+            total_inc_tax = financial_override["line_total_included"]
+        else:
+            price_unit = line.price_unit
+            discount = line.discount
+            cgst_amount = tax_details["cgst_amount"]
+            sgst_amount = tax_details["sgst_amount"]
+            igst_amount = tax_details["igst_amount"]
+            cgst_rate = tax_details["cgst_rate"]
+            sgst_rate = tax_details["sgst_rate"]
+            igst_rate = tax_details["igst_rate"]
+            tax_names = ", ".join(line.tax_ids.mapped("name"))
+            unit_price_inc_tax = tax_details["unit_price_included"]
+            total_inc_tax = tax_details["line_total_included"]
 
         return [
             product.display_name or product.name or line.name or "",
+            line.hsn_code or product.l10n_in_hsn_code or "",
             product.default_code or "",
             self.partner_id.name or "",
             self.partner_id.vat or "",
@@ -502,6 +518,86 @@ class AccountMove(models.Model):
             self.billing_address or "",
             components_override if components_override is not None else self._get_kit_components(line.product_id),
         ]
+
+    def _get_kit_component_export_rows(self, line, bom):
+        self.ensure_one()
+        quantity = line.quantity or 0.0
+        tax_details = self._get_invoice_line_tax_details(line)
+        discount = line.discount or 0.0
+        discount_factor = 1 - (discount / 100.0)
+        tax_names = ", ".join(line.tax_ids.mapped("name"))
+
+        components = []
+        total_component_qty = 0.0
+        for bom_line in bom.bom_line_ids:
+            component_qty = quantity * bom_line.product_qty
+            components.append({
+                "product": bom_line.product_id,
+                "uom": bom_line.product_uom_id,
+                "quantity": component_qty,
+            })
+            total_component_qty += component_qty
+
+        if not components:
+            return []
+
+        if not total_component_qty:
+            total_component_qty = float(len(components))
+            for component in components:
+                component["quantity"] = component["quantity"] or 0.0
+
+        totals_map = {
+            "subtotal_excluded": line.price_subtotal or 0.0,
+            "line_total_included": line.price_total or 0.0,
+            "cgst_amount": tax_details["cgst_amount"],
+            "sgst_amount": tax_details["sgst_amount"],
+            "igst_amount": tax_details["igst_amount"],
+        }
+        allocated_sums = {key: 0.0 for key in totals_map}
+
+        for index, component in enumerate(components):
+            is_last = index == len(components) - 1
+            ratio = (component["quantity"] / total_component_qty) if total_component_qty else 0.0
+
+            allocated = {}
+            for key, total_value in totals_map.items():
+                if is_last:
+                    allocated_value = total_value - allocated_sums[key]
+                else:
+                    allocated_value = self.currency_id.round(total_value * ratio)
+                    allocated_sums[key] += allocated_value
+                allocated[key] = allocated_value
+
+            net_unit_price = (
+                allocated["subtotal_excluded"] / component["quantity"]
+                if component["quantity"]
+                else 0.0
+            )
+            if discount and discount_factor:
+                price_unit = net_unit_price / discount_factor
+            else:
+                price_unit = net_unit_price
+            unit_price_included = (
+                allocated["line_total_included"] / component["quantity"]
+                if component["quantity"]
+                else 0.0
+            )
+
+            component["financials"] = {
+                "price_unit": self.currency_id.round(price_unit),
+                "discount": discount,
+                "cgst_amount": allocated["cgst_amount"],
+                "sgst_amount": allocated["sgst_amount"],
+                "igst_amount": allocated["igst_amount"],
+                "cgst_rate": tax_details["cgst_rate"],
+                "sgst_rate": tax_details["sgst_rate"],
+                "igst_rate": tax_details["igst_rate"],
+                "tax_names": tax_names,
+                "unit_price_included": self.currency_id.round(unit_price_included),
+                "line_total_included": allocated["line_total_included"],
+            }
+
+        return components
 
     def _get_phantom_bom(self, product):
         """Find a Kit-type BoM for the given product."""

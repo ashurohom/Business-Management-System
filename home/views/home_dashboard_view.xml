@@ -71,7 +71,7 @@
                 <field name="name"/>
                 <field name="user"/>
                 <field name="partner"/>
-                <field name="packed_by"/>
+                <field name="packed_by_user"/>
                 <field name="delivered_by"/>
                 <field name="packing_notes"/>
                 <field name="delivered_notes"/>
@@ -125,7 +125,7 @@
                             <field name="date"/>
                         </group>
                         <group>
-                            <field name="packed_by"/>
+                            <field name="packed_by_user"/>
                             <field name="delivered_by"/>
                         </group>
                     </group>
@@ -162,7 +162,7 @@
                                 <field name="name"/>
                                 <field name="user"/>
                                 <field name="partner"/>
-                                <field name="packed_by"/>
+                                <field name="packed_by_user"/>
                                 <field name="delivered_by"/>
                                 <field name="packing_notes"/>
                                 <field name="delivered_notes"/>

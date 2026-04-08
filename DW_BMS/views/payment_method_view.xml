@@ -1,0 +1,20 @@
+<odoo>
+    <record id="view_account_payment_register_inherit" model="ir.ui.view">
+        <field name="name">account.payment.register.custom</field>
+        <field name="model">account.payment.register</field>
+        <field name="inherit_id" ref="account.view_account_payment_register_form"/>
+        <field name="arch" type="xml">
+
+            <!--  Hide default Payment Method -->
+            <xpath expr="//field[@name='payment_method_line_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!--  Add new field exactly after Journal -->
+            <xpath expr="//field[@name='journal_id']" position="after">
+                <field name="custom_payment_method" required="1"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

@@ -11,7 +11,7 @@ class HomeDashboardActivity(models.Model):
     name = fields.Char(string="Document", required=True, readonly=True)
     user = fields.Char(readonly=True)
     partner = fields.Char(string="Customer/Vendor", readonly=True)
-    packed_by = fields.Char(readonly=True)
+    packed_by_user = fields.Char(string="Packed By", readonly=True)
     delivered_by = fields.Char(readonly=True)
     packing_notes = fields.Text(readonly=True)
     delivered_notes = fields.Text(readonly=True)

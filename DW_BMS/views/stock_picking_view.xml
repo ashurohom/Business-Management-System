@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="stock.view_picking_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header/field[@name='state'][@invisible=&quot;picking_type_code != 'incoming'&quot;]" position="attributes">
-                <attribute name="statusbar_visible">draft,waiting,assigned,packed,done</attribute>
+                <attribute name="statusbar_visible">draft,waiting,assigned,done</attribute>
             </xpath>
 
             <xpath expr="//div[@name='button_box']" position="inside">
@@ -23,7 +23,7 @@
             </xpath>
 
             <xpath expr="//header/field[@name='state'][@invisible=&quot;picking_type_code == 'incoming'&quot;]" position="attributes">
-                <attribute name="statusbar_visible">draft,waiting,assigned,packed,done</attribute>
+                <attribute name="statusbar_visible">draft,waiting,assigned,done</attribute>
             </xpath>
 
             <xpath expr="//header/button[@name='button_validate'][1]" position="attributes">
@@ -31,7 +31,7 @@
             </xpath>
 
             <xpath expr="//header/button[@name='button_validate'][2]" position="attributes">
-                <attribute name="invisible">state in ('waiting', 'assigned', 'packed', 'done', 'cancel')</attribute>
+                <attribute name="invisible">state in ('waiting', 'assigned', 'done', 'cancel')</attribute>
             </xpath>
 
             <xpath expr="//header/button[@name='action_confirm']" position="attributes">
@@ -79,7 +79,8 @@
             </xpath>
 
             <xpath expr="//field[@name='partner_id']" position="after">
-                <field name="packed_by" readonly="state in ['waiting', 'done', 'cancel']"/>
+                <field name="packed_by" invisible="1"/>
+                <field name="packed_by_user" readonly="state in ['waiting', 'done', 'cancel']"/>
                 <field name="delivered_by" readonly="1" invisible="1"/>
             </xpath>
 

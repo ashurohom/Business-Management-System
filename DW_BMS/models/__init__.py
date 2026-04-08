@@ -20,3 +20,4 @@ from . import packing_order
 from . import sale_order_packing
 from . import shipping_management
 from . import activity_timeline
+from . import payment_method    

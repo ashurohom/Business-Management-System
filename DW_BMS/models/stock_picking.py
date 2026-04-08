@@ -6,11 +6,15 @@ class StockPicking(models.Model):
     _inherit = "stock.picking"
 
     state = fields.Selection(
-        selection_add=[("packed", "Packed"), ("done",)],
-        ondelete={"packed": lambda records: records.write({"state": "assigned"})},
+        selection_add=[("done", "Packed")],
     )
     packed_by = fields.Many2one(
         "res.partner",
+        string="Packed By",
+        copy=False,
+    )
+    packed_by_user = fields.Many2one(
+        "res.users",
         string="Packed By",
         copy=False,
     )
@@ -35,27 +39,13 @@ class StockPicking(models.Model):
             raise UserError("Packing Team users are not allowed to create deliveries.")
 
         pickings = super().create(vals_list)
-        pickings._update_state_for_packed_by()
         return pickings
 
     def write(self, vals):
         res = super().write(vals)
-        if "packed_by" in vals:
-            self._update_state_for_packed_by()
         return res
 
-    @api.onchange("packed_by")
-    def _onchange_packed_by(self):
-        for picking in self:
-            if picking.packed_by and picking.state not in ("waiting", "done", "cancel"):
-                picking.state = "packed"
 
-    def _update_state_for_packed_by(self):
-        pickings_to_pack = self.filtered(
-            lambda picking: picking.packed_by and picking.state not in ("waiting", "done", "cancel")
-        )
-        if pickings_to_pack:
-            pickings_to_pack.with_context(skip_packed_state_update=True).write({"state": "packed"})
 
     def button_validate(self):
         res = super().button_validate()
@@ -72,7 +62,7 @@ class StockPicking(models.Model):
                     'quotation_id': picking.sale_id.id,
                     'activity_type': 'delivery',
                     'description': f'Delivery {picking.name} validated.',
-                    'status': 'Done',
+                    'status': 'Packed',
                 })
 
         moved_products = done_pickings.move_ids_without_package.mapped("product_id").filtered(

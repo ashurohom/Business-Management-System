@@ -25,6 +25,26 @@ class SaleOrderLine(models.Model):
     )
     stock_qty = fields.Float(related="free_qty", readonly=True)
 
+    def _check_duplicate_product_in_same_order(self):
+        for line in self:
+            if not line.order_id or not line.product_id or line.display_type:
+                continue
+
+            sibling_lines = line.order_id.order_line.filtered(
+                lambda order_line: (
+                    order_line.id != line.id
+                    and order_line.product_id
+                    and not order_line.display_type
+                    and order_line.product_id.id == line.product_id.id
+                )
+            )
+            if sibling_lines:
+                raise ValidationError(
+                    "The product '%s' is already added in this quotation. "
+                    "You cannot add the same product more than once."
+                    % line.product_id.display_name
+                )
+
     @api.depends("product_id", "order_id.warehouse_id")
     def _compute_free_qty(self):
         for line in self:
@@ -138,6 +158,21 @@ class SaleOrderLine(models.Model):
                     )
                 )
 
+    @api.constrains("order_id", "product_id", "display_type")
+    def _check_duplicate_product_constraint(self):
+        self._check_duplicate_product_in_same_order()
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        lines = super().create(vals_list)
+        lines._check_duplicate_product_in_same_order()
+        return lines
+
+    def write(self, vals):
+        res = super().write(vals)
+        self._check_duplicate_product_in_same_order()
+        return res
+
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
@@ -232,6 +267,33 @@ class SaleOrder(models.Model):
         compute="_compute_invoice_number",
         help="Concatenated names of all posted invoices related to this quotation.",
     )
+
+    def _check_duplicate_products_in_order_line(self):
+        for order in self:
+            product_lines = order.order_line.filtered(lambda line: line.product_id and not line.display_type)
+            products = product_lines.mapped("product_id")
+            product_ids = products.ids
+
+            if len(product_ids) == len(set(product_ids)):
+                continue
+
+            seen_product_ids = set()
+            duplicate_products = []
+            for product in products:
+                if product.id in seen_product_ids:
+                    duplicate_products.append(product.display_name)
+                    continue
+                seen_product_ids.add(product.id)
+
+            raise ValidationError(
+                "The same product cannot be added more than once in a quotation.\n"
+                "Duplicate product(s): %s"
+                % ", ".join(sorted(set(duplicate_products)))
+            )
+
+    @api.constrains("order_line")
+    def _constrains_duplicate_products_in_order_line(self):
+        self._check_duplicate_products_in_order_line()
 
     @api.depends("invoice_ids.state", "invoice_ids.name")
     def _compute_invoice_number(self):
@@ -615,6 +677,7 @@ class SaleOrder(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         orders = super().create(vals_list)
+        orders._check_duplicate_products_in_order_line()
         for order in orders:
             order.env['activity.timeline'].create({
                 'quotation_id': order.id,
@@ -624,7 +687,13 @@ class SaleOrder(models.Model):
             })
         return orders
 
+    def write(self, vals):
+        res = super().write(vals)
+        self._check_duplicate_products_in_order_line()
+        return res
+
     def action_confirm(self):
+        self._check_duplicate_products_in_order_line()
         res = super().action_confirm()
         for order in self:
             order.env['activity.timeline'].create({

@@ -32,6 +32,7 @@
         "data/invoice_import_sequence.xml",
         "data/customer_type_data.xml",
         "data/purchase_status_cron.xml",
+        "data/legacy_rounding_cleanup.xml",
 
         # Reports
         "reports/report_common_templates.xml",
@@ -59,6 +60,7 @@
         "views/sale_order_packing_views.xml",
         "views/shipping_management_views.xml",
         "views/activity_timeline_views.xml",
+        "views/payment_method_view.xml",
 
         # Wizard & reports
         "wizard/bms_report_wizard_view.xml",

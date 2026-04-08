@@ -246,15 +246,19 @@
                             <tr>
                                 <td class="dw-label">Contact Details</td>
                                 <td><span t-field="doc.partner_id.phone"/></td>
-                                <td class="dw-label">Total Products Weight</td>
-                                <td class="dw-center"><span t-field="doc.total_products_weight"/> KG</td>
+                                <td class="dw-label">Customer Type</td>
+                                <td class="dw-center">
+                                    <span t-esc="doc.partner_id.customer_type_master_id.name or dict(doc.partner_id._fields['customer_type'].selection).get(doc.partner_id.customer_type, '')"/>
+                                </td>
                             </tr>
                             <tr>
                                 <td class="dw-label">E-mail Address</td>
-                                <td><span t-field="doc.partner_id.email"/></td>
+                                <td>
+                                    <span t-field="doc.partner_id.email"/>
+                                    <t t-set="is_same_state" t-value="doc.partner_id.country_id and doc.company_id.country_id and doc.partner_id.country_id == doc.company_id.country_id and doc.partner_id.state_id and doc.company_id.state_id and doc.partner_id.state_id == doc.company_id.state_id"/>
+                                </td>
                                 <td class="dw-label">GST Type</td>
                                 <td class="dw-center">
-                                    <t t-set="is_same_state" t-value="doc.partner_id.country_id and doc.company_id.country_id and doc.partner_id.country_id == doc.company_id.country_id and doc.partner_id.state_id and doc.company_id.state_id and doc.partner_id.state_id == doc.company_id.state_id"/>
                                     <t t-if="is_same_state">GST</t>
                                     <t t-else="">IGST</t>
                                 </td>
