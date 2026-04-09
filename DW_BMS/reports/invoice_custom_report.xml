@@ -535,6 +535,19 @@
                                 <t t-else="">-</t>
                             </td>
                         </tr>
+                        <tr>
+                            <td class="inv-label">Recipient Bank Account</td>
+                            <td>
+                                <t t-if="doc.partner_bank_id">
+                                    <span t-field="doc.partner_bank_id"/>
+                                </t>
+                                <t t-else="">-</t>
+                            </td>
+                            <td class="inv-label">Payment Reference</td>
+                            <td class="inv-center">
+                                <span t-esc="doc.payment_reference or '-'"/>
+                            </td>
+                        </tr>
                     </table>
 
                     <!-- ========== 5. PRODUCT LINES ========== -->
@@ -600,6 +613,7 @@
                     </table>
 
                     <!-- ========== 6. TOTALS ========== -->
+                    <t t-set="rounding_amount" t-value="sum(doc.line_ids.filtered(lambda l: l.display_type == 'rounding').mapped('amount_currency'))"/>
                     <table class="inv-totals">
                         <tr>
                             <td><strong>Untaxed Amount</strong></td>
@@ -617,6 +631,13 @@
                             </td>
                             <td class="inv-right">
                                 <span t-esc="doc.amount_tax"
+                                      t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Rounding</td>
+                            <td class="inv-right">
+                                <span t-esc="rounding_amount"
                                       t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                             </td>
                         </tr>
