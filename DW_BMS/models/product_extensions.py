@@ -54,6 +54,8 @@ class ProductTemplate(models.Model):
 
     @api.constrains("name")
     def _check_duplicate_product_name(self):
+        if self.env.context.get("skip_duplicate_product_name_check"):
+            return
         for product_tmpl in self:
             product_name = (product_tmpl.name or "").strip()
             if not product_name:

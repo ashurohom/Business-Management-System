@@ -112,6 +112,17 @@
         </field>
     </record>
 
+    <record id="view_order_form_roundup_total" model="ir.ui.view">
+        <field name="name">sale.order.form.roundup.total</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='sale_total']/field[@name='tax_totals']" position="after">
+                <field name="roundup_total" widget="monetary" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
     <record id="sale_order_form_hsn_position_fix" model="ir.ui.view">
         <field name="name">sale.order.form.hsn.position.fix</field>
         <field name="model">sale.order</field>

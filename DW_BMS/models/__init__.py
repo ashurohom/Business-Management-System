@@ -4,6 +4,7 @@ from . import account_move
 from . import account_partner_ledger
 from . import mrp_bom
 from . import sale_order
+from . import sale_order_discount
 from . import base_import_fix
 from . import product_alias
 from . import bms_report_wizard

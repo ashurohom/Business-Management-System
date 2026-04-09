@@ -315,7 +315,7 @@
                             <tr>
                                 <td class="dw-total-strong">Total (Incl. Taxes)</td>
                                 <td class="dw-right dw-total-strong">
-                                    <span t-esc="doc.amount_total" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    <span t-esc="doc.roundup_total" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                                 </td>
                             </tr>
                         </table>

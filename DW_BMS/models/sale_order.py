@@ -1,3 +1,5 @@
+import math
+
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.float_utils import float_compare, float_is_zero
@@ -177,6 +179,12 @@ class SaleOrderLine(models.Model):
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
+    roundup_total = fields.Monetary(
+        string="Roundup Total",
+        compute="_compute_roundup_total",
+        currency_field="currency_id",
+    )
+
     # ─────────────────────────────────────────────────────────────────
     # Delivery Type choices (same as account.move)
     # ─────────────────────────────────────────────────────────────────
@@ -241,6 +249,21 @@ class SaleOrder(models.Model):
         compute="_compute_total_products_weight",
         store=True,
     )
+
+    @api.depends("amount_total")
+    def _compute_roundup_total(self):
+        for order in self:
+            amount_total = order.amount_total or 0.0
+            if amount_total >= 0:
+                base_amount = math.floor(amount_total)
+                fractional_amount = amount_total - base_amount
+                order.roundup_total = base_amount + (1 if fractional_amount >= 0.5 else 0)
+            else:
+                absolute_total = abs(amount_total)
+                base_amount = math.floor(absolute_total)
+                fractional_amount = absolute_total - base_amount
+                rounded_total = base_amount + (1 if fractional_amount >= 0.5 else 0)
+                order.roundup_total = -rounded_total
 
     # ── Activity Timeline ────────────────────────────────────────────
     activity_timeline_ids = fields.One2many(

@@ -12,6 +12,43 @@ from odoo.tools.safe_eval import safe_eval
 class AccountMove(models.Model):
     _inherit = "account.move"
 
+    def _get_default_cash_rounding(self):
+        self.ensure_one()
+        rounding_model = self.env["account.cash.rounding"].sudo()
+        rounding = rounding_model.search(
+            [
+                ("name", "=", "Round to nearest 1"),
+                ("company_id", "in", [self.company_id.id, False]),
+            ],
+            order="company_id desc, id desc",
+            limit=1,
+        )
+        if rounding:
+            return rounding
+
+        company = self.company_id.sudo()
+        profit_account = company.default_cash_difference_income_account_id
+        loss_account = company.default_cash_difference_expense_account_id
+        if not (profit_account and loss_account):
+            return rounding_model.browse()
+
+        return rounding_model.create({
+            "name": "Round to nearest 1",
+            "rounding": 1.0,
+            "strategy": "add_invoice_line",
+            "rounding_method": "HALF-UP",
+            "profit_account_id": profit_account.id,
+            "loss_account_id": loss_account.id,
+        })
+
+    def _apply_default_cash_rounding(self):
+        for move in self.filtered(
+            lambda m: m.move_type in ("out_invoice", "out_refund") and not m.invoice_cash_rounding_id
+        ):
+            rounding = move._get_default_cash_rounding()
+            if rounding:
+                move.invoice_cash_rounding_id = rounding
+
     _DELIVERY_TYPES = [
         ("direct_delivery", "Direct Delivery"),
         ("ship_to_different", "Ship To Different"),
@@ -972,6 +1009,10 @@ class AccountMove(models.Model):
         if fiscal_position:
             self.fiscal_position_id = fiscal_position
 
+    @api.onchange("move_type", "company_id")
+    def _onchange_apply_default_cash_rounding(self):
+        self._apply_default_cash_rounding()
+
     @api.onchange("bill_to_same_as_customer")
     def _onchange_bill_to_same_as_customer(self):
         if self.bill_to_same_as_customer:
@@ -1051,6 +1092,7 @@ class AccountMove(models.Model):
         moves = super().create(vals_list)
         for move in moves.filtered(lambda m: m.move_type in ("out_invoice", "out_refund")):
             super(AccountMove, move).write(move._get_delivery_type_default_vals())
+        moves._apply_default_cash_rounding()
         moves._sync_invoice_address_partners()
         return moves
 
