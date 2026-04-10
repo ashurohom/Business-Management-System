@@ -1,0 +1,19 @@
+/* Force chatter to stay below the form for all screen sizes. */
+
+.o_form_view .o_FormRenderer_chatterContainer {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.o_form_view.o_xxl_form_view .o_form_renderer {
+    display: block !important;
+}
+
+.o_form_view.o_xxl_form_view .o_FormRenderer_chatterContainer,
+.o_form_view .o_FormRenderer_chatterContainer.o-aside {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    margin-left: 0 !important;
+}

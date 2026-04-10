@@ -55,11 +55,13 @@ class ProductTemplate(models.Model):
     )
 
     def _check_sales_price_edit_access(self, vals, for_create=False):
+        if self.env.context.get("skip_sales_price_access_check"):
+            return
+        if for_create:
+            return
         if "list_price" not in vals:
             return
         if self.env.su or self.env.user.has_group("DW_BMS.group_bms_admin"):
-            return
-        if for_create and self.env.user.has_group("DW_BMS.group_bms_sales"):
             return
         raise ValidationError("Only BMS Admin can change Product Sales Price.")
 
@@ -67,7 +69,7 @@ class ProductTemplate(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             self._check_sales_price_edit_access(vals, for_create=True)
-        return super().create(vals_list)
+        return super(ProductTemplate, self.with_context(skip_sales_price_access_check=True)).create(vals_list)
 
     @api.model
     def load(self, fields, data):
@@ -214,11 +216,13 @@ class ProductProduct(models.Model):
     _inherit = "product.product"
 
     def _check_sales_price_edit_access(self, vals, for_create=False):
+        if self.env.context.get("skip_sales_price_access_check"):
+            return
+        if for_create:
+            return
         if "list_price" not in vals:
             return
         if self.env.su or self.env.user.has_group("DW_BMS.group_bms_admin"):
-            return
-        if for_create and self.env.user.has_group("DW_BMS.group_bms_sales"):
             return
         raise ValidationError("Only BMS Admin can change Product Sales Price.")
 
@@ -226,7 +230,7 @@ class ProductProduct(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             self._check_sales_price_edit_access(vals, for_create=True)
-        return super().create(vals_list)
+        return super(ProductProduct, self.with_context(skip_sales_price_access_check=True)).create(vals_list)
 
     @api.model
     def load(self, fields, data):

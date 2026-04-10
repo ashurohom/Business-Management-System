@@ -279,6 +279,8 @@ class DwInvoiceImportWizard(models.TransientModel):
         "flipkart wb": "flipkart_wb",
         "vastu craft (delhi)": "vastu_delhi",
         "vastu craft delhi": "vastu_delhi",
+        "e-com kv delhi": "ecom_kv_delhi",
+        "ecom kv delhi": "ecom_kv_delhi",
         "daily sales": "daily_sales",
         "flipkart mh": "flipkart_mh",
         "kv enterprises (haryana)": "kv_hr",

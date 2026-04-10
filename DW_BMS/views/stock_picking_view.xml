@@ -114,6 +114,14 @@
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.vpicktree"/>
         <field name="arch" type="xml">
+            <xpath expr="//tree" position="attributes">
+                <attribute name="default_order">create_date desc</attribute>
+            </xpath>
+
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="create_date" string="Created On" widget="date"/>
+            </xpath>
+
             <xpath expr="//tree" position="inside">
                 <field name="sale_id" column_invisible="True"/>
                 <button name="action_open_packing_order" 

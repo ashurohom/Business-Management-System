@@ -8,6 +8,7 @@ class AccountMove(models.Model):
     _INVOICE_TYPE_SEQUENCE_MAP = {
         'flipkart_wb': 'invoice.flipkart.wb',
         'vastu_delhi': 'invoice.vc.delhi',
+        'ecom_kv_delhi': 'invoice.ecom.kv.delhi',
         'daily_sales': 'invoice.daily.sales',
         'flipkart_mh': 'invoice.flipkart.mh',
         'kv_hr': 'invoice.kv.hr',
@@ -24,6 +25,7 @@ class AccountMove(models.Model):
     invoice_type = fields.Selection([
         ('flipkart_wb', 'Flipkart WB'),
         ('vastu_delhi', 'Vastu Craft (Delhi)'),
+        ('ecom_kv_delhi', 'E-com KV Delhi'),
         ('daily_sales', 'Daily Sales'),
         ('flipkart_mh', 'Flipkart MH'),
         ('kv_hr', 'KV Enterprises (Haryana)'),

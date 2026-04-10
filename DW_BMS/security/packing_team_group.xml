@@ -27,8 +27,7 @@
                 ref('base.group_system'),
                 ref('DW_BMS.group_bms_admin'),
                 ref('DW_BMS.group_bms_sales'),
-                ref('DW_BMS.group_sales_team'),
-                ref('DW_BMS.group_packing_team')
+                ref('DW_BMS.group_sales_team')
             ])
         ]"/>
     </record>

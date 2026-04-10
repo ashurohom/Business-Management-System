@@ -67,6 +67,11 @@
         "views/account_partner_ledger_view.xml",
         "reports/bms_report_templates.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "DW_BMS/static/src/css/chatter_position.css",
+        ],
+    },
     "installable": True,
     "application": True,
 }
