@@ -406,6 +406,7 @@
                                     <span t-field="doc.partner_id.name"/>
                                 </div>
                                 <div class="inv-addr-text">
+                                    <t t-set="bill_to_contact_number" t-value="doc.billing_mobile or (doc.billing_partner_id and (doc.billing_partner_id.phone or doc.billing_partner_id.mobile)) or customer_contact_number"/>
                                     <t t-if="doc.bill_to_same_as_customer">
                                         <!-- Use partner address when same as customer -->
                                         <span t-esc="doc.partner_id.street or ''"/>
@@ -437,6 +438,10 @@
                                             - <span t-esc="doc.bill_to_zip"/>
                                         </t>
                                     </t>
+                                    <t t-if="bill_to_contact_number">
+                                        <br/><strong>Ph:</strong>
+                                        <span t-esc="bill_to_contact_number"/>
+                                    </t>
                                 </div>
                             </td>
 
@@ -447,6 +452,7 @@
                                     <span t-field="doc.partner_id.name"/>
                                 </div>
                                 <div class="inv-addr-text">
+                                    <t t-set="ship_to_contact_number" t-value="doc.shipping_mobile or (doc.shipping_partner_id and (doc.shipping_partner_id.phone or doc.shipping_partner_id.mobile)) or customer_contact_number"/>
                                     <t t-if="doc.ship_to_same_as_customer">
                                         <!-- Use partner address when same as customer -->
                                         <span t-esc="doc.partner_id.street or ''"/>
@@ -477,6 +483,10 @@
                                         <t t-if="doc.ship_to_zip">
                                             - <span t-esc="doc.ship_to_zip"/>
                                         </t>
+                                    </t>
+                                    <t t-if="ship_to_contact_number">
+                                        <br/><strong>Ph:</strong>
+                                        <span t-esc="ship_to_contact_number"/>
                                     </t>
                                 </div>
                             </td>
