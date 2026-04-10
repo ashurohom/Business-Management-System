@@ -535,7 +535,7 @@
                                 <t t-else="">-</t>
                             </td>
                         </tr>
-                        <tr>
+                        <tr t-if="doc.payment_state == 'paid'">
                             <td class="inv-label">Recipient Bank Account</td>
                             <td>
                                 <t t-if="doc.partner_bank_id">
