@@ -372,13 +372,14 @@
                                     <span t-field="doc.partner_id.name"/>
                                 </div>
                                 <div class="inv-addr-text">
+                                    <t t-set="customer_contact_number" t-value="doc.partner_id.phone or doc.partner_id.mobile"/>
                                     <t t-if="doc.partner_id.contact_address">
                                         <span t-esc="doc.partner_id.contact_address"/>
                                         <br/>
                                     </t>
-                                    <t t-if="doc.partner_id.phone">
+                                    <t t-if="customer_contact_number">
                                         <strong>Ph:</strong>
-                                        <span t-esc="doc.partner_id.phone"/>
+                                        <span t-esc="customer_contact_number"/>
                                         <br/>
                                     </t>
                                     <t t-if="doc.partner_id.email">
