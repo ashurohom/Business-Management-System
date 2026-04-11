@@ -108,6 +108,38 @@
                             font-weight: 700;
                             white-space: nowrap;
                         }
+                        .dw-addr-section {
+                            width: 100%;
+                            border-collapse: collapse;
+                            border-spacing: 0;
+                            table-layout: fixed;
+                        }
+                        .dw-addr-section td {
+                            border: 1px solid #222;
+                            padding: 8px 10px;
+                            vertical-align: top;
+                        }
+                        .dw-addr-section tr:first-child td {
+                            border-top: 0;
+                        }
+                        .dw-addr-heading {
+                            font-size: 10px;
+                            font-weight: 700;
+                            text-transform: uppercase;
+                            letter-spacing: 1px;
+                            border-bottom: 1px solid #222;
+                            padding-bottom: 4px;
+                            margin-bottom: 5px;
+                        }
+                        .dw-addr-name {
+                            font-weight: 700;
+                            font-size: 13px;
+                            margin-bottom: 3px;
+                        }
+                        .dw-addr-text {
+                            font-size: 11.5px;
+                            line-height: 1.6;
+                        }
                         .dw-lines {
                             margin-top: 0;
                         }
@@ -118,6 +150,15 @@
                             font-weight: 700;
                             text-align: center;
                             background: #f1f1f1;
+                            font-size: 10px;
+                            line-height: 1.2;
+                            padding: 5px 4px;
+                            vertical-align: middle;
+                        }
+                        .dw-lines td {
+                            font-size: 10px;
+                            line-height: 1.25;
+                            padding: 5px 4px;
                         }
                         .dw-right {
                             text-align: right;
@@ -224,43 +265,146 @@
                         </table>
                         <h2 class="dw-quote-title">Quotation</h2>
 
+                        <t t-set="customer_contact_number" t-value="doc.partner_id.phone or doc.partner_id.mobile"/>
+                        <t t-set="is_same_state" t-value="doc.partner_id.country_id and doc.company_id.country_id and doc.partner_id.country_id == doc.company_id.country_id and doc.partner_id.state_id and doc.company_id.state_id and doc.partner_id.state_id == doc.company_id.state_id"/>
+
+                        <table class="dw-addr-section">
+                            <tr>
+                                <td style="width: 33%;">
+                                    <div class="dw-addr-heading">Customer Details</div>
+                                    <div class="dw-addr-name">
+                                        <span t-field="doc.partner_id.name"/>
+                                    </div>
+                                    <div class="dw-addr-text">
+                                        <t t-if="doc.partner_id.contact_address">
+                                            <span t-esc="doc.partner_id.contact_address"/>
+                                            <br/>
+                                        </t>
+                                        <t t-if="customer_contact_number">
+                                            <strong>Ph:</strong>
+                                            <span t-esc="customer_contact_number"/>
+                                            <br/>
+                                        </t>
+                                        <t t-if="doc.partner_id.email">
+                                            <strong>Email:</strong>
+                                            <span t-esc="doc.partner_id.email"/>
+                                            <br/>
+                                        </t>
+                                        <t t-if="doc.partner_id.vat">
+                                            <strong>GSTIN:</strong>
+                                            <span t-esc="doc.partner_id.vat"/>
+                                            <br/>
+                                        </t>
+                                        <t t-if="doc.partner_id.customer_type_master_id or doc.partner_id.customer_type">
+                                            <strong>Customer Type:</strong>
+                                            <span t-esc="doc.partner_id.customer_type_master_id.name or dict(doc.partner_id._fields['customer_type'].selection).get(doc.partner_id.customer_type, '')"/>
+                                        </t>
+                                    </div>
+                                </td>
+                                <td style="width: 33%;">
+                                    <div class="dw-addr-heading">Bill To</div>
+                                    <div class="dw-addr-name">
+                                        <span t-esc="doc.billing_customer_name or (doc.billing_partner_id and doc.billing_partner_id.name) or doc.partner_id.name"/>
+                                    </div>
+                                    <div class="dw-addr-text">
+                                        <t t-set="bill_to_contact_number" t-value="doc.billing_mobile or (doc.billing_partner_id and (doc.billing_partner_id.phone or doc.billing_partner_id.mobile)) or customer_contact_number"/>
+                                        <t t-if="doc.bill_to_same_as_customer">
+                                            <span t-esc="doc.partner_id.street or ''"/>
+                                            <t t-if="doc.partner_id.street2">
+                                                , <span t-esc="doc.partner_id.street2"/>
+                                            </t>
+                                            <t t-if="doc.partner_id.city">
+                                                <br/><span t-esc="doc.partner_id.city"/>
+                                            </t>
+                                            <t t-if="doc.partner_id.state_id">
+                                                , <span t-esc="doc.partner_id.state_id.name"/>
+                                            </t>
+                                            <t t-if="doc.partner_id.zip">
+                                                - <span t-esc="doc.partner_id.zip"/>
+                                            </t>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-if="doc.bill_to_address">
+                                                <span t-esc="doc.bill_to_address"/>
+                                            </t>
+                                            <t t-if="doc.bill_to_city">
+                                                <br/><span t-esc="doc.bill_to_city"/>
+                                            </t>
+                                            <t t-if="doc.bill_to_state_id">
+                                                , <span t-esc="doc.bill_to_state_id.name"/>
+                                            </t>
+                                            <t t-if="doc.bill_to_zip">
+                                                - <span t-esc="doc.bill_to_zip"/>
+                                            </t>
+                                        </t>
+                                        <t t-if="bill_to_contact_number">
+                                            <br/><strong>Ph:</strong>
+                                            <span t-esc="bill_to_contact_number"/>
+                                        </t>
+                                    </div>
+                                </td>
+                                <td style="width: 34%;">
+                                    <div class="dw-addr-heading">Ship To</div>
+                                    <div class="dw-addr-name">
+                                        <span t-esc="doc.shipping_customer_name or (doc.shipping_partner_id and doc.shipping_partner_id.name) or doc.partner_id.name"/>
+                                    </div>
+                                    <div class="dw-addr-text">
+                                        <t t-set="ship_to_contact_number" t-value="doc.shipping_mobile or (doc.shipping_partner_id and (doc.shipping_partner_id.phone or doc.shipping_partner_id.mobile)) or customer_contact_number"/>
+                                        <t t-if="doc.ship_to_same_as_customer">
+                                            <span t-esc="doc.partner_id.street or ''"/>
+                                            <t t-if="doc.partner_id.street2">
+                                                , <span t-esc="doc.partner_id.street2"/>
+                                            </t>
+                                            <t t-if="doc.partner_id.city">
+                                                <br/><span t-esc="doc.partner_id.city"/>
+                                            </t>
+                                            <t t-if="doc.partner_id.state_id">
+                                                , <span t-esc="doc.partner_id.state_id.name"/>
+                                            </t>
+                                            <t t-if="doc.partner_id.zip">
+                                                - <span t-esc="doc.partner_id.zip"/>
+                                            </t>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-if="doc.ship_to_address">
+                                                <span t-esc="doc.ship_to_address"/>
+                                            </t>
+                                            <t t-if="doc.ship_to_city">
+                                                <br/><span t-esc="doc.ship_to_city"/>
+                                            </t>
+                                            <t t-if="doc.ship_to_state_id">
+                                                , <span t-esc="doc.ship_to_state_id.name"/>
+                                            </t>
+                                            <t t-if="doc.ship_to_zip">
+                                                - <span t-esc="doc.ship_to_zip"/>
+                                            </t>
+                                        </t>
+                                        <t t-if="ship_to_contact_number">
+                                            <br/><strong>Ph:</strong>
+                                            <span t-esc="ship_to_contact_number"/>
+                                        </t>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <t t-set="packing_order" t-value="env['packing.order'].search([('sale_order_id', '=', doc.id)], limit=1)"/>
                         <table class="dw-table dw-meta">
                             <tr>
-                                <td style="width: 20%;" class="dw-label">Customer Name</td>
-                                <td style="width: 40%;"><span t-field="doc.partner_id.name"/></td>
-                                <td style="width: 20%;" class="dw-label">Date</td>
-                                <td style="width: 20%;" class="dw-center"><span t-field="doc.date_order"/></td>
-                            </tr>
-                            <tr>
-                                <td class="dw-label">Address</td>
-                                <td><span t-esc="doc.partner_id.contact_address"/></td>
                                 <td class="dw-label">Quotation Ref No</td>
                                 <td class="dw-center"><span t-field="doc.name"/></td>
+                                <td style="width: 25%;" class="dw-label">Date</td>
+                                <td style="width: 25%;" class="dw-center"><span t-field="doc.date_order"/></td>
+                                
                             </tr>
                             <tr>
-                                <td class="dw-label">Contact Person</td>
-                                <td><span t-field="doc.partner_id.name"/></td>
-                                <td class="dw-label">Payment Terms</td>
-                                <td class="dw-center"><span t-field="doc.payment_term_id"/></td>
-                            </tr>
-                            <tr>
-                                <td class="dw-label">Contact Details</td>
-                                <td><span t-field="doc.partner_id.phone"/></td>
                                 <td class="dw-label">Customer Type</td>
                                 <td class="dw-center">
                                     <span t-esc="doc.partner_id.customer_type_master_id.name or dict(doc.partner_id._fields['customer_type'].selection).get(doc.partner_id.customer_type, '')"/>
                                 </td>
-                            </tr>
-                            <tr>
-                                <td class="dw-label">E-mail Address</td>
-                                <td>
-                                    <span t-field="doc.partner_id.email"/>
-                                    <t t-set="is_same_state" t-value="doc.partner_id.country_id and doc.company_id.country_id and doc.partner_id.country_id == doc.company_id.country_id and doc.partner_id.state_id and doc.company_id.state_id and doc.partner_id.state_id == doc.company_id.state_id"/>
-                                </td>
-                                <td class="dw-label">GST Type</td>
+                                <td class="dw-label">Dispatch Mode</td>
                                 <td class="dw-center">
-                                    <t t-if="is_same_state">GST</t>
-                                    <t t-else="">IGST</t>
+                                    <span t-esc="packing_order.dispatch_mode_id.name or '-'"/>
                                 </td>
                             </tr>
                         </table>
@@ -268,27 +412,37 @@
                         <table class="dw-table dw-lines">
                             <thead>
                                 <tr>
-                                    <th style="width: 7%;">S.No</th>
-                                    <th style="width: 25%;">Product</th>
-                                    <th style="width: 12%;">HSN No.</th>
-                                    <th style="width: 12%;">Quantity</th>
-                                    <th style="width: 10%;">UOM</th>
-                                    <th style="width: 18%;">Unit Price</th>
-                                    <th style="width: 16%;">Total Price</th>
+                                    <th style="width: 5%;">Sr.no</th>
+                                    <th style="width: 20%;">Product</th>
+                                    <th style="width: 10%;">HSN Number</th>
+                                    <th style="width: 9%;">Quantity</th>
+                                    <th style="width: 10%;">GST</th>
+                                    <th style="width: 11%;">Unit Price</th>
+                                    <th style="width: 13%;">Unit Price Incl. of Tax</th>
+                                    <th style="width: 8%;">UOM</th>
+                                    <th style="width: 14%;">Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr t-foreach="doc.order_line.filtered(lambda l: not l.display_type)" t-as="line">
                                     <td class="dw-center"><span t-esc="line_index + 1"/></td>
                                     <td><span t-field="line.product_id"/></td>
-                                    <td class="dw-center"><span t-field="line.hsn_code"/></td>
+                                    <td class="dw-center">
+                                        <span t-esc="line.hsn_code or (line.product_id and line.product_id.l10n_in_hsn_code) or ''"/>
+                                    </td>
                                     <td class="dw-right"><span t-field="line.product_uom_qty"/></td>
-                                    <td class="dw-center"><span t-field="line.product_uom"/></td>
+                                    <td class="dw-center">
+                                        <span t-esc="', '.join(line.tax_id.mapped('name'))"/>
+                                    </td>
                                     <td class="dw-right">
                                         <span t-esc="line.price_unit" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                                     </td>
                                     <td class="dw-right">
-                                        <span t-esc="line.price_subtotal" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        <span t-esc="line.price_incl_tax or line._get_price_incl_from_unit(line.price_unit or 0.0)" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    </td>
+                                    <td class="dw-center"><span t-field="line.product_uom"/></td>
+                                    <td class="dw-right">
+                                        <span t-esc="line.price_total" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                                     </td>
                                 </tr>
                             </tbody>
