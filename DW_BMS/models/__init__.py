@@ -18,6 +18,7 @@ from . import invoice_import_column_map
 from . import invoice_import_wizard
 from . import invoice_numbers
 from . import packing_order
+from . import packing_order_print
 from . import sale_order_packing
 from . import shipping_management
 from . import activity_timeline

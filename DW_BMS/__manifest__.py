@@ -32,7 +32,7 @@
         "data/invoice_import_sequence.xml",
         "data/customer_type_data.xml",
         "data/purchase_status_cron.xml",
-        "data/legacy_rounding_cleanup.xml",
+        
 
         # Reports
         "reports/report_common_templates.xml",

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_saleorder_document_indian_tax_visibility" inherit_id="sale.report_saleorder_document">
+        <xpath expr="//th[@name='th_taxes']" position="attributes">
+            <attribute name="t-if">doc.partner_id.country_id and doc.partner_id.country_id.code == 'IN'</attribute>
+        </xpath>
+
+        <xpath expr="//td[@name='td_taxes']" position="attributes">
+            <attribute name="t-if">doc.partner_id.country_id and doc.partner_id.country_id.code == 'IN'</attribute>
+        </xpath>
+
+        <xpath expr="//t[@t-call='sale.document_tax_totals']" position="attributes">
+            <attribute name="t-if">doc.partner_id.country_id and doc.partner_id.country_id.code == 'IN'</attribute>
+        </xpath>
+    </template>
+</odoo>

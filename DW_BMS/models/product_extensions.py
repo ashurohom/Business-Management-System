@@ -52,6 +52,31 @@ class ProductTemplate(models.Model):
         help="Stock Keeping Unit — a unique identifier for this product (alphanumeric).",
     )
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if "name" in vals and not self.env.context.get("skip_duplicate_product_name_check"):
+                name = (vals.get("name") or "").strip()
+                if name:
+                    duplicate = self.with_context(active_test=False).search([("name", "=ilike", name)], limit=1)
+                    if duplicate:
+                        raise ValidationError(_("Product with this name already exists: %s", name))
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if "name" in vals and not self.env.context.get("skip_duplicate_product_name_check"):
+            name = (vals.get("name") or "").strip()
+            if name:
+                # We have to check if any other record has this name
+                for product_tmpl in self:
+                    duplicate = self.with_context(active_test=False).search([
+                        ("id", "!=", product_tmpl.id),
+                        ("name", "=ilike", name),
+                    ], limit=1)
+                    if duplicate:
+                        raise ValidationError(_("Product with this name already exists: %s", name))
+        return super().write(vals)
+
     @api.constrains("name")
     def _check_duplicate_product_name(self):
         if self.env.context.get("skip_duplicate_product_name_check"):
@@ -66,7 +91,7 @@ class ProductTemplate(models.Model):
                 ("name", "=ilike", product_name),
             ])
             if duplicate_exists:
-                raise ValidationError("Product with this name already exists.")
+                raise ValidationError(_("Product with this name already exists: %s", product_name))
 
     @api.depends("opening_stock_ref", "opening_stock_added_qty")
     def _compute_opening_stock_pending_qty(self):
@@ -301,3 +326,46 @@ class ProductTemplate(models.Model):
                 "sticky": True,
             },
         }
+
+class ProductProduct(models.Model):
+    _inherit = "product.product"
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if "name" in vals and not self.env.context.get("skip_duplicate_product_name_check"):
+                name = (vals.get("name") or "").strip()
+                if name:
+                    duplicate = self.env['product.template'].with_context(active_test=False).search([("name", "=ilike", name)], limit=1)
+                    if duplicate:
+                        raise ValidationError(_("Product with this name already exists: %s", name))
+        return super().create(vals_list)
+
+    def write(self, vals):
+        if "name" in vals and not self.env.context.get("skip_duplicate_product_name_check"):
+            name = (vals.get("name") or "").strip()
+            if name:
+                for product in self:
+                    duplicate = self.env['product.template'].with_context(active_test=False).search([
+                        ("id", "!=", product.product_tmpl_id.id),
+                        ("name", "=ilike", name)
+                    ], limit=1)
+                    if duplicate:
+                        raise ValidationError(_("Product with this name already exists: %s", name))
+        return super().write(vals)
+
+    @api.constrains("name")
+    def _check_duplicate_product_name(self):
+        if self.env.context.get("skip_duplicate_product_name_check"):
+            return
+        for product in self:
+            product_name = (product.name or "").strip()
+            if not product_name:
+                continue
+
+            duplicate_exists = self.env['product.template'].with_context(active_test=False).search_count([
+                ("id", "!=", product.product_tmpl_id.id),
+                ("name", "=ilike", product_name),
+            ])
+            if duplicate_exists:
+                raise ValidationError(_("Product with this name already exists: %s", product_name))

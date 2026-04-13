@@ -266,6 +266,7 @@
                         <h2 class="dw-quote-title">Quotation</h2>
 
                         <t t-set="customer_contact_number" t-value="doc.partner_id.phone or doc.partner_id.mobile"/>
+                        <t t-set="is_indian_customer" t-value="doc.partner_id.country_id and doc.partner_id.country_id.code == 'IN'"/>
                         <t t-set="is_same_state" t-value="doc.partner_id.country_id and doc.company_id.country_id and doc.partner_id.country_id == doc.company_id.country_id and doc.partner_id.state_id and doc.company_id.state_id and doc.partner_id.state_id == doc.company_id.state_id"/>
 
                         <table class="dw-addr-section">
@@ -416,9 +417,9 @@
                                     <th style="width: 20%;">Product</th>
                                     <th style="width: 10%;">HSN Number</th>
                                     <th style="width: 9%;">Quantity</th>
-                                    <th style="width: 10%;">GST</th>
+                                    <th t-if="is_indian_customer" style="width: 10%;">GST</th>
                                     <th style="width: 11%;">Unit Price</th>
-                                    <th style="width: 13%;">Unit Price Incl. of Tax</th>
+                                    <th t-if="is_indian_customer" style="width: 13%;">Unit Price Incl. of Tax</th>
                                     <th style="width: 8%;">UOM</th>
                                     <th style="width: 14%;">Amount</th>
                                 </tr>
@@ -431,13 +432,13 @@
                                         <span t-esc="line.hsn_code or (line.product_id and line.product_id.l10n_in_hsn_code) or ''"/>
                                     </td>
                                     <td class="dw-right"><span t-field="line.product_uom_qty"/></td>
-                                    <td class="dw-center">
+                                    <td t-if="is_indian_customer" class="dw-center">
                                         <span t-esc="', '.join(line.tax_id.mapped('name'))"/>
                                     </td>
                                     <td class="dw-right">
                                         <span t-esc="line.price_unit" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                                     </td>
-                                    <td class="dw-right">
+                                    <td t-if="is_indian_customer" class="dw-right">
                                         <span t-esc="line.price_incl_tax or line._get_price_incl_from_unit(line.price_unit or 0.0)" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                                     </td>
                                     <td class="dw-center"><span t-field="line.product_uom"/></td>
@@ -455,7 +456,7 @@
                                     <span t-esc="doc.amount_untaxed" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                                 </td>
                             </tr>
-                            <tr>
+                            <tr t-if="is_indian_customer">
                                 <td>
                                     <strong>
                                         <t t-if="is_same_state">GST</t>
@@ -467,7 +468,10 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td class="dw-total-strong">Total (Incl. Taxes)</td>
+                                <td class="dw-total-strong">
+                                    <t t-if="is_indian_customer">Total (Incl. Taxes)</t>
+                                    <t t-else="">Total</t>
+                                </td>
                                 <td class="dw-right dw-total-strong">
                                     <span t-esc="doc.roundup_total" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                                 </td>

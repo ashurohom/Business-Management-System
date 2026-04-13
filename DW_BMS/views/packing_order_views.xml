@@ -25,6 +25,16 @@
                             type="object"
                             string="Print Packing Slip"
                             class="btn-primary"/>
+                    <button name="action_print_quotation"
+                            type="object"
+                            string="Print Quotation"
+                            class="btn-secondary"
+                            invisible="not sale_order_id"/>
+                    <button name="action_print_invoice"
+                            type="object"
+                            string="Print Invoice"
+                            class="btn-secondary"
+                            invisible="not invoice_id and not sale_order_id"/>
                 </header>
                 <sheet>
                     <group>
