@@ -48,6 +48,10 @@
                             <field name="delivered_by" options="{'no_create': True}"/>
                             <field name="tracking_id"/>
                             <field name="tracking_link" widget="url"/>
+                            <field name="packing_notes"
+                                   readonly="1"
+                                   invisible="not packing_notes"
+                                   placeholder="No packing notes on delivery"/>
                         </group>
                         <group>
                             <field name="complaint" widget="text" invisible="1"/>

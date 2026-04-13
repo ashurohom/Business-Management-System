@@ -49,6 +49,7 @@
         "views/product_storage_location_views.xml",
         "views/product_extensions_view.xml",
         "views/stock_picking_view.xml",
+        "views/stock_picking_display_status_view.xml",
 
         # Invoice Import feature
         "views/invoice_import_wizard_view.xml",

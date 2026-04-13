@@ -93,7 +93,19 @@
     <record id="rule_packing_team_delivery_only" model="ir.rule">
         <field name="name">Packing Team: Active Deliveries Only</field>
         <field name="model_id" ref="stock.model_stock_picking"/>
-        <field name="domain_force">[('picking_type_code', '=', 'outgoing'), ('state', 'not in', ['done', 'cancel'])]</field>
+        <!--
+            SHOW delivery to packing team if:
+              (a) outgoing AND latest_shipping_status is False/NULL (no shipping created yet), OR
+              (b) outgoing AND latest_shipping_status is not 'delivered' or 'cancel'
+
+            HIDE when shipping status = 'delivered' or 'cancel'.
+
+            WHY the OR clause:
+              In PostgreSQL, NULL NOT IN ('delivered', 'cancel') evaluates to NULL
+              (not TRUE), which would block write access for unshipped deliveries.
+              The explicit False check handles this SQL NULL edge case.
+        -->
+        <field name="domain_force">['&amp;', ('picking_type_code', '=', 'outgoing'), '|', ('latest_shipping_status', '=', False), ('latest_shipping_status', 'not in', ['delivered', 'cancel'])]</field>
         <field name="groups" eval="[(4, ref('DW_BMS.group_packing_team'))]"/>
         <field name="perm_read" eval="True"/>
         <field name="perm_write" eval="True"/>

@@ -141,9 +141,13 @@
         <field name="inherit_id" ref="stock.vpicktree"/>
         <field name="arch" type="xml">
 
-            <!-- Show after Created On -->
+            <!-- Add Responsible (sale order creator) after Created On -->
             <xpath expr="//field[@name='create_date']" position="after">
-                <field name="delivered_by" string="Packed By"/>
+                <field name="sale_responsible_id"
+                       string="Responsible"
+                       optional="show"
+                       readonly="1"
+                       options="{'no_open': True}"/>
             </xpath>
 
         </field>

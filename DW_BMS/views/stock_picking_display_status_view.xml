@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        stock_picking_display_status_view.xml
+        ─────────────────────────────────────
+        Shows a single "Status" badge column in the Delivery list view that:
+          - Displays standard picking state when NOT done
+          - Displays shipping status (from shipping.management) when done
+          - Falls back to "Packed" when done but no shipping record exists
+
+        Key design constraints (Odoo 17):
+          • state MUST remain in the view (column_invisible) — internal modifiers
+            use it (e.g. readonly="state == 'done'"). Removing it crashes loading.
+          • decoration-secondary is NOT in the Odoo 17 RNG schema. Valid values:
+            danger | info | muted | primary | success | warning | bf | it
+          • display_status_key is inserted alongside display_status (no //tree
+            position="inside" which conflicts with <header> ordering).
+    -->
+
+    <record id="view_picking_tree_display_status" model="ir.ui.view">
+        <field name="name">stock.picking.tree.display.status</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+
+            <!-- Step 1: hide state but keep it in DOM (required by modifiers) -->
+            <xpath expr="//field[@name='state']" position="attributes">
+                <attribute name="column_invisible">True</attribute>
+            </xpath>
+
+            <!-- Step 2: inject display_status + key right after state -->
+            <xpath expr="//field[@name='state']" position="after">
+                <!-- key field: invisible, used only for badge decoration conditions -->
+                <field name="display_status_key" column_invisible="True"/>
+
+                <!-- combined Status badge column -->
+                <field name="display_status"
+                       string="Status"
+                       widget="badge"
+                       decoration-muted="display_status_key in ('draft', 'cancel', 'packed')"
+                       decoration-warning="display_status_key in ('waiting', 'confirmed', 'in_transit', 'rto', 'rto_received', 'complaint')"
+                       decoration-info="display_status_key in ('assigned', 'shipped', 'out_for_delivery')"
+                       decoration-success="display_status_key == 'delivered'"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

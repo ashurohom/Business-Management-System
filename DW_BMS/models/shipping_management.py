@@ -43,6 +43,29 @@ class ShippingManagement(models.Model):
     transporter_name = fields.Char(string='Transporter Name', copy=False)
     transporter_mobile = fields.Char(string='Transporter Mobile', copy=False)
 
+    packing_notes = fields.Text(
+        string='Packing Notes',
+        compute='_compute_packing_notes',
+        store=False,
+        help='Packing notes from the related delivery order (read-only).',
+    )
+
+    @api.depends('invoice_id', 'invoice_id.invoice_line_ids')
+    def _compute_packing_notes(self):
+        for rec in self:
+            notes = False
+            if rec.invoice_id:
+                # Navigate: invoice → sale order → outgoing picking
+                sale_orders = rec.invoice_id.invoice_line_ids.sale_line_ids.order_id
+                for order in sale_orders:
+                    picking = order.picking_ids.filtered(
+                        lambda p: p.picking_type_code == 'outgoing'
+                    )[:1]
+                    if picking and picking.packed_notes:
+                        notes = picking.packed_notes
+                        break
+            rec.packing_notes = notes
+
     def name_get(self):
         return [(rec.id, f"Shipment - {rec.invoice_id.name or 'New'}") for rec in self]
 
@@ -53,6 +76,21 @@ class ShippingManagement(models.Model):
     def action_cancel(self):
         for rec in self:
             rec.shipping_status = 'cancel'
+
+    def _update_picking_shipping_status(self):
+        """
+        Push the current shipping_status to the latest_shipping_status field
+        on all outgoing stock.picking records linked to the same sale order.
+        This keeps the stored field in sync for the packing team record rule.
+        """
+        for shipping in self:
+            sale_orders = shipping.invoice_id.invoice_line_ids.sale_line_ids.order_id
+            for order in sale_orders:
+                pickings = order.picking_ids.filtered(
+                    lambda p: p.picking_type_code == 'outgoing'
+                )
+                if pickings:
+                    pickings.write({'latest_shipping_status': shipping.shipping_status})
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -75,6 +113,8 @@ class ShippingManagement(models.Model):
                     'shipping_status': mapped_status if mapped_status in ['shipped', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled', 'complaint', 'rto', 'rto_received'] else False,
                     'status': status_label,
                 })
+        # Sync latest_shipping_status on related pickings
+        shippings._update_picking_shipping_status()
         return shippings
 
     def write(self, vals):
@@ -98,4 +138,7 @@ class ShippingManagement(models.Model):
                         'shipping_status': mapped_status if mapped_status in ['not_started', 'shipped', 'in_transit', 'out_for_delivery', 'delivered', 'cancelled', 'complaint', 'rto', 'rto_received'] else False,
                         'status': status_label,
                     })
+        # Sync latest_shipping_status on related pickings whenever status changes
+        if 'shipping_status' in vals:
+            self._update_picking_shipping_status()
         return res

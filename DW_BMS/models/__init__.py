@@ -13,6 +13,7 @@ from . import product_extensions
 from . import product_storage_location
 from . import purchase_order_line
 from . import stock_picking
+from . import stock_picking_display_status
 from . import invoice_import_log
 from . import invoice_import_column_map
 from . import invoice_import_wizard
