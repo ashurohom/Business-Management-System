@@ -134,4 +134,19 @@
             </xpath>
         </field>
     </record>
+
+    <record id="view_picking_tree_inherit_delivered_by" model="ir.ui.view">
+        <field name="name">stock.picking.tree.delivered.by</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+
+            <!-- Show after Created On -->
+            <xpath expr="//field[@name='create_date']" position="after">
+                <field name="delivered_by" string="Packed By"/>
+            </xpath>
+
+        </field>
+    </record>
+
 </odoo>

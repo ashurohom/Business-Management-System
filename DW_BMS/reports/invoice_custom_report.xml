@@ -516,7 +516,7 @@
 
                                         <t t-set="payment" t-value="env['account.payment'].browse(pmt.get('account_payment_id'))"/>
 
-                                        <span t-esc="dict(payment._fields['custom_payment_method'].selection).get(payment.custom_payment_method) or '-'"/>
+                                        <span t-esc="dict(payment._fields['custom_payment_method'].selection).get(payment.custom_payment_method) or ' '"/>
 
                                         <t t-if="not pmt_last">, </t>
                                     </t>
@@ -556,7 +556,7 @@
                             </td>
                             <td class="inv-label">Payment Reference</td>
                             <td class="inv-center">
-                                <span t-esc="doc.payment_reference or '-'"/>
+                                <span t-esc="doc.payment_reference or ' '"/>
                             </td>
                         </tr>
                     </table>

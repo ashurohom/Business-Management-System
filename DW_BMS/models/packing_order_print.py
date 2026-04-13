@@ -33,7 +33,7 @@ class PackingOrderPrint(models.Model):
                   "Please link a Sale Order before printing the quotation.")
             )
 
-        return self.env.ref("sale.action_report_saleorder").report_action(
+        return self.env.ref("DW_BMS.action_report_saleorder_custom_quotation").report_action(
             self.sale_order_id
         )
 
@@ -62,7 +62,7 @@ class PackingOrderPrint(models.Model):
                   "Please create and confirm an invoice on the related Sale Order first.")
             )
 
-        return self.env.ref("account.account_invoices").report_action(invoice)
+        return self.env.ref("DW_BMS.action_report_invoice_custom").report_action(invoice)
 
     # ─────────────────────────────────────────────────────────────────────────
     # Helpers

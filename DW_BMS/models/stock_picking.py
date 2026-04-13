@@ -2,6 +2,7 @@ from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 
+
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
@@ -32,6 +33,8 @@ class StockPicking(models.Model):
         string="Delivered Notes",
         copy=False,
     )
+
+
 
     @api.model_create_multi
     def create(self, vals_list):
