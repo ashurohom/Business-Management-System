@@ -265,7 +265,6 @@
                     }
                     .inv-bank-qr {
                         text-align: center;
-                        width: 180px;
                     }
                     .inv-bank-qr img {
                         max-width: 130px;
@@ -683,7 +682,7 @@
                     <!-- ========== 7. BANK DETAILS ========== -->
                     <table class="inv-bank-box">
                         <tr>
-                            <td>
+                            <td style="width: 40%; text-align: left;">
                                 <div class="inv-bank-title">Company Bank Details</div>
                                 <div class="inv-bank-text">K V ENTERPRISES
 Ac. 0125009300101082
@@ -692,10 +691,17 @@ IFSC Code. PUNB0012500
 MICR Code. 110024031
 SWIFT Code. PUNBINBBISB</div>
                             </td>
-                            <td class="inv-bank-qr">
+                            <td class="inv-bank-qr" style="width: 30%; text-align: center;">
                                 <t t-set="qr_title" t-value="'Scan to Pay'"/>
                                 <t t-set="qr_title_class" t-value="'inv-bank-title'"/>
                                 <t t-call="DW_BMS.report_bank_qr_image"/>
+                            </td>
+                            <td style="width: 30%; text-align: right; vertical-align: bottom;">
+                                <div class="inv-bank-text">for K V ENTERPRISES 2026-27
+
+
+
+Authorized Signature</div>
                             </td>
                         </tr>
                     </table>
