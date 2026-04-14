@@ -505,7 +505,7 @@
                             </td>
                             <td class="inv-label" style="width:25%;">Invoice Date</td>
                             <td style="width:25%;" class="inv-center">
-                                <span t-field="doc.invoice_date"/>
+                                <span t-field="doc.invoice_date" t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
                             </td>
                         </tr>
                         <tr>
@@ -542,10 +542,12 @@
                             <td class="inv-center">
                                 <t t-if="doc.payment_state == 'paid' and first_payment.get('account_payment_id')">
                                     <t t-set="payment_rec" t-value="env['account.payment'].browse(first_payment.get('account_payment_id'))"/>
-                                    <span t-field="payment_rec.date"/>
+                                    <span t-field="payment_rec.date" t-options='{"widget": "date", "format": "dd/MM/yyyy"}'/>
                                 </t>
                                 <t t-elif="doc.payment_state == 'paid' and first_payment.get('date')">
-                                    <span t-esc="first_payment.get('date')"/>
+                                    <!-- Fallback for JSON string date usually in YYYY-MM-DD -->
+                                    <t t-set="p_date" t-value="first_payment.get('date')"/>
+                                    <span t-esc="p_date[8:10] + '/' + p_date[5:7] + '/' + p_date[0:4] if len(p_date) >= 10 else p_date"/>
                                 </t>
                                 <t t-else="">-</t>
                             </td>
@@ -631,24 +633,37 @@
                     <t t-set="rounding_amount" t-value="sum(doc.line_ids.filtered(lambda l: l.display_type == 'rounding').mapped('amount_currency'))"/>
                     <table class="inv-totals">
                         <tr>
-                            <td><strong>Sub Total</strong></td>
+                            <td><strong>Subtotal</strong></td>
                             <td class="inv-right">
                                 <span t-esc="doc.amount_untaxed"
                                       t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                             </td>
                         </tr>
-                        <tr>
-                            <td>
-                                <strong>
-                                    Tax Amount
-                                    (<t t-if="is_same_state">GST</t><t t-else="">IGST</t>)
-                                </strong>
-                            </td>
-                            <td class="inv-right">
-                                <span t-esc="doc.amount_tax"
-                                      t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
-                            </td>
-                        </tr>
+                        <t t-if="is_same_state">
+                            <tr>
+                                <td><strong>CGST Amount</strong></td>
+                                <td class="inv-right">
+                                    <span t-esc="doc.amount_tax / 2"
+                                          t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>SGST Amount</strong></td>
+                                <td class="inv-right">
+                                    <span t-esc="doc.amount_tax / 2"
+                                          t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                </td>
+                            </tr>
+                        </t>
+                        <t t-else="">
+                            <tr>
+                                <td><strong>IGST Amount</strong></td>
+                                <td class="inv-right">
+                                    <span t-esc="doc.amount_tax"
+                                          t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                </td>
+                            </tr>
+                        </t>
                         <tr>
                             <td>Rounding</td>
                             <td class="inv-right">
@@ -684,6 +699,9 @@ SWIFT Code. PUNBINBBISB</div>
                             </td>
                         </tr>
                     </table>
+
+                    <!-- ADD THIS PAGE BREAK HERE -->
+                    <div style="page-break-before: always;"></div>
 
                     <!-- ========== 8. HSN SUMMARY ========== -->
                     <t t-set="hsn_summary" t-value="doc._dw_get_hsn_summary_table()"/>
