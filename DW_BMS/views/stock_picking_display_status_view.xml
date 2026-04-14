@@ -3,10 +3,8 @@
     <!--
         stock_picking_display_status_view.xml
         ─────────────────────────────────────
-        Shows a single "Status" badge column in the Delivery list view that:
-          - Displays standard picking state when NOT done
-          - Displays shipping status (from shipping.management) when done
-          - Falls back to "Packed" when done but no shipping record exists
+        1. Adds "Status" badge column to the Delivery list view.
+        2. Adds Shipping Status quick-filter buttons to the Delivery search panel.
 
         Key design constraints (Odoo 17):
           • state MUST remain in the view (column_invisible) — internal modifiers
@@ -15,8 +13,12 @@
             danger | info | muted | primary | success | warning | bf | it
           • display_status_key is inserted alongside display_status (no //tree
             position="inside" which conflicts with <header> ordering).
+          • Shipping status filters use the stored `latest_shipping_status` field
+            (populated by shipping.management create/write hooks) so they work
+            efficiently without re-computing on every load.
     -->
 
+    <!-- ── 1. Delivery list: Status badge column ─────────────────────────── -->
     <record id="view_picking_tree_display_status" model="ir.ui.view">
         <field name="name">stock.picking.tree.display.status</field>
         <field name="model">stock.picking</field>
@@ -43,6 +45,62 @@
                        decoration-success="display_status_key == 'delivered'"/>
             </xpath>
 
+        </field>
+    </record>
+
+    <!-- ── 2. Delivery search: Shipping Status quick-filter buttons ───────── -->
+    <record id="view_picking_search_shipping_status" model="ir.ui.view">
+        <field name="name">stock.picking.search.shipping.status</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+        <field name="arch" type="xml">
+            <!--
+                Append shipping-status filter buttons inside the existing
+                <search> element, after all built-in filters.
+                A <separator/> groups them visually under "Shipping Status".
+            -->
+            <xpath expr="//search" position="inside">
+
+                <separator/>
+
+                <!-- Label group heading (non-functional, visual only) -->
+                <filter string="── Shipping Status ──" name="sep_shipping_status"
+                        domain="[('id', '=', False)]" invisible="1"/>
+
+
+                <filter string="Shipped"
+                        name="filter_shipped"
+                        domain="[('latest_shipping_status', '=', 'shipped')]"/>
+
+                <filter string="In Transit"
+                        name="filter_in_transit"
+                        domain="[('latest_shipping_status', '=', 'in_transit')]"/>
+
+                <filter string="Out for Delivery"
+                        name="filter_out_for_delivery"
+                        domain="[('latest_shipping_status', '=', 'out_for_delivery')]"/>
+
+                <filter string="Delivered"
+                        name="filter_delivered"
+                        domain="[('latest_shipping_status', '=', 'delivered')]"/>
+
+                <filter string="RTO"
+                        name="filter_rto"
+                        domain="[('latest_shipping_status', '=', 'rto')]"/>
+
+                <filter string="RTO Received"
+                        name="filter_rto_received"
+                        domain="[('latest_shipping_status', '=', 'rto_received')]"/>
+
+                <filter string="Complaint"
+                        name="filter_complaint"
+                        domain="[('latest_shipping_status', '=', 'complaint')]"/>
+
+                <filter string="Cancelled"
+                        name="filter_cancelled"
+                        domain="[('latest_shipping_status', '=', 'cancel')]"/>
+
+            </xpath>
         </field>
     </record>
 
