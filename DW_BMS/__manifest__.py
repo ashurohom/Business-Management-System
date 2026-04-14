@@ -66,6 +66,7 @@
         # Wizard & reports
         "wizard/bms_report_wizard_view.xml",
         "views/account_partner_ledger_view.xml",
+        "views/account_aged_partner_balance_view.xml",
         "reports/bms_report_templates.xml",
     ],
     "assets": {

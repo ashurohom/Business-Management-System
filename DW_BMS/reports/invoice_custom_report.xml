@@ -540,7 +540,11 @@
                             </td>
                             <td class="inv-label">Payment Date</td>
                             <td class="inv-center">
-                                <t t-if="doc.payment_state == 'paid' and first_payment.get('date')">
+                                <t t-if="doc.payment_state == 'paid' and first_payment.get('account_payment_id')">
+                                    <t t-set="payment_rec" t-value="env['account.payment'].browse(first_payment.get('account_payment_id'))"/>
+                                    <span t-field="payment_rec.date"/>
+                                </t>
+                                <t t-elif="doc.payment_state == 'paid' and first_payment.get('date')">
                                     <span t-esc="first_payment.get('date')"/>
                                 </t>
                                 <t t-else="">-</t>
@@ -627,7 +631,7 @@
                     <t t-set="rounding_amount" t-value="sum(doc.line_ids.filtered(lambda l: l.display_type == 'rounding').mapped('amount_currency'))"/>
                     <table class="inv-totals">
                         <tr>
-                            <td><strong>Untaxed Amount</strong></td>
+                            <td><strong>Sub Total</strong></td>
                             <td class="inv-right">
                                 <span t-esc="doc.amount_untaxed"
                                       t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
