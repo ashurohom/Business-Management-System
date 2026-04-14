@@ -103,4 +103,12 @@
         <field name="target">new</field>
         <field name="context">{'default_report_type': 'bank'}</field>
     </record>
+
+    <record id="action_bms_report_manifest" model="ir.actions.act_window">
+        <field name="name">Manifest Report</field>
+        <field name="res_model">bms.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_report_type': 'manifest'}</field>
+    </record>
 </odoo>

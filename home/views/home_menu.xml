@@ -87,6 +87,13 @@
         sequence="9"/>
 
     <menuitem
+        id="menu_home_report_manifest"
+        name="Manifest Report"
+        parent="menu_home_reports_root"
+        action="DW_BMS.action_bms_report_manifest"
+        sequence="10"/>
+
+    <menuitem
         id="menu_home_product_stock_status"
         name="Product Stock Status"
         parent="home.menu_home_root"

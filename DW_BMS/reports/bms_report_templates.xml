@@ -531,6 +531,38 @@
                     <!-- ══════════════════════════════════════════════ -->
                     <!-- FOOTER                                         -->
                     <!-- ══════════════════════════════════════════════ -->
+                    <t t-if="report_data['report_type'] == 'manifest'">
+                        <p class="dw-section-title">Manifest Details</p>
+                        <table class="dw-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">Invoice Date</th>
+                                    <th class="text-left">Invoice Number</th>
+                                    <th class="text-left">Customer Name</th>
+                                    <th class="text-left">Contact Number</th>
+                                    <th class="text-left">Delivery Type</th>
+                                    <th class="text-left">Dispatch Mode</th>
+                                    <th class="text-left">Packing Team</th>
+                                    <th class="text-left">Shipping Status</th>
+                                    <th class="text-left">BOX</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="report_data['manifest_lines']" t-as="line">
+                                    <td class="text-center text-muted"><span t-esc="line['invoice_date']"/></td>
+                                    <td class="fw-bold"><span t-esc="line['invoice_number']"/></td>
+                                    <td><span t-esc="line['customer_name']"/></td>
+                                    <td><span t-esc="line['contact_number']"/></td>
+                                    <td><span t-esc="line['delivery_type']"/></td>
+                                    <td><span t-esc="line['dispatch_mode']"/></td>
+                                    <td><span t-esc="line['packing_team']"/></td>
+                                    <td><span t-esc="line['shipping_status']"/></td>
+                                    <td><span t-esc="line['box']"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </t>
+
                     <div class="dw-footer">
                         <table>
                             <tr>

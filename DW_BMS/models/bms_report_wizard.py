@@ -21,6 +21,7 @@ class BmsReportWizard(models.TransientModel):
             ("purchase_payment", "Purchase Payment / Pending Report"),
             ("sales_payment", "Sales Payment Report"),
             ("bank", "Bank Report"),
+            ("manifest", "Manifest Report"),
         ],
         required=True,
         default="profit_loss",
@@ -349,6 +350,70 @@ class BmsReportWizard(models.TransientModel):
             "bank_detail_lines": bank_detail,
         }
 
+    def _get_manifest_sale_order(self, invoice):
+        sale_orders = invoice.invoice_line_ids.sale_line_ids.order_id
+        return sale_orders[:1]
+
+    def _get_manifest_packing_order(self, invoice, sale_order):
+        domain = [("invoice_id", "=", invoice.id)]
+        if sale_order:
+            domain = ["|", ("invoice_id", "=", invoice.id), ("sale_order_id", "=", sale_order.id)]
+        return self.env["packing.order"].search(domain, limit=1)
+
+    def _get_manifest_packing_notes(self, sale_order):
+        if not sale_order:
+            return ""
+        picking = sale_order.picking_ids.filtered(lambda p: p.picking_type_code == "outgoing" and p.packed_notes)[:1]
+        return picking.packed_notes or ""
+
+    def _collect_manifest(self):
+        domain = [("state", "=", "posted"), ("move_type", "=", "out_invoice")]
+        domain += self._date_domain("invoice_date")
+        if self.partner_id:
+            domain.append(("partner_id", "=", self.partner_id.id))
+        self._append_partner_role_domain(domain)
+        domain += self._payment_status_domain()
+
+        invoices = self.env["account.move"].search(domain, order="invoice_date asc, name asc")
+        delivery_type_labels = dict(self.env["sale.order"]._fields["delivery_type"].selection)
+        manifest_lines = []
+        for invoice in invoices:
+            sale_order = self._get_manifest_sale_order(invoice)
+            if self.user_id and (not sale_order or sale_order.user_id != self.user_id):
+                continue
+            if self.shipping_status != "all":
+                if not sale_order:
+                    continue
+                done = any(picking.state == "done" for picking in sale_order.picking_ids)
+                if self.shipping_status == "done" and not done:
+                    continue
+                if self.shipping_status == "pending" and done:
+                    continue
+
+            packing_order = self._get_manifest_packing_order(invoice, sale_order)
+            contact_number = (
+                invoice.shipping_mobile
+                or invoice.billing_mobile
+                or invoice.partner_id.phone
+                or invoice.partner_id.mobile
+                or ""
+            )
+            delivery_type = sale_order.delivery_type if sale_order else invoice.delivery_type
+            manifest_lines.append(
+                {
+                    "invoice_date": invoice.invoice_date,
+                    "invoice_number": invoice.name,
+                    "customer_name": invoice.partner_id.display_name,
+                    "contact_number": contact_number,
+                    "delivery_type": delivery_type_labels.get(delivery_type, delivery_type or ""),
+                    "dispatch_mode": packing_order.dispatch_mode_id.name or "",
+                    "packing_team": "",
+                    "shipping_status": "",
+                    "box": self._get_manifest_packing_notes(sale_order),
+                }
+            )
+        return {"manifest_lines": manifest_lines}
+
     def _collect_data(self):
         self.ensure_one()
         payload = {}
@@ -371,6 +436,8 @@ class BmsReportWizard(models.TransientModel):
             payload = self._collect_sales_payment()
         elif self.report_type == "bank":
             payload = self._collect_bank()
+        elif self.report_type == "manifest":
+            payload = self._collect_manifest()
 
         return {
             "generated_on": fields.Datetime.now(),
@@ -538,6 +605,38 @@ class BmsReportWizard(models.TransientModel):
                 [
                     [l["date"], l["name"], l["bank"], l["partner"], l["amount"]]
                     for l in data["bank_detail_lines"]
+                ],
+                bold,
+                money,
+            )
+        elif data["report_type"] == "manifest":
+            row = self._write_table(
+                sheet,
+                row,
+                [
+                    "Invoice Date",
+                    "Invoice Number",
+                    "Customer Name",
+                    "Contact Number",
+                    "Delivery Type",
+                    "Dispatch Mode",
+                    "Packing Team",
+                    "Shipping Status",
+                    "BOX",
+                ],
+                [
+                    [
+                        l["invoice_date"],
+                        l["invoice_number"],
+                        l["customer_name"],
+                        l["contact_number"],
+                        l["delivery_type"],
+                        l["dispatch_mode"],
+                        l["packing_team"],
+                        l["shipping_status"],
+                        l["box"],
+                    ]
+                    for l in data["manifest_lines"]
                 ],
                 bold,
                 money,
