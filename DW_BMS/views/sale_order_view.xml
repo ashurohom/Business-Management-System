@@ -456,6 +456,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='state']" position="before">
                 <field name="dw_packing_status" optional="show" widget="badge" decoration-success="dw_packing_status == 'Packed'" decoration-info="dw_packing_status == 'Ready'" decoration-warning="dw_packing_status == 'Waiting'"/>
+                <field name="dispatch_mode_id" optional="show"/>
             </xpath>
         </field>
     </record>
@@ -467,6 +468,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='state']" position="before">
                 <field name="dw_packing_status" optional="show" widget="badge" decoration-success="dw_packing_status == 'Packed'" decoration-info="dw_packing_status == 'Ready'" decoration-warning="dw_packing_status == 'Waiting'"/>
+                <field name="dispatch_mode_id" optional="show"/>
             </xpath>
         </field>
     </record>

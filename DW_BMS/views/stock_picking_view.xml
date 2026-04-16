@@ -124,6 +124,7 @@
 
             <xpath expr="//tree" position="inside">
                 <field name="sale_id" column_invisible="True"/>
+                <field name="dispatch_mode_id" optional="show"/>
                 <button name="action_open_packing_order" 
                         string="Packing" 
                         type="object" 

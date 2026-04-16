@@ -185,6 +185,18 @@ class SaleOrder(models.Model):
         currency_field="currency_id",
     )
 
+    dispatch_mode_id = fields.Many2one(
+        "packing.dispatch.mode",
+        string="Dispatch Mode",
+        compute="_compute_dispatch_mode",
+        store=False,
+    )
+
+    def _compute_dispatch_mode(self):
+        for order in self:
+            packing = self.env["packing.order"].search([("sale_order_id", "=", order.id)], limit=1)
+            order.dispatch_mode_id = packing.dispatch_mode_id.id if packing else False
+
     # ─────────────────────────────────────────────────────────────────
     # Delivery Type choices (same as account.move)
     # ─────────────────────────────────────────────────────────────────

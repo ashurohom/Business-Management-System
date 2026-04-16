@@ -38,6 +38,12 @@ class StockPicking(models.Model):
         string="Delivered Notes",
         copy=False,
     )
+    dispatch_mode_id = fields.Many2one(
+        "packing.dispatch.mode",
+        string="Dispatch Mode",
+        related="sale_id.dispatch_mode_id",
+        store=False,
+    )
 
 
 
