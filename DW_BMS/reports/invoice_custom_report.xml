@@ -520,7 +520,7 @@
                                         <t t-if="not pmt_last">, </t>
                                     </t>
                                 </t>
-                                <t t-else="">-</t>
+                                <t t-else=""> </t>
                             </td>
                             <td class="inv-label">Payment Status</td>
                             <td class="inv-center">
@@ -548,7 +548,7 @@
                                     <t t-set="p_date" t-value="first_payment.get('date')"/>
                                     <span t-esc="p_date[8:10] + '/' + p_date[5:7] + '/' + p_date[0:4] if len(p_date) >= 10 else p_date"/>
                                 </t>
-                                <t t-else="">-</t>
+                                <t t-else=""> </t>
                             </td>
                         </tr>
                         <tr t-if="doc.payment_state == 'paid'">
@@ -571,6 +571,7 @@
 
                     <!-- ========== 5. PRODUCT LINES ========== -->
                     <!-- Determine GST type once -->
+                    <t t-set="is_indian_customer" t-value="doc.partner_id.country_id and doc.partner_id.country_id.code == 'IN'"/>
                     <t t-set="is_same_state"
                        t-value="doc.partner_id.state_id and doc.company_id.state_id and doc.partner_id.state_id == doc.company_id.state_id"/>
 
@@ -582,9 +583,9 @@
                                 <th style="width:10%;">HSN Code</th>
                                 <th style="width:8%;">Qty</th>
                                 <th style="width:7%;">UOM</th>
-                                <th style="width:10%;">Tax</th>
+                                <th t-if="is_indian_customer" style="width:10%;">Tax</th>
                                 <th style="width:11%;">Unit Price</th>
-                                <th style="width:12%;">Unit Price Incl. Tax</th>
+                                <th t-if="is_indian_customer" style="width:12%;">Unit Price Incl. Tax</th>
                                 <th style="width:12%;">Total Price</th>
                             </tr>
                         </thead>
@@ -617,25 +618,35 @@
                                     <td class="inv-center">
                                         <span t-field="line.product_uom_id"/>
                                     </td>
-                                    <td class="inv-center">
+                                    <td t-if="is_indian_customer" class="inv-center">
                                         <span t-esc="', '.join(line.tax_ids.mapped('name'))"/>
                                     </td>
                                     <td class="inv-right">
-                                        <span t-esc="line.price_unit"
-                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        <t t-if="is_indian_customer">
+                                            <span t-esc="line.price_unit"
+                                                  t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        </t>
+                                        <t t-else="">
+                                            <span>Rs <t t-esc="'{0:,.2f}'.format(line.price_unit)"/></span>
+                                        </t>
                                     </td>
-                                    <td class="inv-right">
+                                    <td t-if="is_indian_customer" class="inv-right">
                                         <span t-esc="(line.price_total / line.quantity) if line.quantity else line.price_unit"
                                               t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                                     </td>
                                     <td class="inv-right">
-                                        <span t-esc="line.price_total"
-                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        <t t-if="is_indian_customer">
+                                            <span t-esc="line.price_total"
+                                                  t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        </t>
+                                        <t t-else="">
+                                            <span>Rs <t t-esc="'{0:,.2f}'.format(line.price_total)"/></span>
+                                        </t>
                                     </td>
                                 </tr>
                             </t>
                             <tr t-if="not invoice_lines">
-                                <td colspan="9" class="inv-center" style="color:#666;">No product lines found for this invoice.</td>
+                                <td t-att-colspan="9 if is_indian_customer else 7" class="inv-center" style="color:#666;">No product lines found for this invoice.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -643,50 +654,65 @@
                     <!-- ========== 6. TOTALS ========== -->
                     <t t-set="rounding_amount" t-value="sum(doc.line_ids.filtered(lambda l: l.display_type == 'rounding').mapped('amount_currency'))"/>
                     <table class="inv-totals">
-                        <tr>
+                        <tr t-if="is_indian_customer">
                             <td><strong>Subtotal</strong></td>
                             <td class="inv-right">
                                 <span t-esc="doc.amount_untaxed"
                                       t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                             </td>
                         </tr>
-                        <t t-if="is_same_state">
-                            <tr>
-                                <td><strong>CGST Amount</strong></td>
-                                <td class="inv-right">
-                                    <span t-esc="doc.amount_tax / 2"
-                                          t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>SGST Amount</strong></td>
-                                <td class="inv-right">
-                                    <span t-esc="doc.amount_tax / 2"
-                                          t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
-                                </td>
-                            </tr>
-                        </t>
-                        <t t-else="">
-                            <tr>
-                                <td><strong>IGST Amount</strong></td>
-                                <td class="inv-right">
-                                    <span t-esc="doc.amount_tax"
-                                          t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
-                                </td>
-                            </tr>
+                        <t t-if="is_indian_customer">
+                            <t t-if="is_same_state">
+                                <tr>
+                                    <td><strong>CGST Amount</strong></td>
+                                    <td class="inv-right">
+                                        <span t-esc="doc.amount_tax / 2"
+                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>SGST Amount</strong></td>
+                                    <td class="inv-right">
+                                        <span t-esc="doc.amount_tax / 2"
+                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </t>
+                            <t t-else="">
+                                <tr>
+                                    <td><strong>IGST Amount</strong></td>
+                                    <td class="inv-right">
+                                        <span t-esc="doc.amount_tax"
+                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </t>
                         </t>
                         <tr>
                             <td>Rounding</td>
                             <td class="inv-right">
-                                <span t-esc="rounding_amount"
-                                      t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                <t t-if="is_indian_customer">
+                                    <span t-esc="rounding_amount"
+                                          t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                </t>
+                                <t t-else="">
+                                    <span>Rs <t t-esc="'{0:,.2f}'.format(rounding_amount)"/></span>
+                                </t>
                             </td>
                         </tr>
                         <tr>
-                            <td>Total (Incl. Tax)</td>
+                            <td>
+                                <t t-if="is_indian_customer">Total (Incl. Tax)</t>
+                                <t t-else="">Total</t>
+                            </td>
                             <td class="inv-right">
-                                <span t-esc="doc.amount_total"
-                                      t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                <t t-if="is_indian_customer">
+                                    <span t-esc="doc.amount_total"
+                                          t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                </t>
+                                <t t-else="">
+                                    <span>Rs <t t-esc="'{0:,.2f}'.format(doc.amount_total)"/></span>
+                                </t>
                             </td>
                         </tr>
                     </table>
@@ -752,24 +778,49 @@ Authorized Signature</div>
                                     </td>
                                     <td class="inv-right" t-esc="item['rate']"/>
                                     <td class="inv-right">
-                                        <span t-esc="item['amount_untaxed']"
-                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        <t t-if="is_indian_customer">
+                                            <span t-esc="item['amount_untaxed']"
+                                                  t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        </t>
+                                        <t t-else="">
+                                            <span>Rs <t t-esc="'{0:,.2f}'.format(item['amount_untaxed'])"/></span>
+                                        </t>
                                     </td>
                                     <td class="inv-right" t-if="hsn_summary['has_gst']">
-                                        <span t-esc="item['tax_amount_sgst']"
-                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        <t t-if="is_indian_customer">
+                                            <span t-esc="item['tax_amount_sgst']"
+                                                  t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        </t>
+                                        <t t-else="">
+                                            <span>Rs <t t-esc="'{0:,.2f}'.format(item['tax_amount_sgst'])"/></span>
+                                        </t>
                                     </td>
                                     <td class="inv-right" t-if="hsn_summary['has_gst']">
-                                        <span t-esc="item['tax_amount_cgst']"
-                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        <t t-if="is_indian_customer">
+                                            <span t-esc="item['tax_amount_cgst']"
+                                                  t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        </t>
+                                        <t t-else="">
+                                            <span>Rs <t t-esc="'{0:,.2f}'.format(item['tax_amount_cgst'])"/></span>
+                                        </t>
                                     </td>
                                     <td class="inv-right" t-if="hsn_summary['has_igst']">
-                                        <span t-esc="item['tax_amount_igst']"
-                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        <t t-if="is_indian_customer">
+                                            <span t-esc="item['tax_amount_igst']"
+                                                  t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        </t>
+                                        <t t-else="">
+                                            <span>Rs <t t-esc="'{0:,.2f}'.format(item['tax_amount_igst'])"/></span>
+                                        </t>
                                     </td>
                                     <td class="inv-right" t-if="hsn_summary['has_cess']">
-                                        <span t-esc="item['tax_amount_cess']"
-                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        <t t-if="is_indian_customer">
+                                            <span t-esc="item['tax_amount_cess']"
+                                                  t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        </t>
+                                        <t t-else="">
+                                            <span>Rs <t t-esc="'{0:,.2f}'.format(item['tax_amount_cess'])"/></span>
+                                        </t>
                                     </td>
                                 </tr>
                             </tbody>
