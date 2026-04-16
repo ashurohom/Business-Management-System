@@ -214,15 +214,15 @@
                         .dw-footer {
                             margin-top: 40px;
                             border-top: 1px solid #222;
-                            padding-top: 10px;
-                            font-size: 12px;
+                            padding: 10px 15px 15px 15px;
+                            font-size: 16px;
                         }
                         .dw-terms-title {
                             margin: 0 0 6px 0;
                         }
                         .dw-terms-list {
                             margin: 0;
-                            padding-left: 18px;
+                            padding-left: 28px;
                         }
                         .dw-terms-list li {
                             margin: 0 0 4px 0;
@@ -235,7 +235,7 @@
                         }
                         .dw-terms-sublist {
                             margin: 4px 0 0 0;
-                            padding-left: 18px;
+                            padding-left: 24px;
                         }
                         .dw-terms-sublist li {
                             display: inline;
@@ -436,21 +436,31 @@
                                         <span t-esc="', '.join(line.tax_id.mapped('name'))"/>
                                     </td>
                                     <td class="dw-right">
-                                        <span t-esc="line.price_unit" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        <t t-if="is_indian_customer">
+                                            <span t-esc="line.price_unit" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        </t>
+                                        <t t-else="">
+                                            <span>Rs <t t-esc="'{0:,.2f}'.format(line.price_unit)"/></span>
+                                        </t>
                                     </td>
                                     <td t-if="is_indian_customer" class="dw-right">
                                         <span t-esc="line.price_incl_tax or line._get_price_incl_from_unit(line.price_unit or 0.0)" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                                     </td>
                                     <td class="dw-center"><span t-field="line.product_uom"/></td>
                                     <td class="dw-right">
-                                        <span t-esc="line.price_total" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        <t t-if="is_indian_customer">
+                                            <span t-esc="line.price_total" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                        </t>
+                                        <t t-else="">
+                                            <span>Rs <t t-esc="'{0:,.2f}'.format(line.price_total)"/></span>
+                                        </t>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
 
                         <table class="dw-totals">
-                            <tr>
+                            <tr t-if="is_indian_customer">
                                 <td><strong>Untaxed Amount</strong></td>
                                 <td class="dw-right">
                                     <span t-esc="doc.amount_untaxed" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
@@ -473,7 +483,12 @@
                                     <t t-else="">Total</t>
                                 </td>
                                 <td class="dw-right dw-total-strong">
-                                    <span t-esc="doc.roundup_total" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    <t t-if="is_indian_customer">
+                                        <span t-esc="doc.roundup_total" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    </t>
+                                    <t t-else="">
+                                        <span>Rs <t t-esc="'{0:,.2f}'.format(doc.roundup_total)"/></span>
+                                    </t>
                                 </td>
                             </tr>
                         </table>
@@ -496,6 +511,10 @@ SWIFT Code. PUNBINBBISB</div>
                                 </td>
                             </tr>
                         </table>
+
+
+                    <!-- ADD THIS PAGE BREAK HERE -->
+                    <div style="page-break-before: always;"></div>
 
                         <div class="dw-footer">
                             <p class="dw-terms-title"><strong>Terms and Conditions</strong></p>

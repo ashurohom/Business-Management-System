@@ -273,15 +273,15 @@
                     .inv-footer {
                         margin-top: 18px;
                         border-top: 1px solid #222;
-                        padding-top: 10px;
-                        font-size: 12px;
+                        padding: 10px 15px 15px 15px;
+                        font-size: 16px;
                     }
                     .inv-terms-title {
                         margin: 0 0 6px 0;
                     }
                     .inv-terms-list {
                         margin: 0;
-                        padding-left: 18px;
+                        padding-left: 28px;
                     }
                     .inv-terms-list li {
                         margin: 0 0 4px 0;
@@ -294,7 +294,7 @@
                     }
                     .inv-terms-sublist {
                         margin: 4px 0 0 0;
-                        padding-left: 18px;
+                        padding-left: 24px;
                     }
                     .inv-terms-sublist li {
                         display: inline;
@@ -552,10 +552,13 @@
                             </td>
                         </tr>
                         <tr t-if="doc.payment_state == 'paid'">
-                            <td class="inv-label">Recipient Bank Account</td>
+                            <td class="inv-label">Payment Type</td>
                             <td>
-                                <t t-if="doc.partner_bank_id">
-                                    <span t-field="doc.partner_bank_id"/>
+                                <t t-if="doc.invoice_payments_widget and doc.invoice_payments_widget.get('content')">
+                                    <t t-foreach="doc.invoice_payments_widget.get('content')" t-as="pmt">
+                                        <span t-esc="pmt.get('journal_name') or '-'"/>
+                                        <t t-if="not pmt_last">, </t>
+                                    </t>
                                 </t>
                                 <t t-else="">-</t>
                             </td>
@@ -574,13 +577,15 @@
                     <table class="inv-table inv-lines" style="margin-top:0;">
                         <thead>
                             <tr>
-                                <th style="width:5%;">S.No</th>
-                                <th style="width:28%;">Product</th>
-                                <th style="width:12%;">HSN Code</th>
-                                <th style="width:9%;">Qty</th>
-                                <th style="width:9%;">UOM</th>
-                                <th style="width:18%;">Unit Price</th>
-                                <th style="width:19%;">Total Price</th>
+                                <th style="width:5%;">Sr.No</th>
+                                <th style="width:25%;">Product</th>
+                                <th style="width:10%;">HSN Code</th>
+                                <th style="width:8%;">Qty</th>
+                                <th style="width:7%;">UOM</th>
+                                <th style="width:10%;">Tax</th>
+                                <th style="width:11%;">Unit Price</th>
+                                <th style="width:12%;">Unit Price Incl. Tax</th>
+                                <th style="width:12%;">Total Price</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -612,18 +617,25 @@
                                     <td class="inv-center">
                                         <span t-field="line.product_uom_id"/>
                                     </td>
+                                    <td class="inv-center">
+                                        <span t-esc="', '.join(line.tax_ids.mapped('name'))"/>
+                                    </td>
                                     <td class="inv-right">
                                         <span t-esc="line.price_unit"
                                               t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                                     </td>
                                     <td class="inv-right">
-                                        <span t-esc="line.price_subtotal"
+                                        <span t-esc="(line.price_total / line.quantity) if line.quantity else line.price_unit"
+                                              t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
+                                    </td>
+                                    <td class="inv-right">
+                                        <span t-esc="line.price_total"
                                               t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                                     </td>
                                 </tr>
                             </t>
                             <tr t-if="not invoice_lines">
-                                <td colspan="7" class="inv-center" style="color:#666;">No product lines found for this invoice.</td>
+                                <td colspan="9" class="inv-center" style="color:#666;">No product lines found for this invoice.</td>
                             </tr>
                         </tbody>
                     </table>

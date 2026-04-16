@@ -3,15 +3,15 @@
 dw_bms / models / invoice_import_wizard.py
 
 Multi-step wizard for XLSX invoice import:
-  Step 1  (state='upload')  — Upload file, click "Read File"
-  Step 2  (state='mapping') — Review/edit XLSX-column → Odoo-field mappings, click "Import"
+  Step 1  (state='upload')  â€” Upload file, click "Read File"
+  Step 2  (state='mapping') â€” Review/edit XLSX-column â†’ Odoo-field mappings, click "Import"
 
 Import engine:
-  • Reads rows using confirmed mapping (not positional)
-  • Groups rows by invoice_number field
-  • Skips duplicates; auto-creates partners (GSTIN-validated) and products
-  • Resolves CGST+SGST vs IGST, creates sale order, confirms, invoices, posts
-  • Writes dw.invoice.import.log and opens it after import
+  â€¢ Reads rows using confirmed mapping (not positional)
+  â€¢ Groups rows by invoice_number field
+  â€¢ Skips duplicates; auto-creates partners (GSTIN-validated) and products
+  â€¢ Resolves CGST+SGST vs IGST, creates sale order, confirms, invoices, posts
+  â€¢ Writes dw.invoice.import.log and opens it after import
 """
 
 import base64
@@ -29,8 +29,8 @@ from .invoice_import_column_map import ODOO_FIELD_SELECTION
 _logger = logging.getLogger(__name__)
 
 
-# ─── SYNONYM TABLE: normalised-header → canonical odoo_field ─────────────────
-# Keys are already normalised (lowercase, spaces→_, stripped).
+# â”€â”€â”€ SYNONYM TABLE: normalised-header â†’ canonical odoo_field â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Keys are already normalised (lowercase, spacesâ†’_, stripped).
 SYNONYMS = {
     # Invoice
     "invoice_no":             "invoice_number",
@@ -169,7 +169,7 @@ SYNONYMS = {
 # Valid canonical field names (the stored VALUES from selection, not display labels)
 VALID_FIELDS = {k for k, v in ODOO_FIELD_SELECTION if k != "skip"}
 
-# Payment mode → journal type
+# Payment mode â†’ journal type
 PAYMENT_MODE_MAP = [
     (["cash"],                              "cash"),
     (["neft", "rtgs", "imps", "bank",
@@ -185,7 +185,7 @@ GSTIN_RE = re.compile(
 
 
 def _norm(raw):
-    """Normalise a header: strip, lower, collapse whitespace→_."""
+    """Normalise a header: strip, lower, collapse whitespaceâ†’_."""
     return re.sub(r"\s+", "_", str(raw).strip().lower())
 
 
@@ -197,7 +197,7 @@ def _safe(val):
         if isinstance(val, float):
             if math.isnan(val):
                 return ""
-            # Convert whole-number floats to int strings: 1727.0 → "1727"
+            # Convert whole-number floats to int strings: 1727.0 â†’ "1727"
             if val == int(val):
                 return str(int(val)).strip()
     except Exception:
@@ -236,7 +236,7 @@ def _to_date(val):
 def _float(val):
     try:
         s = str(val).strip().replace(",", "")
-        s = s.replace("%", "").replace("₹", "").replace("$", "")
+        s = s.replace("%", "").replace("â‚¹", "").replace("$", "")
         return float(s) if s else 0.0
     except (TypeError, ValueError):
         return 0.0
@@ -269,7 +269,7 @@ def _gstin_ok(val):
     return bool(GSTIN_RE.match(_safe(val).upper().strip()))
 
 
-# ─── WIZARD ──────────────────────────────────────────────────────────────────
+# â”€â”€â”€ WIZARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class DwInvoiceImportWizard(models.TransientModel):
     _name = "dw.invoice.import.wizard"
@@ -312,7 +312,7 @@ class DwInvoiceImportWizard(models.TransientModel):
         default="Review the auto-detected mappings below. Change any dropdown to correct it, then click Import.",
     )
 
-    # ── STEP 1: Read headers ──────────────────────────────────────────────────
+    # â”€â”€ STEP 1: Read headers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def action_read_headers(self):
         """Parse XLSX row 0, create column_map_ids with auto-detected odoo_field."""
@@ -342,7 +342,7 @@ class DwInvoiceImportWizard(models.TransientModel):
         wb.close()
 
         if not any(headers):
-            raise UserError(_("Row 1 of the XLSX is empty — no column headers found."))
+            raise UserError(_("Row 1 of the XLSX is empty â€” no column headers found."))
 
         # Remove old mappings
         self.column_map_ids.unlink()
@@ -397,7 +397,7 @@ class DwInvoiceImportWizard(models.TransientModel):
             "target": "new",
         }
 
-    # ── STEP 2: Import ────────────────────────────────────────────────────────
+    # â”€â”€ STEP 2: Import â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def action_import(self):
         self.ensure_one()
@@ -493,7 +493,7 @@ class DwInvoiceImportWizard(models.TransientModel):
 
         return {
             "type": "ir.actions.act_window",
-            "name": _("Import Log — %s", log.name),
+            "name": _("Import Log â€” %s", log.name),
             "res_model": "dw.invoice.import.log",
             "res_id": log.id,
             "view_mode": "form",
@@ -501,7 +501,7 @@ class DwInvoiceImportWizard(models.TransientModel):
             "target": "current",
         }
 
-    # ── XLSX PARSING ──────────────────────────────────────────────────────────
+    # â”€â”€ XLSX PARSING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _parse_xlsx(self, field_to_col):
         """Return list of dicts keyed by canonical odoo_field names."""
@@ -526,7 +526,7 @@ class DwInvoiceImportWizard(models.TransientModel):
         wb.close()
         return rows
 
-    # ── INVOICE PROCESSING ────────────────────────────────────────────────────
+    # â”€â”€ INVOICE PROCESSING â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _process_invoice(self, inv_number, rows):
         header = rows[0]
@@ -554,35 +554,27 @@ class DwInvoiceImportWizard(models.TransientModel):
         effective_state_id = bill_state_id or ship_state_id or partner.state_id.id
         is_intra = bool(company_state and effective_state_id and company_state.id == effective_state_id)
 
-        order_line_vals = []
+        invoice_line_vals = []
         for row in rows:
-            line = self._build_sale_order_line(row, is_intra, partner)
+            line = self._build_invoice_line(row, is_intra, partner)
             if line:
-                order_line_vals.append((0, 0, line))
+                invoice_line_vals.append((0, 0, line))
 
-        if not order_line_vals:
+        if not invoice_line_vals:
             raise UserError(f"No valid product lines for invoice '{inv_number}'.")
 
         fiscal = self._get_fiscal_position(is_intra)
         inv_date = _to_date(header.get("invoice_date"))
-        sale_order = self.env["sale.order"].sudo().with_context(skip_stock_validation=True).create({
-            "partner_id": partner.id,
-            "date_order": inv_date or fields.Datetime.now(),
-            "currency_id": currency.id if currency else self.env.company.currency_id.id,
-            "fiscal_position_id": fiscal.id if fiscal else False,
-            "client_order_ref": inv_number,
-            "order_line": order_line_vals,
-        })
-        sale_order.with_context(skip_stock_validation=True).action_confirm()
-        invoice = sale_order.with_context(skip_stock_validation=True)._create_invoices()
-        invoice = invoice.filtered(lambda move: move.move_type == "out_invoice")[:1]
-        if not invoice:
-            raise UserError(f"Unable to create a customer invoice for sales order '{sale_order.name}'.")
 
         move_vals = {
             "ref": inv_number,
-            "invoice_date": inv_date,
+            "move_type": "out_invoice",
+            "partner_id": partner.id,
+            "invoice_date": inv_date or fields.Date.context_today(self),
+            "date": inv_date or fields.Date.context_today(self),
+            "currency_id": currency.id if currency else self.env.company.currency_id.id,
             "fiscal_position_id": fiscal.id if fiscal else False,
+            "invoice_line_ids": invoice_line_vals,
             "invoice_type": invoice_type,
             # Address fields
             "bill_to_same_as_customer": False,
@@ -621,25 +613,26 @@ class DwInvoiceImportWizard(models.TransientModel):
             "dw_platform_order_id":    _safe(header.get("platform_order_id")) or False,
             "dw_grand_total_imported": _float(header.get("grand_total")),
         }
-        invoice.sudo().write(move_vals)
+        
+        invoice = self.env["account.move"].sudo().with_context(check_move_validity=False).create(move_vals)
         invoice.action_post()
 
         return {
             "invoice_number": inv_number,
             "status": "created",
-            "message": f"Sale Order {sale_order.name} confirmed and invoice {invoice.name} posted.",
+            "message": f"Invoice {invoice.name} posted directly.",
             "move_id": invoice.id,
         }
 
-    # ── LINE BUILDER ──────────────────────────────────────────────────────────
+    # â”€â”€ LINE BUILDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-    def _build_sale_order_line(self, row, is_intra, partner):
+    def _build_invoice_line(self, row, is_intra, partner):
         product, product_uom_id = self._get_or_create_product(row)
         qty = _float(row.get("quantity")) or 1.0
         price = _float(row.get("unit_price"))
         disc = _percent(row.get("discount_percent"))
 
-        # Determine tax% — prefer explicit cgst+sgst/igst, fall back to tax_percent
+        # Determine tax% â€” prefer explicit cgst+sgst/igst, fall back to tax_percent
         tax_pct = _percent(row.get("tax_percent"))
         cgst_r = _percent(row.get("cgst_rate"))
         sgst_r = _percent(row.get("sgst_rate"))
@@ -656,33 +649,22 @@ class DwInvoiceImportWizard(models.TransientModel):
                     tax_pct = (total_tax_amount / taxable_value) * 100.0
 
         tax_ids = self._get_taxes(tax_pct, is_intra)
-        price_with_tax = _float(row.get("price_with_tax"))
-        if not price_with_tax:
-            tax_compute = tax_ids.compute_all(
-                price,
-                currency=self.env.company.currency_id,
-                quantity=1.0,
-                product=product,
-                partner=partner,
-            )
-            price_with_tax = tax_compute.get("total_included", price)
 
         line_vals = {
             "product_id": product.id,
             "name": _safe(row.get("product_name")) or product.name,
-            "product_uom_qty": qty,
+            "quantity": qty,
             "price_unit": price,
             "discount": disc,
-            "tax_id": [(6, 0, tax_ids.ids)],
-            "price_incl_tax": price_with_tax,
+            "tax_ids": [(6, 0, tax_ids.ids)],
         }
 
         if product_uom_id:
-            line_vals["product_uom"] = product_uom_id
+            line_vals["product_uom_id"] = product_uom_id
 
         return line_vals
 
-    # ── HELPERS ───────────────────────────────────────────────────────────────
+    # â”€â”€ HELPERS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _get_or_create_partner(self, header):
         Partner = self.env["res.partner"].sudo()

@@ -300,6 +300,10 @@ class SaleOrder(models.Model):
     ], string='Shipping Status', compute='_compute_activity_stats')
     latest_shipping_notes = fields.Text(string='Notes', compute='_compute_activity_stats')
     overall_activity_status = fields.Char(string='Overall Status', compute='_compute_activity_stats')
+    dw_packing_status = fields.Char(
+        string="Packed",
+        compute="_compute_dw_packing_status",
+    )
     invoice_number = fields.Char(
         string="Invoice Number",
         compute="_compute_invoice_number",
@@ -340,6 +344,23 @@ class SaleOrder(models.Model):
                 lambda m: m.move_type == "out_invoice" and m.state == "posted"
             )
             order.invoice_number = ", ".join(invoices.mapped("name")) if invoices else False
+
+    @api.depends("picking_ids.state")
+    def _compute_dw_packing_status(self):
+        for order in self:
+            pickings = order.picking_ids.filtered(
+                lambda p: p.picking_type_code == "outgoing" and p.state != "cancel"
+            )
+            if not pickings:
+                order.dw_packing_status = ""
+            elif all(p.state == "done" for p in pickings):
+                order.dw_packing_status = "Packed"
+            elif any(p.state == "assigned" for p in pickings):
+                order.dw_packing_status = "Ready"
+            elif any(p.state in ["waiting", "confirmed"] for p in pickings):
+                order.dw_packing_status = "Waiting"
+            else:
+                order.dw_packing_status = ""
 
     @api.depends('activity_timeline_ids.shipping_status', 'activity_timeline_ids.status', 'activity_timeline_ids.notes', 'state')
     def _compute_activity_stats(self):

@@ -9,13 +9,18 @@ class StockPicking(models.Model):
     state = fields.Selection(
         selection_add=[("done", "Packed")],
     )
-    packed_by = fields.Many2one(
-        "res.partner",
-        string="Packed By",
+
+    def _auto_init(self):
+        self.env.cr.execute("""
+            ALTER TABLE stock_picking DROP CONSTRAINT IF EXISTS stock_picking_packed_by_fkey;
+            ALTER TABLE stock_picking DROP CONSTRAINT IF EXISTS stock_picking_packed_by_user_fkey;
+        """)
+        return super()._auto_init()
+    packed_by = fields.Char(
+        string="Packed By (Partner)",
         copy=False,
     )
-    packed_by_user = fields.Many2one(
-        "res.users",
+    packed_by_user = fields.Char(
         string="Packed By",
         copy=False,
     )
