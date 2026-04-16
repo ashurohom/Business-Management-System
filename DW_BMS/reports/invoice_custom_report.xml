@@ -627,7 +627,7 @@
                                                   t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                                         </t>
                                         <t t-else="">
-                                            <span>Rs <t t-esc="'{0:,.2f}'.format(line.price_unit)"/></span>
+                                            <span>Rs <t t-esc="'{0:,.2f}'.format((line.price_total / line.quantity) if line.quantity else line.price_unit)"/></span>
                                         </t>
                                     </td>
                                     <td t-if="is_indian_customer" class="inv-right">

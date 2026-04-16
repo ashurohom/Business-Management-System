@@ -405,7 +405,7 @@
                                 </td>
                                 <td class="dw-label">Dispatch Mode</td>
                                 <td class="dw-center">
-                                    <span t-esc="packing_order.dispatch_mode_id.name or '-'"/>
+                                    <span t-esc="packing_order.dispatch_mode_id.name or ' '"/>
                                 </td>
                             </tr>
                         </table>
@@ -440,7 +440,7 @@
                                             <span t-esc="line.price_unit" t-options='{"widget":"monetary","display_currency": doc.currency_id}'/>
                                         </t>
                                         <t t-else="">
-                                            <span>Rs <t t-esc="'{0:,.2f}'.format(line.price_unit)"/></span>
+                                            <span>Rs <t t-esc="'{0:,.2f}'.format(line.price_incl_tax or line._get_price_incl_from_unit(line.price_unit or 0.0))"/></span>
                                         </t>
                                     </td>
                                     <td t-if="is_indian_customer" class="dw-right">
