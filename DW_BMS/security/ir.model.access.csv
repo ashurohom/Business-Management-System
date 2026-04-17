@@ -8,6 +8,7 @@ access_bms_admin_sale,bms admin sale,sale.model_sale_order,DW_BMS.group_bms_admi
 access_bms_admin_sale_line,bms admin sale order line,sale.model_sale_order_line,DW_BMS.group_bms_admin,1,1,1,1
 access_bms_admin_purchase,bms admin purchase,purchase.model_purchase_order,DW_BMS.group_bms_admin,1,1,1,1
 access_bms_admin_account_move,bms admin account move,account.model_account_move,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_admin_stock_picking,bms admin stock picking,stock.model_stock_picking,DW_BMS.group_bms_admin,1,1,1,1
 
 
 

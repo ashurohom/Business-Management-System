@@ -145,7 +145,7 @@
             <!-- Add Responsible (sale order creator) after Created On -->
             <xpath expr="//field[@name='create_date']" position="after">
                 <field name="sale_responsible_id"
-                       string="Responsible"
+                       string="User"
                        optional="show"
                        readonly="1"
                        options="{'no_open': True}"/>

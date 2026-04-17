@@ -35,6 +35,11 @@
                 <attribute name="invisible">1</attribute>
             </xpath>
 
+            <xpath expr="//field[@name='narration']" position="after">
+                <field name="previous_due_invoices_details" nolabel="1" colspan="2" readonly="1" invisible="not previous_due_invoices_details"/>
+            </xpath>
+
+
             <!-- Keep Payment Terms selectable on customer invoices (draft) -->
             <xpath expr="//group[@id='header_right_group']//field[@name='invoice_payment_term_id']" position="attributes">
                 <attribute name="invisible">move_type not in ('out_invoice', 'out_refund')</attribute>

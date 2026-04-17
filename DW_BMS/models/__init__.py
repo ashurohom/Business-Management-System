@@ -25,3 +25,4 @@ from . import shipping_management
 from . import activity_timeline
 from . import payment_method    
 from . import account_aged_partner_balance
+from . import account_move_due_amount

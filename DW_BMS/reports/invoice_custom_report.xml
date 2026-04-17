@@ -653,6 +653,14 @@
 
                     <!-- ========== 6. TOTALS ========== -->
                     <t t-set="rounding_amount" t-value="sum(doc.line_ids.filtered(lambda l: l.display_type == 'rounding').mapped('amount_currency'))"/>
+                    
+                    <div style="float: left; width: 50%; padding-top: 15px; text-align: left;">
+                        <div style="display: inline-block; font-size: 14px; font-weight: bold; color: #4f648b; padding: 10px 15px; border: 1px solid #b0bcd4; background-color: #f3f7fc; border-radius: 5px;">
+                            <div style="margin-bottom: 4px; color: #333;">Customer Total Due</div>
+                            <span t-field="doc.customer_due_amount" t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                        </div>
+                    </div>
+
                     <table class="inv-totals">
                         <tr t-if="is_indian_customer">
                             <td><strong>Subtotal</strong></td>
