@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_config_settings_view_form_indiamart_push" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.indiamart.push</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="crm.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app string="CRM" name="crm">
+                    <block title="IndiaMART Push Integration">
+                        <setting string="IndiaMART Webhook Token"
+                                 help="Token used to validate IndiaMART webhook requests.">
+                            <field name="indiamart_webhook_token" password="True"/>
+                        </setting>
+
+                        <setting string="Default CRM Team"
+                                 help="New IndiaMART leads will be assigned to this sales team.">
+                            <field name="indiamart_default_team_id"/>
+                        </setting>
+
+                        <setting string="Default Salesperson"
+                                 help="New IndiaMART leads will be assigned to this user.">
+                            <field name="indiamart_default_user_id"/>
+                        </setting>
+
+                        <div class="text-muted mt16">
+                            Webhook URL:
+                            <code>/api/indiamart/webhook</code>
+                        </div>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

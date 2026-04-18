@@ -1,0 +1,45 @@
+<odoo>
+
+    <!-- Wizard Form -->
+    <record id="view_dw_invoice_import_v2_wizard_form" model="ir.ui.view">
+        <field name="name">dw.invoice.import.v2.wizard.form</field>
+        <field name="model">dw.invoice.import.v2.wizard</field>
+        <field name="arch" type="xml">
+            <form string="DW SKU Invoice Import">
+                <group>
+                    <field name="file"/>
+                    <field name="partner_id"/>
+                    <field name="invoice_date"/>
+                    <field name="invoice_type"/>
+                    <field name="gst_treatment"/>
+                </group>
+
+                <footer>
+                    <button name="action_import"
+                            type="object"
+                            string="Create Invoice"
+                            class="btn-primary"/>
+                    <button string="Cancel" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_dw_invoice_import_v2_wizard" model="ir.actions.act_window">
+        <field name="name">DW SKU Invoice Import</field>
+        <field name="res_model">dw.invoice.import.v2.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_dw_invoice_import_v2_wizard_form"/>
+        <field name="views">[(ref('view_dw_invoice_import_v2_wizard_form'), 'form')]</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu (SEPARATE - NO CONFLICT) -->
+    <menuitem id="menu_dw_invoice_import"
+              name="DW SKU Invoice Import"
+              parent="account.menu_finance_receivables"
+              action="action_dw_invoice_import_v2_wizard"
+              sequence="99"/>
+
+</odoo>

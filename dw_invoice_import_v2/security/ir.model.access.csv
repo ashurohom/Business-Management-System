@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_dw_invoice_import_v2_wizard,dw invoice import v2 wizard,model_dw_invoice_import_v2_wizard,,1,1,1,1

@@ -9,7 +9,7 @@ class ProductNameAlias(models.Model):
     _description = "Product Alternate Name"
     _order = "name"
 
-    name = fields.Char(string="Alternate Name", required=True, index=True)
+    name = fields.Char(string="SKU / Alternate Names", required=True, index=True)
     product_tmpl_id = fields.Many2one(
         "product.template",
         string="Product",
