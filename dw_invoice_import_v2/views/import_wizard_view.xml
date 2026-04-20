@@ -10,6 +10,7 @@
                     <field name="file"/>
                     <field name="partner_id"/>
                     <field name="invoice_date"/>
+                    <field name="shipping_id"/>
                     <field name="invoice_type"/>
                 </group>
 

@@ -86,6 +86,7 @@ class AccountMove(models.Model):
         "E-Way bill Date",
         "E-way Amt",
         "Payment Method",
+        "Shipping Id",
         "Shipping State",
         "Shipping Country",
         "Shipping Pincode",
@@ -217,6 +218,7 @@ class AccountMove(models.Model):
     dw_bank_name = fields.Char(string="Bank Name", copy=False)
     dw_payment_reference = fields.Char(string="Payment Reference", copy=False)
     dw_payment_date_imported = fields.Date(string="Payment Date", copy=False)
+    dw_shipping_id = fields.Char(string="Shipping Id", copy=False)
 
     # ─── E-Invoice fields ────────────────────────────────────────────────────
     dw_irn_number = fields.Char(string="E-Invoice IRN Number", copy=False)
@@ -410,8 +412,8 @@ class AccountMove(models.Model):
         worksheet.set_column(7, 8, 16)
         worksheet.set_column(9, 21, 14)
         worksheet.set_column(22, 29, 18)
-        worksheet.set_column(30, 37, 22)
-        worksheet.set_column(38, 38, 50)
+        worksheet.set_column(30, 38, 22)
+        worksheet.set_column(39, 39, 50)
 
         for col, header in enumerate(self._INVOICE_XLSX_HEADERS):
             worksheet.write(0, col, header, header_format)
@@ -545,6 +547,7 @@ class AccountMove(models.Model):
             "",
             "",
             self.invoice_payment_term_id.name or "",
+            self.dw_shipping_id or "",
             self.shipping_state or "",
             self.shipping_country or "",
             self.shipping_pincode or "",

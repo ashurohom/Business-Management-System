@@ -11,6 +11,7 @@ class InvoiceImportWizard(models.TransientModel):
     file = fields.Binary(required=True)
     partner_id = fields.Many2one('res.partner', string='Customer', required=True)
     invoice_date = fields.Date(required=True)
+    shipping_id = fields.Char(string='Shipping Id')
     invoice_type = fields.Selection(
         selection=lambda self: self.env['account.move']._fields['invoice_type'].selection,
         required=True
@@ -82,6 +83,7 @@ class InvoiceImportWizard(models.TransientModel):
             'partner_id': self.partner_id.id,
             'invoice_date': self.invoice_date,
             'invoice_type': self.invoice_type,
+            'dw_shipping_id': self.shipping_id,
         }
 
         if seq:
