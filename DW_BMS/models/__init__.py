@@ -11,6 +11,7 @@ from . import bms_report_wizard
 from . import product_alert
 from . import product_extensions
 from . import product_storage_location
+from . import purchase_order
 from . import purchase_order_line
 from . import stock_picking
 from . import stock_picking_display_status

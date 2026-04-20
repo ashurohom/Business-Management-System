@@ -2,7 +2,7 @@
 <odoo>
 
     <menuitem id="menu_dw_bms_root"
-              name="Import Invoice"
+              name="Imports"
               parent="account.menu_finance"
               sequence="36"
               groups="DW_BMS.group_bms_admin,DW_BMS.group_bms_accounts"/>
@@ -18,7 +18,7 @@
               name="Logs"
               parent="menu_dw_bms_root"
               action="action_dw_invoice_import_log"
-              sequence="20"
+              sequence="30"
               groups="DW_BMS.group_bms_admin,DW_BMS.group_bms_accounts"/>
 
     <record id="view_account_move_inherit_import_btn" model="ir.ui.view">

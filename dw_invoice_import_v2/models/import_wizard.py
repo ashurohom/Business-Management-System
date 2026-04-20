@@ -9,14 +9,11 @@ class InvoiceImportWizard(models.TransientModel):
     _description = 'DW SKU Invoice Import Wizard'
 
     file = fields.Binary(required=True)
-    partner_id = fields.Many2one('res.partner', required=True)
+    partner_id = fields.Many2one('res.partner', string='Customer', required=True)
     invoice_date = fields.Date(required=True)
     invoice_type = fields.Selection(
         selection=lambda self: self.env['account.move']._fields['invoice_type'].selection,
         required=True
-    )
-    gst_treatment = fields.Selection(
-        selection=lambda self: self.env['account.move']._fields['l10n_in_gst_treatment'].selection
     )
 
     state = fields.Selection([
@@ -45,7 +42,9 @@ class InvoiceImportWizard(models.TransientModel):
         errors = []
 
         for idx, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
-            sku, qty, name = row
+            sku = row[0] if len(row) > 0 else False
+            qty = row[1] if len(row) > 1 else False
+            name = row[2] if len(row) > 2 else False
 
             if not sku or not qty:
                 continue
@@ -53,12 +52,19 @@ class InvoiceImportWizard(models.TransientModel):
             key = str(sku).strip().lower()
             product_id = alias_map.get(key)
 
+            if not product_id:
+                sku_text = str(sku).strip()
+                product = product_model.search([('name', '=ilike', sku_text)], limit=1)
+                if not product:
+                    product = product_model.search([('name', 'ilike', sku_text)], limit=1)
+                product_id = product.id if product else False
+
             if not product_id and name:
                 product = product_model.search([('name', 'ilike', name)], limit=1)
                 product_id = product.id if product else False
 
             if not product_id:
-                errors.append(f"Row {idx}: SKU not found → {sku}")
+                errors.append(f"Row {idx}: SKU/Product not found → {sku}")
                 continue
 
             product_qty[product_id] = product_qty.get(product_id, 0) + qty
@@ -76,7 +82,6 @@ class InvoiceImportWizard(models.TransientModel):
             'partner_id': self.partner_id.id,
             'invoice_date': self.invoice_date,
             'invoice_type': self.invoice_type,
-            'l10n_in_gst_treatment': self.gst_treatment,
         }
 
         if seq:
@@ -99,4 +104,14 @@ class InvoiceImportWizard(models.TransientModel):
 
         self.state = 'done'
 
-        return {'type': 'ir.actions.act_window_close'}
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Invoice Created',
+                'message': f"Invoice {invoice.name} created successfully.",
+                'type': 'success',
+                'sticky': False,
+                'next': {'type': 'ir.actions.act_window_close'},
+            },
+        }

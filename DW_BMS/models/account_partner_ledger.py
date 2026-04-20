@@ -10,7 +10,6 @@ class AccountCommonPartnerReport(models.TransientModel):
     partner_id = fields.Many2one(
         "res.partner",
         string="Customer",
-        domain=[("customer_rank", ">", 0)],
     )
 
     def pre_print_report(self, data):
