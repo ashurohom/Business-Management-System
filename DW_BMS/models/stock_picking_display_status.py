@@ -60,6 +60,7 @@ class StockPickingDisplayStatus(models.Model):
     display_status_key = fields.Char(
         string="Status Key",
         compute="_compute_display_status",
+        search="_search_display_status_key",
         store=False,
     )
 
@@ -162,3 +163,95 @@ class StockPickingDisplayStatus(models.Model):
             limit=1,
         )
         return shipping.shipping_status if shipping else False
+
+    @api.model
+    def _get_done_picking_status_key_map(self, pickings):
+        """
+        Batch-resolve the display status key for done pickings using the same
+        logic as the badge column:
+          - latest shipping status if present
+          - otherwise 'packed'
+        """
+        result = {}
+        done_pickings = pickings.filtered(lambda p: p.state == "done")
+        if not done_pickings:
+            return result
+
+        for picking in done_pickings.filtered(lambda p: not p.sale_id):
+            result[picking.id] = "packed"
+
+        sales = done_pickings.mapped("sale_id").filtered(bool)
+        if not sales:
+            return result
+
+        sale_invoice_map = {}
+        invoice_to_sale_ids = {}
+        invoice_ids = set()
+
+        for sale in sales:
+            invoices = sale.invoice_ids.filtered(lambda inv: inv.move_type == "out_invoice")
+            posted = invoices.filtered(lambda inv: inv.state == "posted")
+            lookup_invoices = posted if posted else invoices
+            sale_invoice_map[sale.id] = lookup_invoices.ids
+            for invoice in lookup_invoices:
+                invoice_ids.add(invoice.id)
+                invoice_to_sale_ids.setdefault(invoice.id, set()).add(sale.id)
+
+        latest_status_by_sale = {}
+        if invoice_ids:
+            shipping_records = self.env["shipping.management"].sudo().search(
+                [("invoice_id", "in", list(invoice_ids))],
+                order="id desc",
+            )
+            for shipping in shipping_records:
+                for sale_id in invoice_to_sale_ids.get(shipping.invoice_id.id, set()):
+                    if sale_id not in latest_status_by_sale:
+                        latest_status_by_sale[sale_id] = shipping.shipping_status
+
+        for picking in done_pickings.filtered(lambda p: p.sale_id):
+            result[picking.id] = latest_status_by_sale.get(picking.sale_id.id) or "packed"
+
+        return result
+
+    @api.model
+    def _search_display_status_key(self, operator, value):
+        supported = {"=", "!=", "in", "not in"}
+        if operator not in supported:
+            return [("id", "=", 0)]
+
+        if operator in {"=", "!="}:
+            values = {value}
+        else:
+            values = set(value or [])
+
+        regular_states = {"draft", "waiting", "confirmed", "assigned", "cancel"}
+        done_states = {
+            "packed",
+            "shipped",
+            "in_transit",
+            "out_for_delivery",
+            "delivered",
+            "complaint",
+            "rto",
+            "rto_received",
+        }
+
+        matching_ids = set()
+
+        regular_matches = values & regular_states
+        if regular_matches:
+            matching_ids.update(self.search([("state", "in", list(regular_matches))]).ids)
+
+        done_matches = values & done_states
+        if done_matches:
+            done_pickings = self.search([("state", "=", "done")])
+            status_key_map = self._get_done_picking_status_key_map(done_pickings)
+            matching_ids.update(
+                picking_id
+                for picking_id, status_key in status_key_map.items()
+                if status_key in done_matches
+            )
+
+        if operator in {"=", "in"}:
+            return [("id", "in", list(matching_ids) or [0])]
+        return [("id", "not in", list(matching_ids))]

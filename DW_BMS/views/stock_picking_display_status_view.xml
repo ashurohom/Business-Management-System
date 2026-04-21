@@ -70,35 +70,39 @@
 
                 <filter string="Shipped"
                         name="filter_shipped"
-                        domain="[('latest_shipping_status', '=', 'shipped')]"/>
+                        domain="[('display_status_key', '=', 'shipped')]"/>
+
+                <filter string="Packed (Done)"
+                        name="filter_packed_done"
+                        domain="[('display_status_key', '=', 'packed')]"/>
 
                 <filter string="In Transit"
                         name="filter_in_transit"
-                        domain="[('latest_shipping_status', '=', 'in_transit')]"/>
+                        domain="[('display_status_key', '=', 'in_transit')]"/>
 
                 <filter string="Out for Delivery"
                         name="filter_out_for_delivery"
-                        domain="[('latest_shipping_status', '=', 'out_for_delivery')]"/>
+                        domain="[('display_status_key', '=', 'out_for_delivery')]"/>
 
                 <filter string="Delivered"
                         name="filter_delivered"
-                        domain="[('latest_shipping_status', '=', 'delivered')]"/>
+                        domain="[('display_status_key', '=', 'delivered')]"/>
 
                 <filter string="RTO"
                         name="filter_rto"
-                        domain="[('latest_shipping_status', '=', 'rto')]"/>
+                        domain="[('display_status_key', '=', 'rto')]"/>
 
                 <filter string="RTO Received"
                         name="filter_rto_received"
-                        domain="[('latest_shipping_status', '=', 'rto_received')]"/>
+                        domain="[('display_status_key', '=', 'rto_received')]"/>
 
                 <filter string="Complaint"
                         name="filter_complaint"
-                        domain="[('latest_shipping_status', '=', 'complaint')]"/>
+                        domain="[('display_status_key', '=', 'complaint')]"/>
 
                 <filter string="Cancelled"
                         name="filter_cancelled"
-                        domain="[('latest_shipping_status', '=', 'cancel')]"/>
+                        domain="[('display_status_key', '=', 'cancel')]"/>
 
             </xpath>
         </field>
