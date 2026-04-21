@@ -9,12 +9,21 @@ access_bms_admin_sale_line,bms admin sale order line,sale.model_sale_order_line,
 access_bms_admin_purchase,bms admin purchase,purchase.model_purchase_order,DW_BMS.group_bms_admin,1,1,1,1
 access_bms_admin_account_move,bms admin account move,account.model_account_move,DW_BMS.group_bms_admin,1,1,1,1
 access_bms_admin_stock_picking,bms admin stock picking,stock.model_stock_picking,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_admin_stock_picking_type,bms admin stock picking type,stock.model_stock_picking_type,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_admin_stock_move,bms admin stock move,stock.model_stock_move,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_admin_stock_move_line,bms admin stock move line,stock.model_stock_move_line,DW_BMS.group_bms_admin,1,1,1,1
+access_bms_admin_stock_lot,bms admin stock lot,stock.model_stock_lot,DW_BMS.group_bms_admin,1,1,1,1
 
 
 
 access_bms_inventory_partner,bms inventory partner read,base.model_res_partner,DW_BMS.group_bms_inventory,1,0,0,0
 access_bms_inventory_product,bms inventory product read,product.model_product_product,DW_BMS.group_bms_inventory,1,0,0,0
 access_bms_inventory_product_alias,bms inventory product alias,DW_BMS.model_dw_product_name_alias,DW_BMS.group_bms_inventory,1,0,0,0
+access_bms_inventory_stock_picking,bms inventory stock picking,stock.model_stock_picking,DW_BMS.group_bms_inventory,1,1,1,0
+access_bms_inventory_stock_picking_type,bms inventory stock picking type read,stock.model_stock_picking_type,DW_BMS.group_bms_inventory,1,0,0,0
+access_bms_inventory_stock_move,bms inventory stock move,stock.model_stock_move,DW_BMS.group_bms_inventory,1,1,1,0
+access_bms_inventory_stock_move_line,bms inventory stock move line,stock.model_stock_move_line,DW_BMS.group_bms_inventory,1,1,1,0
+access_bms_inventory_stock_lot,bms inventory stock lot,stock.model_stock_lot,DW_BMS.group_bms_inventory,1,1,1,0
 access_bms_inventory_report_wizard,bms inventory report wizard,DW_BMS.model_bms_report_wizard,DW_BMS.group_bms_inventory,1,1,1,0
 
 access_bms_sales_partner,bms sales partner read,base.model_res_partner,DW_BMS.group_bms_sales,1,0,0,0

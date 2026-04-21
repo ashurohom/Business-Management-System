@@ -468,6 +468,7 @@
                                     <th class="text-right">Total</th>
                                     <th class="text-right">Paid</th>
                                     <th class="text-right">Pending</th>
+                                    <th t-if="report_data['report_type'] == 'purchase_payment'" class="text-left">Bank Name</th>
                                     <th class="text-center">Status</th>
                                 </tr>
                             </thead>
@@ -479,6 +480,7 @@
                                     <td class="text-right"><span t-esc="line['total']"/></td>
                                     <td class="text-right" style="color:#27ae60;"><span t-esc="line['paid']"/></td>
                                     <td class="text-right" style="color:#e74c3c;"><span t-esc="line['pending']"/></td>
+                                    <td t-if="report_data['report_type'] == 'purchase_payment'"><span t-esc="line.get('bank_name', '')"/></td>
                                     <td class="text-center text-muted"><span t-esc="line['payment_state']"/></td>
                                 </tr>
                             </tbody>

@@ -38,6 +38,9 @@ class StockPicking(models.Model):
         string="Delivered Notes",
         copy=False,
     )
+    is_packing_restricted_user = fields.Boolean(
+        compute="_compute_is_packing_restricted_user",
+    )
     dispatch_mode_id = fields.Many2one(
         "packing.dispatch.mode",
         string="Dispatch Mode",
@@ -45,12 +48,49 @@ class StockPicking(models.Model):
         store=False,
     )
 
+    def _is_packing_restricted_user(self):
+        user = self.env.user
+        return user.has_group("DW_BMS.group_packing_team") and not (
+            user.has_group("DW_BMS.group_bms_admin")
+            or user.has_group("DW_BMS.group_bms_inventory")
+            or user.has_group("base.group_system")
+        )
 
+    def _compute_is_packing_restricted_user(self):
+        restricted = self._is_packing_restricted_user()
+        for picking in self:
+            picking.is_packing_restricted_user = restricted
+
+    def _get_default_customer_location(self):
+        return self.env.ref("stock.stock_location_customers", raise_if_not_found=False)
+
+    @api.model
+    def default_get(self, fields_list):
+        vals = super().default_get(fields_list)
+        picking_type_id = vals.get("picking_type_id") or self.env.context.get("default_picking_type_id")
+        picking_type = self.env["stock.picking.type"].browse(picking_type_id)
+        if (
+            picking_type
+            and picking_type.code == "outgoing"
+            and not vals.get("location_dest_id")
+            and "location_dest_id" in fields_list
+        ):
+            customer_location = self._get_default_customer_location()
+            if customer_location:
+                vals["location_dest_id"] = customer_location.id
+        return vals
 
     @api.model_create_multi
     def create(self, vals_list):
-        if self.env.user.has_group("DW_BMS.group_packing_team"):
+        if self._is_packing_restricted_user():
             raise UserError("Packing Team users are not allowed to create deliveries.")
+
+        customer_location = self._get_default_customer_location()
+        for vals in vals_list:
+            picking_type_id = vals.get("picking_type_id") or self.env.context.get("default_picking_type_id")
+            picking_type = self.env["stock.picking.type"].browse(picking_type_id)
+            if picking_type and picking_type.code == "outgoing" and not vals.get("location_dest_id") and customer_location:
+                vals["location_dest_id"] = customer_location.id
 
         pickings = super().create(vals_list)
         return pickings
@@ -96,7 +136,7 @@ class StockPicking(models.Model):
         return res
 
     def unlink(self):
-        if self.env.user.has_group("DW_BMS.group_packing_team"):
+        if self._is_packing_restricted_user():
             raise UserError("Packing Team users are not allowed to delete deliveries.")
         return super().unlink()
 

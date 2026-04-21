@@ -291,10 +291,19 @@ class BmsReportWizard(models.TransientModel):
                     "total": move.amount_total,
                     "paid": paid_amount,
                     "pending": move.amount_residual,
+                    "bank_name": self._get_move_bank_name(move),
                     "payment_state": move.payment_state,
                 }
             )
         return {"payment_lines": lines, "total_paid": total_paid, "total_pending": total_pending}
+
+    def _get_move_bank_name(self, move):
+        if move.dw_bank_name:
+            return move.dw_bank_name
+
+        payments = move._get_reconciled_payments()
+        bank_names = payments.mapped("journal_id.display_name")
+        return ", ".join(dict.fromkeys(bank_names))
 
     def _collect_sales_payment(self):
         domain = [("state", "=", "posted"), ("move_type", "in", ("out_invoice", "out_refund"))]
@@ -578,14 +587,23 @@ class BmsReportWizard(models.TransientModel):
             sheet.write(row, 0, "Total Pending", bold)
             sheet.write(row, 1, data["total_pending"], money)
             row += 2
+            payment_headers = ["Reference", "Date", "Partner", "Total", "Paid", "Pending"]
+            payment_rows = [
+                [l["name"], l["date"], l["partner"], l["total"], l["paid"], l["pending"]]
+                for l in data["payment_lines"]
+            ]
+            if data["report_type"] == "purchase_payment":
+                payment_headers.append("Bank Name")
+                for payment_row, line in zip(payment_rows, data["payment_lines"]):
+                    payment_row.append(line.get("bank_name", ""))
+            payment_headers.append("Payment State")
+            for payment_row, line in zip(payment_rows, data["payment_lines"]):
+                payment_row.append(line["payment_state"])
             row = self._write_table(
                 sheet,
                 row,
-                ["Reference", "Date", "Partner", "Total", "Paid", "Pending", "Payment State"],
-                [
-                    [l["name"], l["date"], l["partner"], l["total"], l["paid"], l["pending"], l["payment_state"]]
-                    for l in data["payment_lines"]
-                ],
+                payment_headers,
+                payment_rows,
                 bold,
                 money,
             )
