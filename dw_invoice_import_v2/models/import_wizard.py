@@ -3,9 +3,16 @@ import io
 
 import openpyxl
 
-from odoo import fields, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools.float_utils import float_compare
+
+
+class InvoiceImportSheet(models.TransientModel):
+    _name = 'dw.invoice.import.v2.sheet'
+    _description = 'DW Import Sheet'
+
+    name = fields.Char(string='Sheet Name', required=True)
 
 
 class InvoiceImportWizard(models.TransientModel):
@@ -13,6 +20,7 @@ class InvoiceImportWizard(models.TransientModel):
     _description = 'DW SKU Invoice Import Wizard'
 
     file = fields.Binary(required=True)
+    sheet_id = fields.Many2one('dw.invoice.import.v2.sheet', string='Sheet', required=True)
     partner_id = fields.Many2one('res.partner', string='Customer', required=True)
     invoice_date = fields.Date(required=True)
     shipping_id = fields.Char(string='Shipping Id')
@@ -29,6 +37,33 @@ class InvoiceImportWizard(models.TransientModel):
     @staticmethod
     def _normalize_key(value):
         return str(value).strip().lower() if value not in (False, None) else False
+
+    def _decode_workbook(self):
+        if not self.file:
+            raise UserError("Please upload file.")
+        try:
+            data = base64.b64decode(self.file)
+            return openpyxl.load_workbook(io.BytesIO(data), read_only=True)
+        except Exception as error:
+            raise UserError("Please upload a valid Excel file.") from error
+
+    @api.onchange('file')
+    def _onchange_file(self):
+        self.sheet_id = False
+        if not self.file:
+            return
+
+        wb = self._decode_workbook()
+        sheet_names = wb.sheetnames
+        if not sheet_names:
+            raise UserError("No sheets found in the uploaded Excel file.")
+
+        sheets = self.env['dw.invoice.import.v2.sheet'].create([
+            {'name': name} for name in sheet_names
+        ])
+        
+        self.sheet_id = sheets[0]
+        return {'domain': {'sheet_id': [('id', 'in', sheets.ids)]}}
 
     def _get_outgoing_picking_type(self, company):
         picking_type = self.env['stock.picking.type'].search([
@@ -137,12 +172,11 @@ class InvoiceImportWizard(models.TransientModel):
         return picking
 
     def action_import(self):
-        if not self.file:
-            raise UserError("Please upload file.")
-
-        data = base64.b64decode(self.file)
-        wb = openpyxl.load_workbook(io.BytesIO(data), read_only=True)
-        sheet = wb.active
+        wb = self._decode_workbook()
+        if self.sheet_id and self.sheet_id.name in wb.sheetnames:
+            sheet = wb[self.sheet_id.name]
+        else:
+            sheet = wb.active
 
         alias_model = self.env['dw.product.name.alias']
         product_model = self.env['product.product']

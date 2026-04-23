@@ -8,6 +8,7 @@
             <form string="DW SKU Invoice Import">
                 <group>
                     <field name="file"/>
+                    <field name="sheet_id"/>
                     <field name="partner_id"/>
                     <field name="invoice_date"/>
                     <field name="shipping_id"/>
