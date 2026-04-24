@@ -78,6 +78,8 @@ class AccountMove(models.Model):
         "Tax (Taxes)",
         "Unit Price Including Tax",
         "Total",
+        "Rounding Amount",
+        "Invoice Total Amount",
         "IRN Number",
         "E-Invoice ACK. NO.",
         "E-Invoice Date",
@@ -410,10 +412,10 @@ class AccountMove(models.Model):
         worksheet.set_column(3, 4, 24)
         worksheet.set_column(5, 6, 20)
         worksheet.set_column(7, 8, 16)
-        worksheet.set_column(9, 21, 14)
-        worksheet.set_column(22, 29, 18)
-        worksheet.set_column(30, 38, 22)
-        worksheet.set_column(39, 39, 50)
+        worksheet.set_column(9, 23, 14)
+        worksheet.set_column(24, 31, 18)
+        worksheet.set_column(32, 40, 22)
+        worksheet.set_column(41, 41, 50)
 
         for col, header in enumerate(self._INVOICE_XLSX_HEADERS):
             worksheet.write(0, col, header, header_format)
@@ -539,6 +541,8 @@ class AccountMove(models.Model):
             tax_names,
             unit_price_inc_tax,
             total_inc_tax,
+            abs(sum(self.line_ids.filtered(lambda l: l.display_type == 'rounding').mapped('amount_currency'))),
+            self.amount_total,
             "",
             "",
             "",
