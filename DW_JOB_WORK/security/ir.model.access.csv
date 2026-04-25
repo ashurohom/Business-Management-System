@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_issue,issue,model_dw_job_work_issue,,1,1,1,1
+access_receipt,receipt,model_dw_job_work_receipt,,1,1,1,1
+access_dashboard,dashboard,model_dw_job_work_dashboard,,1,1,1,1

@@ -1,0 +1,8 @@
+
+<odoo>
+<record id="job_work_receipt_action" model="ir.actions.act_window">
+    <field name="name">Receipt</field>
+    <field name="res_model">dw.job.work.receipt</field>
+    <field name="view_mode">tree,form</field>
+</record>
+</odoo>

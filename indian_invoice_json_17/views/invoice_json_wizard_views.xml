@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_invoice_json_wizard_form" model="ir.ui.view">
+        <field name="name">invoice.json.wizard.form</field>
+        <field name="model">invoice.json.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Generate Government JSON">
+                <sheet>
+                    <group>
+                        <field name="json_type"/>
+                        <field name="move_ids" widget="many2many_tags" readonly="1"/>
+                    </group>
+
+                    <!-- IMPORTANT: hidden fields must exist -->
+                    <field name="file_data" invisible="1"/>
+                    <field name="file_name" invisible="1"/>
+
+                    <group>
+                        <field name="preview_json" readonly="1"
+                               invisible="not preview_json"/>
+                    </group>
+                </sheet>
+
+                <footer>
+                    <button name="action_generate_preview"
+                            string="Generate"
+                            type="object"
+                            class="btn-primary"/>
+
+                    <button name="action_download_json"
+                            string="Download"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="not file_data"/>
+
+                    <button string="Close"
+                            special="cancel"
+                            class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

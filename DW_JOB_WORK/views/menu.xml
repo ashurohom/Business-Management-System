@@ -1,0 +1,7 @@
+
+<odoo>
+    <menuitem id="job_work_root" name="Job Work"/>
+    <menuitem id="job_work_issue_menu" parent="job_work_root" action="job_work_issue_action"/>
+    <menuitem id="job_work_receipt_menu" parent="job_work_root" action="job_work_receipt_action"/>
+    <menuitem id="job_work_dashboard_menu" parent="job_work_root" action="job_work_dashboard_action"/>
+</odoo>

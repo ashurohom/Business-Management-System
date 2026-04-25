@@ -20,6 +20,7 @@ class InvoiceImportWizard(models.TransientModel):
     _description = 'DW SKU Invoice Import Wizard'
 
     file = fields.Binary(required=True)
+    available_sheet_ids = fields.Many2many('dw.invoice.import.v2.sheet', string="Available Sheets")
     sheet_id = fields.Many2one('dw.invoice.import.v2.sheet', string='Sheet', required=True)
     partner_id = fields.Many2one('res.partner', string='Customer', required=True)
     invoice_date = fields.Date(required=True)
@@ -50,6 +51,7 @@ class InvoiceImportWizard(models.TransientModel):
     @api.onchange('file')
     def _onchange_file(self):
         self.sheet_id = False
+        self.available_sheet_ids = [(5, 0, 0)]
         if not self.file:
             return
 
@@ -62,8 +64,8 @@ class InvoiceImportWizard(models.TransientModel):
             {'name': name} for name in sheet_names
         ])
         
-        self.sheet_id = sheets[0]
-        return {'domain': {'sheet_id': [('id', 'in', sheets.ids)]}}
+        self.available_sheet_ids = [(6, 0, sheets.ids)]
+        self.sheet_id = sheets[0] if sheets else False
 
     def _get_outgoing_picking_type(self, company):
         picking_type = self.env['stock.picking.type'].search([
@@ -210,7 +212,8 @@ class InvoiceImportWizard(models.TransientModel):
             )
 
             if not product_id:
-                errors.append(f"Row {idx}: SKU/Product not found -> {sku}")
+                identifier = name.strip() if name else str(sku).strip()
+                errors.append(f"Product '{identifier}' is not available in the system.")
                 continue
 
             product_qty[product_id] = product_qty.get(product_id, 0.0) + qty

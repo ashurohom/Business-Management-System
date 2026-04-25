@@ -247,4 +247,17 @@
         </field>
     </record>
 
+    <record id="view_account_invoice_filter_custom_b2b_b2c" model="ir.ui.view">
+        <field name="name">account.invoice.select.custom.b2b.b2c</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <separator/>
+                <filter string="B2B (Has Tax ID)" name="filter_b2b_tax_id" domain="[('partner_id.vat', '!=', False)]"/>
+                <filter string="B2C (No Tax ID)" name="filter_b2c_no_tax_id" domain="[('partner_id.vat', '=', False)]"/>
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

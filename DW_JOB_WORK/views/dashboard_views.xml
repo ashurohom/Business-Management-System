@@ -1,0 +1,8 @@
+
+<odoo>
+<record id="job_work_dashboard_action" model="ir.actions.act_window">
+    <field name="name">Dashboard</field>
+    <field name="res_model">dw.job.work.dashboard</field>
+    <field name="view_mode">tree</field>
+</record>
+</odoo>

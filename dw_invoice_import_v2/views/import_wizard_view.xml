@@ -8,7 +8,8 @@
             <form string="DW SKU Invoice Import">
                 <group>
                     <field name="file"/>
-                    <field name="sheet_id"/>
+                    <field name="available_sheet_ids" invisible="1"/>
+                    <field name="sheet_id" domain="[('id', 'in', available_sheet_ids)]"/>
                     <field name="partner_id"/>
                     <field name="invoice_date"/>
                     <field name="shipping_id"/>
