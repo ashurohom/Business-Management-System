@@ -1,8 +1,51 @@
-
 <odoo>
-<record id="job_work_receipt_action" model="ir.actions.act_window">
-    <field name="name">Receipt</field>
-    <field name="res_model">dw.job.work.receipt</field>
-    <field name="view_mode">tree,form</field>
-</record>
+    <record id="view_job_work_receipt_tree" model="ir.ui.view">
+        <field name="name">dw.job.work.receipt.tree</field>
+        <field name="model">dw.job.work.receipt</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="receipt_date"/>
+                <field name="contractor_id"/>
+                <field name="raw_material_product_id"/>
+                <field name="qty_used"/>
+                <field name="finished_product_id"/>
+                <field name="qty_produced"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_job_work_receipt_form" model="ir.ui.view">
+        <field name="name">dw.job.work.receipt.form</field>
+        <field name="model">dw.job.work.receipt</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" type="object" string="Confirm" class="btn-primary" invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="receipt_date" readonly="state != 'draft'"/>
+                            <field name="contractor_id" readonly="state != 'draft'"/>
+                            <field name="raw_material_product_id" readonly="state != 'draft'"/>
+                            <field name="available_qty" readonly="1"/>
+                            <field name="qty_used" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="finished_product_id" readonly="state != 'draft'"/>
+                            <field name="qty_produced" readonly="state != 'draft'"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="job_work_receipt_action" model="ir.actions.act_window">
+        <field name="name">Job Work Receipt</field>
+        <field name="res_model">dw.job.work.receipt</field>
+        <field name="view_mode">tree,form</field>
+    </record>
 </odoo>

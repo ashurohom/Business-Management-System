@@ -1,8 +1,18 @@
-
 <odoo>
-<record id="job_work_dashboard_action" model="ir.actions.act_window">
-    <field name="name">Dashboard</field>
-    <field name="res_model">dw.job.work.dashboard</field>
-    <field name="view_mode">tree</field>
-</record>
+    <record id="view_job_work_dashboard_tree" model="ir.ui.view">
+        <field name="name">dw.job.work.dashboard.tree</field>
+        <field name="model">dw.job.work.dashboard</field>
+        <field name="arch" type="xml">
+            <tree create="0" edit="0" delete="0">
+                <field name="contractor_id"/>
+                <field name="total_remaining"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="job_work_dashboard_action" model="ir.actions.act_window">
+        <field name="name">Job Work Dashboard</field>
+        <field name="res_model">dw.job.work.dashboard</field>
+        <field name="view_mode">tree</field>
+    </record>
 </odoo>

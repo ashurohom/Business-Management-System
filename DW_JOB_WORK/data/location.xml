@@ -1,15 +1,16 @@
-
 <odoo>
-    <record id="job_work_location" model="stock.location">
-        <field name="name">Job Work</field>
-        <field name="usage">internal</field>
-        <field name="location_id" ref="stock.stock_location_locations"/>
-    </record>
+    <data noupdate="1">
+        <record id="job_work_location" model="stock.location">
+            <field name="name">Job Work</field>
+            <field name="usage">internal</field>
+            <field name="location_id" ref="stock.stock_location_stock"/>
+        </record>
 
-    <record id="seq_job_work" model="ir.sequence">
-        <field name="name">Job Work</field>
-        <field name="code">dw.job.work</field>
-        <field name="prefix">JW/</field>
-        <field name="padding">3</field>
-    </record>
+        <record id="seq_job_work" model="ir.sequence">
+            <field name="name">Job Work</field>
+            <field name="code">dw.job.work</field>
+            <field name="prefix">JW/</field>
+            <field name="padding">3</field>
+        </record>
+    </data>
 </odoo>
