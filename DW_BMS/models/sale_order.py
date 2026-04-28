@@ -764,8 +764,30 @@ class SaleOrder(models.Model):
         return res
 
     def action_confirm(self):
+        for order in self:
+            partner = order.partner_id
+            missing = []
+
+            # Check Mobile OR Phone
+            if not (partner.mobile or partner.phone):
+                missing.append("Mobile or Phone Number")
+
+            # Check PIN Code
+            if not partner.zip:
+                missing.append("PIN Code")
+
+            if missing:
+                raise UserError(
+                    "Cannot confirm quotation '%s'.\n"
+                    "The following mandatory field(s) are missing on customer '%s':\n• %s\n\n"
+                    "Please update the customer record and try again."
+                    % (order.name, partner.name, "\n• ".join(missing))
+                )
+
         self._check_duplicate_products_in_order_line()
+
         res = super().action_confirm()
+
         for order in self:
             order.env['activity.timeline'].create({
                 'quotation_id': order.id,
@@ -773,4 +795,5 @@ class SaleOrder(models.Model):
                 'description': f'Sales Order {order.name} confirmed.',
                 'status': 'Confirmed',
             })
+
         return res

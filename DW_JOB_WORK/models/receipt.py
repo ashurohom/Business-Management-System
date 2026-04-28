@@ -28,12 +28,12 @@ class JobWorkReceipt(models.Model):
         readonly=True,
     )
     qty_used = fields.Float(string="Raw Material Used", required=True)
-    finished_product_id = fields.Many2one(
-        "product.product",
-        string="Finished Product",
-        required=True,
+    line_ids = fields.One2many(
+        "dw.job.work.receipt.line",
+        "receipt_id",
+        string="Finished Products",
+        copy=True,
     )
-    qty_produced = fields.Float(string="Finished Quantity", required=True)
     state = fields.Selection(
         [("draft", "Draft"), ("confirmed", "Confirmed")],
         default="draft",
@@ -61,13 +61,11 @@ class JobWorkReceipt(models.Model):
             )
             rec.available_qty = grouped[0]["remaining_qty"] if grouped else 0.0
 
-    @api.constrains("qty_used", "qty_produced")
+    @api.constrains("qty_used")
     def _check_positive_quantities(self):
         for rec in self:
             if rec.qty_used <= 0:
                 raise ValidationError(_("Raw material used must be greater than zero."))
-            if rec.qty_produced <= 0:
-                raise ValidationError(_("Finished quantity must be greater than zero."))
 
     def action_confirm(self):
         inventory_location = self.env["stock.location"].sudo().search(
@@ -82,6 +80,8 @@ class JobWorkReceipt(models.Model):
         for rec in self:
             if rec.state != "draft":
                 continue
+            if not rec.line_ids:
+                raise ValidationError(_("Add at least one finished product line before confirming."))
             if rec.qty_used > rec.available_qty:
                 raise ValidationError(
                     _(
@@ -131,20 +131,57 @@ class JobWorkReceipt(models.Model):
             raw_move.picked = True
             raw_move._action_done()
 
-            finished_move = self.env["stock.move"].create(
-                {
-                    "name": _("%s Finished Receipt", rec.contractor_id.display_name),
-                    "product_id": rec.finished_product_id.id,
-                    "product_uom_qty": rec.qty_produced,
-                    "product_uom": rec.finished_product_id.uom_id.id,
-                    "location_id": inventory_location.id,
-                    "location_dest_id": stock_location.id,
-                    "company_id": self.env.company.id,
-                    "is_inventory": True,
-                }
-            )
-            finished_move._action_confirm()
-            finished_move.quantity = rec.qty_produced
-            finished_move.picked = True
-            finished_move._action_done()
+            finished_moves = self.env["stock.move"]
+            for line in rec.line_ids:
+                finished_move = self.env["stock.move"].create(
+                    {
+                        "name": _("%s Finished Receipt", rec.contractor_id.display_name),
+                        "product_id": line.product_id.id,
+                        "product_uom_qty": line.qty,
+                        "product_uom": line.product_uom_id.id,
+                        "location_id": inventory_location.id,
+                        "location_dest_id": stock_location.id,
+                        "company_id": self.env.company.id,
+                        "is_inventory": True,
+                    }
+                )
+                finished_moves |= finished_move
+            finished_moves._action_confirm()
+            for move in finished_moves:
+                move.quantity = move.product_uom_qty
+                move.picked = True
+            finished_moves._action_done()
             rec.state = "confirmed"
+
+
+class JobWorkReceiptLine(models.Model):
+    _name = "dw.job.work.receipt.line"
+    _description = "Job Work Receipt Line"
+    _order = "receipt_id, id"
+
+    receipt_id = fields.Many2one(
+        "dw.job.work.receipt",
+        string="Receipt",
+        required=True,
+        ondelete="cascade",
+    )
+    product_id = fields.Many2one(
+        "product.product",
+        string="Finished Product",
+        required=True,
+    )
+    product_uom_id = fields.Many2one(
+        "uom.uom",
+        string="Unit",
+        related="product_id.uom_id",
+        store=True,
+        readonly=True,
+    )
+    qty = fields.Float(string="Finished Quantity", required=True)
+    state = fields.Selection(related="receipt_id.state", store=True, readonly=True)
+
+    @api.constrains("qty")
+    def _check_positive_qty(self):
+        for rec in self:
+            if rec.qty <= 0:
+                raise ValidationError(_("Finished quantity must be greater than zero."))

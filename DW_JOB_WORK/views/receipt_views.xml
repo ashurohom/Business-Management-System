@@ -8,8 +8,6 @@
                 <field name="contractor_id"/>
                 <field name="raw_material_product_id"/>
                 <field name="qty_used"/>
-                <field name="finished_product_id"/>
-                <field name="qty_produced"/>
                 <field name="state"/>
             </tree>
         </field>
@@ -33,11 +31,18 @@
                             <field name="available_qty" readonly="1"/>
                             <field name="qty_used" readonly="state != 'draft'"/>
                         </group>
-                        <group>
-                            <field name="finished_product_id" readonly="state != 'draft'"/>
-                            <field name="qty_produced" readonly="state != 'draft'"/>
-                        </group>
                     </group>
+                    <notebook>
+                        <page string="Finished Products">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <tree editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="product_uom_id" readonly="1"/>
+                                    <field name="qty"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

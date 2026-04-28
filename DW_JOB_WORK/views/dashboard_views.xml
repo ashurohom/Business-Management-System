@@ -5,7 +5,9 @@
         <field name="arch" type="xml">
             <tree create="0" edit="0" delete="0">
                 <field name="contractor_id"/>
+                <field name="product_id"/>
                 <field name="total_remaining"/>
+                <field name="product_uom_id"/>
             </tree>
         </field>
     </record>
@@ -14,5 +16,6 @@
         <field name="name">Job Work Dashboard</field>
         <field name="res_model">dw.job.work.dashboard</field>
         <field name="view_mode">tree</field>
+        <field name="context">{'group_by': ['contractor_id']}</field>
     </record>
 </odoo>

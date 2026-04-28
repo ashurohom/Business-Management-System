@@ -41,11 +41,27 @@ class JobWorkIssue(models.Model):
         compute="_compute_remaining_qty",
         store=True,
     )
+    remaining_summary = fields.Char(
+        string="Remaining Quantity",
+        compute="_compute_remaining_summary",
+    )
 
     @api.depends("line_ids.remaining_qty")
     def _compute_remaining_qty(self):
         for rec in self:
             rec.remaining_qty = sum(rec.line_ids.mapped("remaining_qty"))
+
+    @api.depends("line_ids.remaining_qty", "line_ids.product_id", "line_ids.product_uom_id")
+    def _compute_remaining_summary(self):
+        for rec in self:
+            parts = []
+            for line in rec.line_ids.filtered(lambda l: l.product_id and l.remaining_qty):
+                uom_name = line.product_uom_id.name or ""
+                qty_text = f"{line.remaining_qty:g}"
+                parts.append(
+                    f"{line.product_id.display_name}: {qty_text}{(' ' + uom_name) if uom_name else ''}"
+                )
+            rec.remaining_summary = ", ".join(parts)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -112,6 +128,13 @@ class JobWorkIssueLine(models.Model):
     product_free_qty = fields.Float(
         string="Free Quantity",
         compute="_compute_product_free_qty",
+        readonly=True,
+    )
+    product_uom_id = fields.Many2one(
+        "uom.uom",
+        string="Unit",
+        related="product_id.uom_id",
+        store=True,
         readonly=True,
     )
     qty = fields.Float(string="Issued Quantity", required=True)

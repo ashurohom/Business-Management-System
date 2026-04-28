@@ -8,6 +8,8 @@ class JobWorkDashboard(models.Model):
     _rec_name = "contractor_id"
 
     contractor_id = fields.Many2one("res.partner", string="Contractor", readonly=True)
+    product_id = fields.Many2one("product.product", string="Raw Material", readonly=True)
+    product_uom_id = fields.Many2one("uom.uom", string="Unit", readonly=True)
     total_remaining = fields.Float(string="Total Remaining Raw Material", readonly=True)
 
     def init(self):
@@ -30,11 +32,18 @@ class JobWorkDashboard(models.Model):
                 SELECT
                     MIN(line.id) AS id,
                     issue.contractor_id AS contractor_id,
+                    line.product_id AS product_id,
+                    product_template.uom_id AS product_uom_id,
                     COALESCE(SUM(line.remaining_qty), 0) AS total_remaining
                 FROM dw_job_work_issue_line line
                 JOIN dw_job_work_issue issue ON issue.id = line.issue_id
+                JOIN product_product product_product ON product_product.id = line.product_id
+                JOIN product_template product_template ON product_template.id = product_product.product_tmpl_id
                 WHERE issue.state = 'confirmed'
-                GROUP BY issue.contractor_id
+                GROUP BY
+                    issue.contractor_id,
+                    line.product_id,
+                    product_template.uom_id
                 HAVING COALESCE(SUM(line.remaining_qty), 0) > 0
             )
             """
