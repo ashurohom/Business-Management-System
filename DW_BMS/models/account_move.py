@@ -12,6 +12,28 @@ from odoo.tools.safe_eval import safe_eval
 class AccountMove(models.Model):
     _inherit = "account.move"
 
+    @api.model
+    def _has_explicit_delivery_address_vals(self, vals):
+        tracked_fields = (
+            "billing_partner_id",
+            "billing_customer_name",
+            "billing_mobile",
+            "bill_to_address",
+            "bill_to_city",
+            "bill_to_state_id",
+            "bill_to_country",
+            "bill_to_zip",
+            "shipping_partner_id",
+            "shipping_customer_name",
+            "shipping_mobile",
+            "ship_to_address",
+            "ship_to_city",
+            "ship_to_state_id",
+            "ship_to_country",
+            "ship_to_zip",
+        )
+        return any(vals.get(field) not in (False, None, "") for field in tracked_fields)
+
     def _get_default_cash_rounding(self):
         self.ensure_one()
         rounding_model = self.env["account.cash.rounding"].sudo()
@@ -1097,10 +1119,20 @@ class AccountMove(models.Model):
             ):
                 vals["invoice_date"] = today
         moves = super().create(vals_list)
-        for move in moves.filtered(lambda m: m.move_type in ("out_invoice", "out_refund")):
+        explicit_delivery_vals_by_move = {}
+        for move, create_vals in zip(moves, vals_list):
+            if move.move_type not in ("out_invoice", "out_refund"):
+                continue
+            has_explicit_delivery_vals = self._has_explicit_delivery_address_vals(create_vals)
+            explicit_delivery_vals_by_move[move.id] = has_explicit_delivery_vals
+            if has_explicit_delivery_vals:
+                continue
             super(AccountMove, move).write(move._get_delivery_type_default_vals())
         moves._apply_default_cash_rounding()
-        moves._sync_invoice_address_partners()
+        moves.filtered(
+            lambda m: m.move_type in ("out_invoice", "out_refund")
+            and not explicit_delivery_vals_by_move.get(m.id)
+        )._sync_invoice_address_partners()
         return moves
 
     def write(self, vals):

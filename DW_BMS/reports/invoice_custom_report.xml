@@ -402,12 +402,11 @@
                             <td style="width:33%; border-right: 1px solid #b0bcd4;">
                                 <div class="inv-addr-heading">Bill To</div>
                                 <div class="inv-addr-name">
-                                    <span t-field="doc.partner_id.name"/>
+                                    <span t-esc="doc.billing_customer_name or (doc.billing_partner_id and doc.billing_partner_id.name) or doc.partner_id.name"/>
                                 </div>
                                 <div class="inv-addr-text">
                                     <t t-set="bill_to_contact_number" t-value="doc.billing_mobile or (doc.billing_partner_id and (doc.billing_partner_id.phone or doc.billing_partner_id.mobile)) or customer_contact_number"/>
                                     <t t-if="doc.bill_to_same_as_customer">
-                                        <!-- Use partner address when same as customer -->
                                         <span t-esc="doc.partner_id.street or ''"/>
                                         <t t-if="doc.partner_id.street2">
                                             , <span t-esc="doc.partner_id.street2"/>
@@ -423,7 +422,6 @@
                                         </t>
                                     </t>
                                     <t t-else="">
-                                        <!-- Custom bill-to address -->
                                         <t t-if="doc.bill_to_address">
                                             <span t-esc="doc.bill_to_address"/>
                                         </t>
@@ -448,12 +446,11 @@
                             <td style="width:34%;">
                                 <div class="inv-addr-heading">Ship To</div>
                                 <div class="inv-addr-name">
-                                    <span t-field="doc.partner_id.name"/>
+                                    <span t-esc="doc.shipping_customer_name or (doc.shipping_partner_id and doc.shipping_partner_id.name) or doc.partner_id.name"/>
                                 </div>
                                 <div class="inv-addr-text">
                                     <t t-set="ship_to_contact_number" t-value="doc.shipping_mobile or (doc.shipping_partner_id and (doc.shipping_partner_id.phone or doc.shipping_partner_id.mobile)) or customer_contact_number"/>
                                     <t t-if="doc.ship_to_same_as_customer">
-                                        <!-- Use partner address when same as customer -->
                                         <span t-esc="doc.partner_id.street or ''"/>
                                         <t t-if="doc.partner_id.street2">
                                             , <span t-esc="doc.partner_id.street2"/>
@@ -469,7 +466,6 @@
                                         </t>
                                     </t>
                                     <t t-else="">
-                                        <!-- Custom ship-to address -->
                                         <t t-if="doc.ship_to_address">
                                             <span t-esc="doc.ship_to_address"/>
                                         </t>
