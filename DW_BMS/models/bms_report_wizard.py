@@ -375,6 +375,21 @@ class BmsReportWizard(models.TransientModel):
         picking = sale_order.picking_ids.filtered(lambda p: p.picking_type_code == "outgoing" and p.packed_notes)[:1]
         return picking.packed_notes or ""
 
+    def _get_manifest_delivery_status(self, sale_order):
+        if not sale_order:
+            return ""
+        pickings = sale_order.picking_ids.filtered(lambda p: p.picking_type_code == "outgoing")
+        if not pickings:
+            return ""
+        
+        valid_pickings = pickings.filtered(lambda p: p.state != 'cancel')
+        if valid_pickings:
+            pickings = valid_pickings
+            
+        state_dict = dict(self.env["stock.picking"]._fields["state"].selection)
+        states = [str(state_dict.get(p.state, p.state)) for p in pickings]
+        return ", ".join(list(dict.fromkeys(states)))
+
     def _collect_manifest(self):
         domain = [("state", "=", "posted"), ("move_type", "=", "out_invoice")]
         domain += self._date_domain("invoice_date")
@@ -408,6 +423,7 @@ class BmsReportWizard(models.TransientModel):
                 or ""
             )
             delivery_type = sale_order.delivery_type if sale_order else invoice.delivery_type
+            delivery_status = self._get_manifest_delivery_status(sale_order)
             manifest_lines.append(
                 {
                     "invoice_date": invoice.invoice_date,
@@ -417,6 +433,7 @@ class BmsReportWizard(models.TransientModel):
                     "delivery_type": delivery_type_labels.get(delivery_type, delivery_type or ""),
                     "dispatch_mode": packing_order.dispatch_mode_id.name or "",
                     "packing_team": "",
+                    "status": delivery_status,
                     "shipping_status": "",
                     "box": self._get_manifest_packing_notes(sale_order),
                 }
@@ -639,6 +656,7 @@ class BmsReportWizard(models.TransientModel):
                     "Delivery Type",
                     "Dispatch Mode",
                     "Packing Team",
+                    "Status",
                     "Shipping Status",
                     "BOX",
                 ],
@@ -651,6 +669,7 @@ class BmsReportWizard(models.TransientModel):
                         l["delivery_type"],
                         l["dispatch_mode"],
                         l["packing_team"],
+                        l["status"],
                         l["shipping_status"],
                         l["box"],
                     ]

@@ -545,6 +545,7 @@
                                     <th class="text-left">Delivery Type</th>
                                     <th class="text-left">Dispatch Mode</th>
                                     <th class="text-left">Packing Team</th>
+                                    <th class="text-left">Status</th>
                                     <th class="text-left">Shipping Status</th>
                                     <th class="text-left">BOX</th>
                                 </tr>
@@ -558,6 +559,7 @@
                                     <td><span t-esc="line['delivery_type']"/></td>
                                     <td><span t-esc="line['dispatch_mode']"/></td>
                                     <td><span t-esc="line['packing_team']"/></td>
+                                    <td><span t-esc="line['status']"/></td>
                                     <td><span t-esc="line['shipping_status']"/></td>
                                     <td><span t-esc="line['box']"/></td>
                                 </tr>

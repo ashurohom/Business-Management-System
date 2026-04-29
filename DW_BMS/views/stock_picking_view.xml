@@ -100,11 +100,14 @@
             </xpath>
 
             <xpath expr="//notebook/page[@name='note']" position="after">
-                <page string="Packing Notes">
+                <page string="Notes">
                     <field name="packed_notes" placeholder="Add packing notes..." readonly="state in ['done', 'cancel']"/>
                 </page>
                 <page string="Delivered Notes" invisible="1">
                     <field name="delivered_notes" placeholder="Add delivered notes..." readonly="1"/>
+                </page>
+                <page string="Quotation/Sales Note" invisible="not sale_special_delivery_note">
+                    <field name="sale_special_delivery_note" readonly="1"/>
                 </page>
             </xpath>
         </field>

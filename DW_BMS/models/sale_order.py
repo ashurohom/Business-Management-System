@@ -321,6 +321,11 @@ class SaleOrder(models.Model):
         compute="_compute_invoice_number",
         help="Concatenated names of all posted invoices related to this quotation.",
     )
+    special_delivery_note = fields.Text(
+        string="Notes",
+        copy=False,
+        help="Note for the delivery team.",
+    )
 
     def _check_duplicate_products_in_order_line(self):
         for order in self:

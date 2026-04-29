@@ -47,6 +47,11 @@ class StockPicking(models.Model):
         related="sale_id.dispatch_mode_id",
         store=False,
     )
+    sale_special_delivery_note = fields.Text(
+        string="Quotation/Sales Note",
+        related="sale_id.special_delivery_note",
+        readonly=True,
+    )
 
     def _is_packing_restricted_user(self):
         user = self.env.user

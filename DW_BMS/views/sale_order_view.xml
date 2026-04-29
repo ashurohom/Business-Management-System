@@ -428,6 +428,9 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="inside">
+                <page string="Note" name="delivery_note">
+                    <field name="special_delivery_note" placeholder="Add note to show in Delivery Order..."/>
+                </page>
                 <page string="Activity Timeline" name="activity_timeline">
                     <field name="activity_timeline_ids" widget="list" nolabel="1">
                         <tree string="Activities" create="0" edit="0" delete="0" decoration-info="activity_type == 'quotation'" decoration-success="activity_type in ('sale', 'delivery')" decoration-warning="activity_type == 'invoice'" decoration-primary="activity_type == 'shipping'">
