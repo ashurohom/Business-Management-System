@@ -38,6 +38,7 @@
         "reports/report_common_templates.xml",
         "reports/sale_quotation_custom_report.xml",
         "reports/invoice_custom_report.xml",
+        "reports/purchase_custom_report.xml",
 
         # Core views
         "views/res_partner_view.xml",

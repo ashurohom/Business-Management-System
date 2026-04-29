@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_purchaseorder_document_custom_header" inherit_id="purchase.report_purchaseorder_document">
+        <xpath expr="//t[@t-call='web.external_layout']" position="replace">
+            <t t-call="web.html_container">
+                <meta charset="utf-8"/>
+                <div class="page">
+                    <style>
+                        .page {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
+                        .dw-quote-wrap {
+                            border: 2px solid #222;
+                            width: 100%;
+                            min-height: 1020px;
+                            box-sizing: border-box;
+                            padding: 0;
+                            font-size: 13px;
+                            line-height: 1.3;
+                            color: #111;
+                            font-family: "DejaVu Sans", Arial, sans-serif;
+                        }
+                        .dw-header {
+                            width: 100%;
+                            border-collapse: collapse;
+                            border-spacing: 0;
+                            table-layout: fixed;
+                        }
+                        .dw-header td {
+                            border-bottom: 1px solid #222;
+                            padding: 14px 12px;
+                            vertical-align: middle;
+                        }
+                        .dw-logo-box {
+                            width: 34%;
+                            text-align: left;
+                            padding-left: 4px !important;
+                        }
+                        .dw-logo {
+                            max-height: 100px;
+                            max-width: 180px;
+                            display: block;
+                            margin-left: 4px;
+                        }
+                        .dw-company-box {
+                            width: 66%;
+                            text-align: right;
+                        }
+                        .dw-company-name {
+                            font-size: 24px;
+                            color: #4f63b8;
+                            font-weight: 700;
+                            margin: 0;
+                            line-height: 1.2;
+                        }
+                        .dw-company-address {
+                            margin-top: 8px;
+                            font-size: 12px;
+                            line-height: 1.45;
+                        }
+                        .dw-quote-title {
+                            text-align: center;
+                            font-size: 18px;
+                            font-weight: 700;
+                            letter-spacing: 0.5px;
+                            margin: 0;
+                            border-bottom: 1px solid #222;
+                            background: #d8e1f0;
+                            padding: 8px 0;
+                        }
+                        .dw-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            border-spacing: 0;
+                            table-layout: fixed;
+                        }
+                        .dw-table td,
+                        .dw-table th {
+                            border: 1px solid #222;
+                            padding: 6px 7px;
+                            vertical-align: top;
+                        }
+                        .dw-head td {
+                            height: 92px;
+                        }
+                        .dw-meta {
+                            margin-top: 0;
+                        }
+                        .dw-meta td {
+                            font-size: 11px;
+                        }
+                        .dw-meta tr:first-child td {
+                            border-top: 0;
+                        }
+                        .dw-label {
+                            font-weight: 700;
+                            white-space: nowrap;
+                        }
+                        .dw-addr-section {
+                            width: 100%;
+                            border-collapse: collapse;
+                            border-spacing: 0;
+                            table-layout: fixed;
+                        }
+                        .dw-addr-section td {
+                            border: 1px solid #222;
+                            padding: 8px 10px;
+                            vertical-align: top;
+                        }
+                        .dw-addr-section tr:first-child td {
+                            border-top: 0;
+                        }
+                        .dw-addr-heading {
+                            font-size: 10px;
+                            font-weight: 700;
+                            text-transform: uppercase;
+                            letter-spacing: 1px;
+                            border-bottom: 1px solid #222;
+                            padding-bottom: 4px;
+                            margin-bottom: 5px;
+                        }
+                        .dw-addr-name {
+                            font-weight: 700;
+                            font-size: 13px;
+                            margin-bottom: 3px;
+                        }
+                        .dw-addr-text {
+                            font-size: 11.5px;
+                            line-height: 1.6;
+                        }
+                        .dw-lines {
+                            margin-top: 0;
+                        }
+                        .dw-lines thead tr:first-child th {
+                            border-top: 0;
+                        }
+                        .dw-lines th {
+                            font-weight: 700;
+                            text-align: center;
+                            background: #f1f1f1;
+                            font-size: 10px;
+                            line-height: 1.2;
+                            padding: 5px 4px;
+                            vertical-align: middle;
+                        }
+                        .dw-lines td {
+                            font-size: 10px;
+                            line-height: 1.25;
+                            padding: 5px 4px;
+                        }
+                        .dw-right {
+                            text-align: right;
+                        }
+                        .dw-center {
+                            text-align: center;
+                        }
+                        .dw-totals {
+                            width: 42%;
+                            margin-left: auto;
+                            margin-top: 0;
+                            border-collapse: collapse;
+                            border-spacing: 0;
+                            table-layout: fixed;
+                        }
+                        .dw-totals td {
+                            border: 1px solid #222;
+                            padding: 6px 7px;
+                        }
+                        .dw-total-strong {
+                            font-size: 14px;
+                            font-weight: 700;
+                        }
+                    </style>
+
+                    <div class="dw-quote-wrap">
+                        <table class="dw-header">
+                            <tr>
+                                <td class="dw-logo-box">
+                                    <img t-if="o.company_id.logo"
+                                         t-att-src="image_data_uri(o.company_id.logo)"
+                                         alt="Company Logo"
+                                         class="dw-logo"/>
+                                </td>
+                                <td class="dw-company-box">
+                                    <p class="dw-company-name"><span t-field="o.company_id.name"/></p>
+                                    <div class="dw-company-address">
+                                        <span t-esc="o.company_id.partner_id.contact_address"/>
+                                        <t t-if="o.company_id.partner_id.vat">
+                                            <br/>GSTIN: <span t-field="o.company_id.partner_id.vat"/>
+                                        </t>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <h2 t-if="o.state in ['draft', 'sent', 'to approve']" class="dw-quote-title">Request for Quotation</h2>
+                        <h2 t-if="o.state in ['purchase', 'done']" class="dw-quote-title">Purchase Order</h2>
+                        <h2 t-if="o.state == 'cancel'" class="dw-quote-title">Cancelled Purchase Order</h2>
+
+                        <table class="dw-addr-section">
+                            <tr>
+                                <td style="width: 50%;">
+                                    <div class="dw-addr-heading">Supplier Details</div>
+                                    <div class="dw-addr-name">
+                                        <span t-field="o.partner_id.name"/>
+                                    </div>
+                                    <div class="dw-addr-text">
+                                        <t t-if="o.partner_id.contact_address">
+                                            <span t-esc="o.partner_id.contact_address"/>
+                                            <br/>
+                                        </t>
+                                        <t t-if="o.partner_id.phone or o.partner_id.mobile">
+                                            <strong>Ph:</strong>
+                                            <span t-esc="o.partner_id.phone or o.partner_id.mobile"/>
+                                            <br/>
+                                        </t>
+                                        <t t-if="o.partner_id.email">
+                                            <strong>Email:</strong>
+                                            <span t-esc="o.partner_id.email"/>
+                                            <br/>
+                                        </t>
+                                        <t t-if="o.partner_id.vat">
+                                            <strong>GSTIN:</strong>
+                                            <span t-esc="o.partner_id.vat"/>
+                                        </t>
+                                    </div>
+                                </td>
+                                <td style="width: 50%;">
+                                    <div class="dw-addr-heading">Shipping Address</div>
+                                    <div class="dw-addr-name">
+                                        <span t-field="o.company_id.name"/>
+                                    </div>
+                                    <div class="dw-addr-text">
+                                        <t t-if="o.picking_type_id and o.picking_type_id.warehouse_id">
+                                            <span t-field="o.picking_type_id.warehouse_id.partner_id.contact_address"/>
+                                        </t>
+                                        <t t-else="">
+                                            <span t-field="o.company_id.partner_id.contact_address"/>
+                                        </t>
+                                        <t t-if="o.dest_address_id">
+                                            <br/><strong>Drop Ship Address:</strong><br/>
+                                            <span t-field="o.dest_address_id.contact_address"/>
+                                        </t>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table class="dw-table dw-meta">
+                            <tr>
+                                <td class="dw-label">PO Number</td>
+                                <td class="dw-center"><span t-field="o.name"/></td>
+                                <td style="width: 25%;" class="dw-label">Order Date</td>
+                                <td style="width: 25%;" class="dw-center"><span t-field="o.date_order"/></td>
+                            </tr>
+                        </table>
+
+                        <table class="dw-table dw-lines">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">Sr.no</th>
+                                    <th style="width: 35%;">Product</th>
+                                    <th style="width: 10%;">Quantity</th>
+                                    <th style="width: 10%;">UOM</th>
+                                    <th style="width: 10%;">Unit Price</th>
+                                    <th style="width: 10%;">Taxes</th>
+                                    <th style="width: 20%;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="line_index" t-value="0"/>
+                                <tr t-foreach="o.order_line" t-as="line">
+                                    <t t-if="not line.display_type">
+                                        <td class="dw-center"><span t-esc="line_index + 1"/></td>
+                                        <td>
+                                            <span t-field="line.name"/>
+                                        </td>
+                                        <td class="dw-right">
+                                            <span t-field="line.product_qty"/>
+                                        </td>
+                                        <td class="dw-center">
+                                            <span t-field="line.product_uom"/>
+                                        </td>
+                                        <td class="dw-right">
+                                            <span t-field="line.price_unit"/>
+                                        </td>
+                                        <td class="dw-center">
+                                            <span t-esc="', '.join(map(lambda x: x.name, line.taxes_id))"/>
+                                        </td>
+                                        <td class="dw-right">
+                                            <span t-esc="line.price_subtotal" t-options='{"widget":"monetary","display_currency": o.currency_id}'/>
+                                        </td>
+                                        <t t-set="line_index" t-value="line_index + 1"/>
+                                    </t>
+                                    <t t-if="line.display_type == 'line_section'">
+                                        <td colspan="7" style="background:#f9f9f9; font-weight:bold;">
+                                            <span t-field="line.name"/>
+                                        </td>
+                                    </t>
+                                    <t t-if="line.display_type == 'line_note'">
+                                        <td colspan="7" style="font-style:italic;">
+                                            <span t-field="line.name"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <table class="dw-totals">
+                            <tr>
+                                <td><strong>Untaxed Amount</strong></td>
+                                <td class="dw-right">
+                                    <span t-esc="o.amount_untaxed" t-options='{"widget":"monetary","display_currency": o.currency_id}'/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Taxes</strong></td>
+                                <td class="dw-right">
+                                    <span t-esc="o.amount_tax" t-options='{"widget":"monetary","display_currency": o.currency_id}'/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="dw-total-strong">Total</td>
+                                <td class="dw-right dw-total-strong">
+                                    <span t-esc="o.amount_total" t-options='{"widget":"monetary","display_currency": o.currency_id}'/>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <t t-if="o.notes">
+                            <div style="margin-top: 15px; padding: 10px; font-size: 11px; border-top: 1px solid #222;">
+                                <strong>Terms and Conditions:</strong>
+                                <p style="white-space: pre-wrap;"><span t-field="o.notes"/></p>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>
