@@ -45,6 +45,20 @@ class JobWorkIssue(models.Model):
         string="Remaining Quantity",
         compute="_compute_remaining_summary",
     )
+    receipt_id = fields.Many2one(
+        "dw.job.work.receipt",
+        string="Receipt",
+        compute="_compute_receipt_id",
+        readonly=True,
+    )
+
+    def _compute_receipt_id(self):
+        receipt_map = {
+            receipt.issue_id.id: receipt.id
+            for receipt in self.env["dw.job.work.receipt"].search([("issue_id", "in", self.ids)])
+        }
+        for rec in self:
+            rec.receipt_id = receipt_map.get(rec.id, False)
 
     @api.depends("line_ids.remaining_qty")
     def _compute_remaining_qty(self):
@@ -63,12 +77,67 @@ class JobWorkIssue(models.Model):
                 )
             rec.remaining_summary = ", ".join(parts)
 
+    def _check_duplicate_issue_products(self):
+        for rec in self:
+            seen_product_ids = set()
+            duplicate_names = []
+            for line in rec.line_ids.filtered(lambda l: l.product_id):
+                if line.product_id.id in seen_product_ids:
+                    duplicate_names.append(line.product_id.display_name)
+                    continue
+                seen_product_ids.add(line.product_id.id)
+            if duplicate_names:
+                raise ValidationError(
+                    _(
+                        "Duplicate raw material products are not allowed in Issue.\n"
+                        "Duplicate product(s): %(products)s",
+                        products=", ".join(sorted(set(duplicate_names))),
+                    )
+                )
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get("name", "New") == "New":
                 vals["name"] = self.env["ir.sequence"].next_by_code("dw.job.work") or "New"
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        records._check_duplicate_issue_products()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        self._check_duplicate_issue_products()
+        return res
+
+    def _prepare_auto_receipt_vals(self):
+        self.ensure_one()
+        return {
+            "issue_id": self.id,
+            "contractor_id": self.contractor_id.id,
+            "raw_line_ids": [
+                (
+                    0,
+                    0,
+                    {
+                        "product_id": line.product_id.id,
+                    },
+                )
+                for line in self.line_ids
+                if line.product_id
+            ],
+        }
+
+    def _create_auto_receipt_if_missing(self):
+        receipt_model = self.env["dw.job.work.receipt"]
+        for rec in self:
+            existing_receipt = receipt_model.search([("issue_id", "=", rec.id)], limit=1)
+            if existing_receipt or not rec.line_ids:
+                continue
+            receipt_model.create(rec._prepare_auto_receipt_vals())
+
+    def action_print_issue_report(self):
+        self.ensure_one()
+        return self.env.ref("DW_JOB_WORK.action_report_job_work_issue").report_action(self)
 
     def action_confirm(self):
         stock_location = self.env.ref("stock.stock_location_stock")
@@ -77,6 +146,7 @@ class JobWorkIssue(models.Model):
         for rec in self:
             if rec.state != "draft":
                 continue
+            rec._check_duplicate_issue_products()
             if not rec.line_ids:
                 raise ValidationError(_("Add at least one raw material line before confirming."))
 
@@ -107,6 +177,7 @@ class JobWorkIssue(models.Model):
                 move.picked = True
             moves._action_done()
             rec.state = "confirmed"
+            rec._create_auto_receipt_if_missing()
 
 
 class JobWorkIssueLine(models.Model):
@@ -163,3 +234,16 @@ class JobWorkIssueLine(models.Model):
         for rec in self:
             if rec.qty <= 0:
                 raise ValidationError(_("Issued quantity must be greater than zero."))
+
+    @api.constrains("issue_id", "product_id")
+    def _check_duplicate_product(self):
+        for rec in self:
+            if not rec.issue_id or not rec.product_id:
+                continue
+            duplicates = rec.issue_id.line_ids.filtered(
+                lambda line: line.product_id == rec.product_id and line.id != rec.id
+            )
+            if duplicates:
+                raise ValidationError(
+                    _("Duplicate raw material products are not allowed in Issue.")
+                )

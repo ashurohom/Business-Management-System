@@ -179,6 +179,10 @@ class SaleOrderLine(models.Model):
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
+    _BMS_ADMIN_GROUP_XML_ID = "DW_BMS.group_bms_admin"
+    _SAME_STATE_CONFIRM_LIMIT = 99999.0
+    _DIFFERENT_STATE_CONFIRM_LIMIT = 49999.0
+
     roundup_total = fields.Monetary(
         string="Roundup Total",
         compute="_compute_roundup_total",
@@ -404,6 +408,51 @@ class SaleOrder(models.Model):
                 (line.product_id.weight or 0.0) * line.product_uom_qty
                 for line in order.order_line
                 if not line.display_type
+            )
+
+    def _get_bms_confirmation_limit(self):
+        self.ensure_one()
+        company_state = self.company_id.partner_id.state_id
+        customer_state = self.partner_id.state_id
+        is_same_state = bool(company_state and customer_state and company_state == customer_state)
+        limit = (
+            self._SAME_STATE_CONFIRM_LIMIT
+            if is_same_state
+            else self._DIFFERENT_STATE_CONFIRM_LIMIT
+        )
+        return limit, is_same_state, company_state, customer_state
+
+    def _check_bms_admin_confirmation_limit(self):
+        if self.env.user.has_group(self._BMS_ADMIN_GROUP_XML_ID):
+            return
+
+        for order in self:
+            limit, is_same_state, company_state, customer_state = order._get_bms_confirmation_limit()
+            rounding = order.currency_id.rounding or order.company_id.currency_id.rounding or 0.01
+
+            if float_compare(order.amount_total or 0.0, limit, precision_rounding=rounding) <= 0:
+                continue
+
+            state_context = (
+                "the company state and customer state are the same"
+                if is_same_state
+                else "the company state and customer state are different or not set"
+            )
+
+            raise UserError(
+                "You are not allowed to confirm quotation '%s'.\n"
+                "Only users in the BMS Admin group can confirm quotations above %.2f when %s.\n"
+                "Quotation Total: %.2f\n"
+                "Company State: %s\n"
+                "Customer State: %s"
+                % (
+                    order.name,
+                    limit,
+                    state_context,
+                    order.amount_total or 0.0,
+                    company_state.name if company_state else "Not Set",
+                    customer_state.name if customer_state else "Not Set",
+                )
             )
 
     # ── _prepare_invoice override ─────────────────────────────────────
@@ -790,6 +839,7 @@ class SaleOrder(models.Model):
                 )
 
         self._check_duplicate_products_in_order_line()
+        self._check_bms_admin_confirmation_limit()
 
         res = super().action_confirm()
 

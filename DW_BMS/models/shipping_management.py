@@ -13,6 +13,25 @@ class ShippingManagement(models.Model):
         ondelete='cascade',
         domain=lambda self: [('move_type', 'in', ('out_invoice', 'out_refund'))]
     )
+    picking_id = fields.Many2one(
+        'stock.picking',
+        string='Delivery Order',
+        copy=False,
+        ondelete='set null',
+        domain=[('picking_type_code', '=', 'outgoing')],
+    )
+    invoice_number = fields.Char(
+        string='Invoice Number',
+        related='invoice_id.name',
+        store=True,
+        readonly=True,
+    )
+    delivery_number = fields.Char(
+        string='Delivery Number',
+        related='picking_id.name',
+        store=True,
+        readonly=True,
+    )
     delivered_by = fields.Many2one(
         'res.users',
         string='Delivered By',
@@ -77,6 +96,21 @@ class ShippingManagement(models.Model):
         for rec in self:
             rec.shipping_status = 'cancel'
 
+    def _get_related_sale_orders(self):
+        self.ensure_one()
+        return self.invoice_id.invoice_line_ids.sale_line_ids.order_id
+
+    def _get_related_outgoing_pickings(self):
+        self.ensure_one()
+        sale_orders = self._get_related_sale_orders()
+        return sale_orders.picking_ids.filtered(lambda picking: picking.picking_type_code == 'outgoing')
+
+    def _sync_related_delivery_order(self):
+        for shipping in self:
+            if shipping.picking_id:
+                continue
+            shipping.picking_id = shipping._get_related_outgoing_pickings()[:1].id or False
+
     def _update_picking_shipping_status(self):
         """
         Push the current shipping_status to the latest_shipping_status field
@@ -84,19 +118,18 @@ class ShippingManagement(models.Model):
         This keeps the stored field in sync for the packing team record rule.
         """
         for shipping in self:
-            sale_orders = shipping.invoice_id.invoice_line_ids.sale_line_ids.order_id
-            for order in sale_orders:
-                pickings = order.picking_ids.filtered(
-                    lambda p: p.picking_type_code == 'outgoing'
-                )
-                if pickings:
-                    pickings.write({'latest_shipping_status': shipping.shipping_status})
+            pickings = shipping._get_related_outgoing_pickings()
+            if shipping.picking_id:
+                pickings |= shipping.picking_id
+            if pickings:
+                pickings.write({'latest_shipping_status': shipping.shipping_status})
 
     @api.model_create_multi
     def create(self, vals_list):
         shippings = super().create(vals_list)
+        shippings._sync_related_delivery_order()
         for shipping in shippings:
-            sale_orders = shipping.invoice_id.invoice_line_ids.sale_line_ids.order_id
+            sale_orders = shipping._get_related_sale_orders()
             for order in sale_orders:
                 status_dict = dict(shipping._fields['shipping_status'].selection)
                 status_label = status_dict.get(shipping.shipping_status, shipping.shipping_status)
@@ -119,9 +152,11 @@ class ShippingManagement(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
+        if 'invoice_id' in vals and 'picking_id' not in vals:
+            self._sync_related_delivery_order()
         if 'shipping_status' in vals or 'tracking_link' in vals:
             for shipping in self:
-                sale_orders = shipping.invoice_id.invoice_line_ids.sale_line_ids.order_id
+                sale_orders = shipping._get_related_sale_orders()
                 for order in sale_orders:
                     status_dict = dict(shipping._fields['shipping_status'].selection)
                     status_label = status_dict.get(shipping.shipping_status, shipping.shipping_status)

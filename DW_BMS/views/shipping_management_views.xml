@@ -6,7 +6,8 @@
         <field name="model">shipping.management</field>
         <field name="arch" type="xml">
             <tree string="Shipping Management" decoration-success="shipping_status == 'delivered'" decoration-info="shipping_status == 'out_for_delivery'" decoration-muted="shipping_status == 'cancel'" decoration-warning="shipping_status == 'in_transit'">
-                <field name="invoice_id"/>
+                <field name="delivery_number"/>
+                <field name="invoice_number"/>
                 <field name="tracking_id"/>
                 <field name="delivered_by"/>
                 <field name="shipping_status" 
@@ -37,13 +38,19 @@
                     <field name="shipping_status" widget="statusbar" statusbar_visible="shipped,in_transit,out_for_delivery,delivered,cancel" options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
+                    <field name="invoice_id" invisible="1"/>
+                    <field name="picking_id" invisible="1"/>
                     <div class="oe_title">
                         <h1>
-                            <field name="invoice_id" readonly="1" options="{'no_open': True}"/>
+                            <field name="invoice_number" readonly="1"/>
                         </h1>
+                        <h2 invisible="not delivery_number">
+                            <field name="delivery_number" readonly="1"/>
+                        </h2>
                     </div>
                     <group>
                         <group>
+                            <field name="picking_id" readonly="1" options="{'no_create': True, 'no_open': True}"/>
                             <field name="shipping_status"/>
                             <field name="delivered_by" options="{'no_create': True}"/>
                             <field name="tracking_id"/>

@@ -118,6 +118,7 @@ access_packing_courier_company_all,packing courier company all,DW_BMS.model_pack
 access_shipping_management_system,shipping management system,DW_BMS.model_shipping_management,base.group_system,1,1,1,1
 access_shipping_management_admin,shipping management admin,DW_BMS.model_shipping_management,DW_BMS.group_bms_admin,1,1,1,1
 access_shipping_management_dispatch,shipping management dispatch,DW_BMS.model_shipping_management,DW_BMS.group_dispatch_team,1,1,1,1
+access_shipping_management_inventory,shipping management inventory,DW_BMS.model_shipping_management,DW_BMS.group_bms_inventory,1,1,1,0
 access_bms_dispatch_account_move,dispatch team account move read,account.model_account_move,DW_BMS.group_dispatch_team,1,1,1,0
 access_bms_dispatch_account_move_line,dispatch team account move line read,account.model_account_move_line,DW_BMS.group_dispatch_team,1,1,1,0
 access_bms_dispatch_res_partner,dispatch team partner read,base.model_res_partner,DW_BMS.group_dispatch_team,1,0,0,0

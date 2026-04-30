@@ -52,6 +52,10 @@ class StockPicking(models.Model):
         related="sale_id.special_delivery_note",
         readonly=True,
     )
+    shipping_count = fields.Integer(
+        string="Shipping Count",
+        compute="_compute_shipping_count",
+    )
 
     def _is_packing_restricted_user(self):
         user = self.env.user
@@ -65,6 +69,30 @@ class StockPicking(models.Model):
         restricted = self._is_packing_restricted_user()
         for picking in self:
             picking.is_packing_restricted_user = restricted
+
+    def _get_shipping_invoices(self):
+        self.ensure_one()
+        if not self.sale_id:
+            return self.env["account.move"]
+        invoices = self.sudo().sale_id.invoice_ids.filtered(
+            lambda move: move.move_type in ("out_invoice", "out_refund") and move.state != "cancel"
+        )
+        posted_invoices = invoices.filtered(lambda move: move.state == "posted")
+        return posted_invoices or invoices
+
+    @api.depends("sale_id", "sale_id.invoice_ids.shipping_ids", "sale_id.invoice_ids.state")
+    def _compute_shipping_count(self):
+        shipping_model = self.env["shipping.management"].sudo()
+        for picking in self:
+            invoice_ids = picking._get_shipping_invoices().ids if picking.sale_id else []
+            if not invoice_ids:
+                picking.shipping_count = 0
+                continue
+            picking.shipping_count = shipping_model.search_count([
+                "|",
+                ("picking_id", "=", picking.id),
+                ("invoice_id", "in", invoice_ids),
+            ])
 
     def _get_default_customer_location(self):
         return self.env.ref("stock.stock_location_customers", raise_if_not_found=False)
@@ -163,4 +191,38 @@ class StockPicking(models.Model):
             "view_mode": "form",
             "views": [(view_id, "form")],
             "target": "current",
+        }
+
+    def action_open_shipping(self):
+        self.ensure_one()
+        if not self.sale_id:
+            raise UserError("Only deliveries linked to a quotation or sale order can open Shipping.")
+
+        invoices = self._get_shipping_invoices()
+        if not invoices:
+            raise UserError(
+                "No customer invoice was found for this delivery.\n"
+                "Please create the invoice first, then open Shipping."
+            )
+
+        shipping_model = self.env["shipping.management"]
+        shipping = shipping_model.search([("picking_id", "=", self.id)], order="id desc", limit=1)
+        if not shipping:
+            shipping = shipping_model.search(
+                [("invoice_id", "in", invoices.ids)],
+                order="id desc",
+                limit=1,
+            )
+
+        default_invoice = invoices[:1]
+        return {
+            "type": "ir.actions.act_window",
+            "name": "Shipping Management",
+            "view_mode": "form",
+            "res_model": "shipping.management",
+            "res_id": shipping.id if shipping else False,
+            "context": {
+                "default_invoice_id": default_invoice.id,
+                "default_picking_id": self.id,
+            },
         }

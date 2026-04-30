@@ -1,6 +1,6 @@
 <odoo>
-    <menuitem id="job_work_root" name="Job Work" sequence="10"/>
-    <menuitem id="job_work_issue_menu" name="Issue" parent="job_work_root" action="job_work_issue_action" sequence="10"/>
-    <menuitem id="job_work_receipt_menu" name="Receipt" parent="job_work_root" action="job_work_receipt_action" sequence="20"/>
-    <menuitem id="job_work_dashboard_menu" name="Dashboard" parent="job_work_root" action="job_work_dashboard_action" sequence="30"/>
+    <menuitem id="job_work_root" name="Job Work" sequence="10" groups="DW_JOB_WORK.group_job_work_user"/>
+    <menuitem id="job_work_issue_menu" name="Issue" parent="job_work_root" action="job_work_issue_action" sequence="10" groups="DW_JOB_WORK.group_job_work_user"/>
+    <menuitem id="job_work_receipt_menu" name="Receipt" parent="job_work_root" action="job_work_receipt_action" sequence="20" groups="DW_JOB_WORK.group_job_work_user"/>
+    <menuitem id="job_work_dashboard_menu" name="Dashboard" parent="job_work_root" action="job_work_dashboard_action" sequence="30" groups="DW_JOB_WORK.group_job_work_user"/>
 </odoo>

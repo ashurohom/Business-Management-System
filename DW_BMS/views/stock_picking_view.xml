@@ -12,6 +12,7 @@
             <xpath expr="//div[@name='button_box']" position="inside">
                 <field name="sale_id" invisible="1"/>
                 <field name="is_packing_restricted_user" invisible="1"/>
+                <field name="shipping_count" invisible="1"/>
                 <button name="action_open_packing_order"
                         type="object"
                         class="oe_stat_button"
@@ -20,6 +21,13 @@
                     <div class="o_stat_info">
                         <span class="o_stat_text">Packing</span>
                     </div>
+                </button>
+                <button name="action_open_shipping"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-truck"
+                        invisible="not sale_id">
+                    <field name="shipping_count" widget="statinfo" string="Shipping"/>
                 </button>
             </xpath>
 
@@ -82,6 +90,9 @@
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="packed_by" invisible="1"/>
                 <field name="packed_by_user" readonly="state in ['waiting', 'done', 'cancel']"/>
+                <field name="sale_special_delivery_note"
+                       readonly="1"
+                       invisible="not sale_special_delivery_note"/>
                 <field name="delivered_by" readonly="1" invisible="1"/>
             </xpath>
 
@@ -105,9 +116,6 @@
                 </page>
                 <page string="Delivered Notes" invisible="1">
                     <field name="delivered_notes" placeholder="Add delivered notes..." readonly="1"/>
-                </page>
-                <page string="Quotation/Sales Note" invisible="not sale_special_delivery_note">
-                    <field name="sale_special_delivery_note" readonly="1"/>
                 </page>
             </xpath>
         </field>
@@ -135,6 +143,13 @@
                         class="btn-info" 
                         icon="fa-cubes" 
                         title="Packing Details"
+                        invisible="not sale_id"/>
+                <button name="action_open_shipping"
+                        string="Shipping"
+                        type="object"
+                        class="btn-info"
+                        icon="fa-truck"
+                        title="Shipping Details"
                         invisible="not sale_id"/>
             </xpath>
         </field>

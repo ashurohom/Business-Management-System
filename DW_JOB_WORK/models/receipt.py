@@ -17,17 +17,23 @@ class JobWorkReceipt(models.Model):
         string="Contractor",
         required=True,
     )
+    issue_id = fields.Many2one(
+        "dw.job.work.issue",
+        string="Issue Slip",
+        copy=False,
+        readonly=True,
+        ondelete="set null",
+    )
     raw_material_product_id = fields.Many2one(
         "product.product",
         string="Raw Material",
-        required=True,
     )
     available_qty = fields.Float(
         string="Available Raw Material",
         compute="_compute_available_qty",
         readonly=True,
     )
-    qty_used = fields.Float(string="Raw Material Used", required=True)
+    qty_used = fields.Float(string="Raw Material Used")
     raw_line_ids = fields.One2many(
         "dw.job.work.receipt.raw.line",
         "receipt_id",
@@ -47,6 +53,23 @@ class JobWorkReceipt(models.Model):
         readonly=True,
         copy=False,
     )
+    status_display = fields.Char(
+        string="Status",
+        compute="_compute_status_display",
+    )
+
+    _sql_constraints = [
+        (
+            "unique_receipt_issue",
+            "unique(issue_id)",
+            "Only one receipt can be linked to an issue slip.",
+        )
+    ]
+
+    @api.depends("state")
+    def _compute_status_display(self):
+        for rec in self:
+            rec.status_display = "Pending" if rec.state == "draft" else "Done"
 
     @api.depends("contractor_id", "raw_material_product_id")
     def _compute_available_qty(self):
@@ -70,8 +93,44 @@ class JobWorkReceipt(models.Model):
     @api.constrains("qty_used")
     def _check_positive_quantities(self):
         for rec in self:
-            if rec.qty_used <= 0:
+            if rec.raw_material_product_id and rec.qty_used <= 0:
                 raise ValidationError(_("Raw material used must be greater than zero."))
+
+    def _check_duplicate_receipt_products(self):
+        for rec in self:
+            raw_seen_product_ids = set()
+            raw_duplicate_names = []
+            for line in rec.raw_line_ids.filtered(lambda l: l.product_id):
+                if line.product_id.id in raw_seen_product_ids:
+                    raw_duplicate_names.append(line.product_id.display_name)
+                    continue
+                raw_seen_product_ids.add(line.product_id.id)
+
+            finished_seen_product_ids = set()
+            finished_duplicate_names = []
+            for line in rec.line_ids.filtered(lambda l: l.product_id):
+                if line.product_id.id in finished_seen_product_ids:
+                    finished_duplicate_names.append(line.product_id.display_name)
+                    continue
+                finished_seen_product_ids.add(line.product_id.id)
+
+            if raw_duplicate_names:
+                raise ValidationError(
+                    _(
+                        "Duplicate raw material products are not allowed in Receipt.\n"
+                        "Duplicate product(s): %(products)s",
+                        products=", ".join(sorted(set(raw_duplicate_names))),
+                    )
+                )
+
+            if finished_duplicate_names:
+                raise ValidationError(
+                    _(
+                        "Duplicate finished products are not allowed in Receipt.\n"
+                        "Duplicate product(s): %(products)s",
+                        products=", ".join(sorted(set(finished_duplicate_names))),
+                    )
+                )
 
     def _get_raw_material_consumptions(self):
         self.ensure_one()
@@ -83,6 +142,7 @@ class JobWorkReceipt(models.Model):
                     "available_qty": line.available_qty,
                 }
                 for line in self.raw_line_ids
+                if line.product_id and line.qty_used > 0
             ]
         if self.raw_material_product_id and self.qty_used > 0:
             return [
@@ -132,6 +192,7 @@ class JobWorkReceipt(models.Model):
         for rec in self:
             if rec.state != "draft":
                 continue
+            rec._check_duplicate_receipt_products()
             raw_consumptions = rec._get_raw_material_consumptions()
             if not raw_consumptions:
                 raise ValidationError(_("Add at least one raw material line before confirming."))
@@ -193,6 +254,17 @@ class JobWorkReceipt(models.Model):
             finished_moves._action_done()
             rec.state = "confirmed"
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        records._check_duplicate_receipt_products()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        self._check_duplicate_receipt_products()
+        return res
+
 
 class JobWorkReceiptLine(models.Model):
     _name = "dw.job.work.receipt.line"
@@ -226,6 +298,19 @@ class JobWorkReceiptLine(models.Model):
             if rec.qty <= 0:
                 raise ValidationError(_("Finished quantity must be greater than zero."))
 
+    @api.constrains("receipt_id", "product_id")
+    def _check_duplicate_product(self):
+        for rec in self:
+            if not rec.receipt_id or not rec.product_id:
+                continue
+            duplicates = rec.receipt_id.line_ids.filtered(
+                lambda line: line.product_id == rec.product_id and line.id != rec.id
+            )
+            if duplicates:
+                raise ValidationError(
+                    _("Duplicate finished products are not allowed in Receipt.")
+                )
+
 
 class JobWorkReceiptRawLine(models.Model):
     _name = "dw.job.work.receipt.raw.line"
@@ -256,7 +341,7 @@ class JobWorkReceiptRawLine(models.Model):
         compute="_compute_available_qty",
         readonly=True,
     )
-    qty_used = fields.Float(string="Raw Material Used", required=True)
+    qty_used = fields.Float(string="Raw Material Used")
     state = fields.Selection(related="receipt_id.state", store=True, readonly=True)
 
     @api.depends("receipt_id.contractor_id", "product_id")
@@ -281,5 +366,18 @@ class JobWorkReceiptRawLine(models.Model):
     @api.constrains("qty_used")
     def _check_positive_qty(self):
         for rec in self:
-            if rec.qty_used <= 0:
+            if rec.qty_used < 0:
                 raise ValidationError(_("Raw material used must be greater than zero."))
+
+    @api.constrains("receipt_id", "product_id")
+    def _check_duplicate_product(self):
+        for rec in self:
+            if not rec.receipt_id or not rec.product_id:
+                continue
+            duplicates = rec.receipt_id.raw_line_ids.filtered(
+                lambda line: line.product_id == rec.product_id and line.id != rec.id
+            )
+            if duplicates:
+                raise ValidationError(
+                    _("Duplicate raw material products are not allowed in Receipt.")
+                )

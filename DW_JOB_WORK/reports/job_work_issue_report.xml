@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="action_report_job_work_issue" model="ir.actions.report">
+        <field name="name">Issue Order</field>
+        <field name="model">dw.job.work.issue</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">DW_JOB_WORK.report_job_work_issue_template</field>
+        <field name="report_file">DW_JOB_WORK.report_job_work_issue_template</field>
+        <field name="binding_model_id" ref="model_dw_job_work_issue"/>
+        <field name="binding_type">report</field>
+        <field name="print_report_name">'Issue Order - %s' % (object.name or '')</field>
+    </record>
+
+    <template id="report_job_work_issue_template">
+        <t t-call="web.html_container">
+            <meta charset="utf-8"/>
+            <t t-foreach="docs" t-as="doc">
+                <t t-set="company" t-value="doc.env.company"/>
+                <t t-set="contractor_contact_number" t-value="doc.contractor_id.mobile or doc.contractor_id.phone"/>
+                <div class="page">
+                    <style>
+                        .page {
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }
+                        .jw-report-wrap {
+                            border: 2px solid #222;
+                            width: 100%;
+                            min-height: 1020px;
+                            box-sizing: border-box;
+                            padding: 0;
+                            font-size: 13px;
+                            line-height: 1.3;
+                            color: #111;
+                            font-family: "DejaVu Sans", Arial, sans-serif;
+                        }
+                        .jw-header {
+                            width: 100%;
+                            border-collapse: collapse;
+                            border-spacing: 0;
+                            table-layout: fixed;
+                        }
+                        .jw-header td {
+                            border-bottom: 1px solid #222;
+                            padding: 14px 12px;
+                            vertical-align: middle;
+                        }
+                        .jw-logo-box {
+                            width: 34%;
+                            text-align: left;
+                            padding-left: 4px !important;
+                        }
+                        .jw-logo {
+                            max-height: 100px;
+                            max-width: 180px;
+                            display: block;
+                            margin-left: 4px;
+                        }
+                        .jw-company-box {
+                            width: 66%;
+                            text-align: right;
+                        }
+                        .jw-company-name {
+                            font-size: 24px;
+                            color: #4f63b8;
+                            font-weight: 700;
+                            margin: 0;
+                            line-height: 1.2;
+                        }
+                        .jw-company-address {
+                            margin-top: 8px;
+                            font-size: 12px;
+                            line-height: 1.45;
+                        }
+                        .jw-title {
+                            text-align: center;
+                            font-size: 18px;
+                            font-weight: 700;
+                            letter-spacing: 0.5px;
+                            margin: 0;
+                            border-bottom: 1px solid #222;
+                            background: #d8e1f0;
+                            padding: 8px 0;
+                        }
+                        .jw-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            border-spacing: 0;
+                            table-layout: fixed;
+                        }
+                        .jw-table td,
+                        .jw-table th {
+                            border: 1px solid #222;
+                            padding: 6px 7px;
+                            vertical-align: top;
+                        }
+                        .jw-meta {
+                            margin-top: 0;
+                        }
+                        .jw-meta td {
+                            font-size: 11px;
+                        }
+                        .jw-meta tr:first-child td {
+                            border-top: 0;
+                        }
+                        .jw-label {
+                            font-weight: 700;
+                            white-space: nowrap;
+                        }
+                        .jw-addr-section {
+                            width: 100%;
+                            border-collapse: collapse;
+                            border-spacing: 0;
+                            table-layout: fixed;
+                        }
+                        .jw-addr-section td {
+                            border: 1px solid #222;
+                            padding: 8px 10px;
+                            vertical-align: top;
+                        }
+                        .jw-addr-section tr:first-child td {
+                            border-top: 0;
+                        }
+                        .jw-addr-heading {
+                            font-size: 10px;
+                            font-weight: 700;
+                            text-transform: uppercase;
+                            letter-spacing: 1px;
+                            border-bottom: 1px solid #222;
+                            padding-bottom: 4px;
+                            margin-bottom: 5px;
+                        }
+                        .jw-addr-name {
+                            font-weight: 700;
+                            font-size: 13px;
+                            margin-bottom: 3px;
+                        }
+                        .jw-addr-text {
+                            font-size: 11.5px;
+                            line-height: 1.6;
+                        }
+                        .jw-lines {
+                            margin-top: 0;
+                        }
+                        .jw-lines thead tr:first-child th {
+                            border-top: 0;
+                        }
+                        .jw-lines th {
+                            font-weight: 700;
+                            text-align: center;
+                            background: #f1f1f1;
+                            font-size: 10px;
+                            line-height: 1.2;
+                            padding: 5px 4px;
+                            vertical-align: middle;
+                        }
+                        .jw-lines td {
+                            font-size: 10px;
+                            line-height: 1.25;
+                            padding: 5px 4px;
+                        }
+                        .jw-center {
+                            text-align: center;
+                        }
+                        .jw-right {
+                            text-align: right;
+                        }
+                    </style>
+
+                    <div class="jw-report-wrap">
+                        <table class="jw-header">
+                            <tr>
+                                <td class="jw-logo-box">
+                                    <img t-if="company.logo"
+                                         t-att-src="image_data_uri(company.logo)"
+                                         alt="Company Logo"
+                                         class="jw-logo"/>
+                                </td>
+                                <td class="jw-company-box">
+                                    <p class="jw-company-name">
+                                        <span t-esc="company.name or ''"/>
+                                    </p>
+                                    <div class="jw-company-address">
+                                        <span t-esc="company.partner_id.contact_address or ''"/>
+                                        <t t-if="company.phone">
+                                            <br/>Ph: <span t-esc="company.phone"/>
+                                        </t>
+                                        <t t-if="company.email">
+                                            <br/>Email: <span t-esc="company.email"/>
+                                        </t>
+                                        <t t-if="company.partner_id.vat">
+                                            <br/>GSTIN: <span t-esc="company.partner_id.vat"/>
+                                        </t>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <h2 class="jw-title">Issue Order</h2>
+
+                        <table class="jw-addr-section">
+                            <tr>
+                                <td style="width: 100%;">
+                                    <div class="jw-addr-name">
+                                        <span t-esc="doc.contractor_id.name or ''"/>
+                                    </div>
+                                    <div class="jw-addr-text">
+                                        <t t-if="doc.contractor_id.contact_address">
+                                            <span t-esc="doc.contractor_id.contact_address"/>
+                                            <br/>
+                                        </t>
+                                        <t t-if="contractor_contact_number">
+                                            <strong>Ph:</strong>
+                                            <span t-esc="contractor_contact_number"/>
+                                            <br/>
+                                        </t>
+                                        <t t-if="doc.contractor_id.vat">
+                                            <strong>GSTIN:</strong>
+                                            <span t-esc="doc.contractor_id.vat"/>
+                                        </t>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table class="jw-table jw-meta">
+                            <tr>
+                                <td class="jw-label">Issue Slip Number</td>
+                                <td class="jw-center"><span t-esc="doc.name or ''"/></td>
+                                <td class="jw-label">Date</td>
+                                <td class="jw-center"><span t-field="doc.issue_date" t-options="{'widget': 'date'}"/></td>
+                            </tr>
+                        </table>
+
+                        <table class="jw-table jw-lines">
+                            <thead>
+                                <tr>
+                                    <th style="width: 8%;">Sr.no</th>
+                                    <th style="width: 40%;">Product</th>
+                                    <th style="width: 18%;">HSN Number</th>
+                                    <th style="width: 14%;">UOM</th>
+                                    <th style="width: 20%;">Issue Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="doc.line_ids" t-as="line">
+                                    <td class="jw-center">
+                                        <span t-esc="line_index + 1"/>
+                                    </td>
+                                    <td>
+                                        <span t-esc="line.product_id.display_name or ''"/>
+                                    </td>
+                                    <td class="jw-center">
+                                        <span t-esc="line.product_id.l10n_in_hsn_code or ''"/>
+                                    </td>
+                                    <td class="jw-center">
+                                        <span t-esc="line.product_uom_id.name or ''"/>
+                                    </td>
+                                    <td class="jw-right">
+                                        <span t-esc="'%g' % (line.qty or 0.0)"/>
+                                    </td>
+                                </tr>
+                                <tr t-if="not doc.line_ids">
+                                    <td colspan="5" class="jw-center">No product lines found.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

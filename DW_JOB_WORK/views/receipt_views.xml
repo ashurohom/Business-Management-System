@@ -5,8 +5,14 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="receipt_date"/>
+                <field name="issue_id"/>
                 <field name="contractor_id"/>
                 <field name="state"/>
+                <field name="status_display"
+                       string="Status"
+                       readonly="1"
+                       decoration-warning="state == 'draft'"
+                       widget="badge"/>
             </tree>
         </field>
     </record>
@@ -24,6 +30,7 @@
                     <group>
                         <group>
                             <field name="receipt_date" readonly="state != 'draft'"/>
+                            <field name="issue_id" readonly="1"/>
                             <field name="contractor_id" readonly="state != 'draft'"/>
                         </group>
                     </group>
