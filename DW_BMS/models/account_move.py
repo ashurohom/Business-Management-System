@@ -120,6 +120,7 @@ class AccountMove(models.Model):
         "BILL Pincode",
         "BILLING Address",
         "Components",
+        "Invoice Status",
     ]
 
     shipping_ids = fields.One2many(
@@ -583,6 +584,7 @@ class AccountMove(models.Model):
             self.billing_pincode or "",
             self.billing_address or "",
             components_override if components_override is not None else self._get_kit_components(line.product_id),
+            {'posted': 'Posted', 'cancel': 'Cancelled', 'draft': 'Draft'}.get(self.state, self.state),
         ]
 
     def _get_kit_component_export_rows(self, line, bom):
@@ -1261,18 +1263,153 @@ class AccountMove(models.Model):
         }
 
     def action_post(self):
-        res = super().action_post()
+        """Preserve the existing invoice number when re-posting an out_invoice.
+
+        First post  -> name is '/' -> Odoo assigns the next sequence normally.
+        Re-post     -> name already set (e.g. 'TEST0019') -> lock it, prevent
+                       _set_next_sequence() from replacing it, and use a direct
+                       SQL restore as an absolute final safety-net.
+        """
+        # ── Step 1: Snapshot names of already-numbered customer invoices ──────
+        locked_names = {
+            move.id: move.name
+            for move in self.filtered(lambda m: m.move_type == 'out_invoice')
+            if move.posted_before and move.name and move.name != '/'
+        }
+
+        # ── Step 2: Standard posting with locked names in context ─────────────
+        # _set_next_sequence override intercepts and restores name for locked
+        # moves instead of generating a new sequence number.
+        res = super(AccountMove, self.with_context(
+            dw_locked_invoice_names=locked_names
+        )).action_post()
+
+        # ── Step 3: Absolute safety-net via direct SQL UPDATE ─────────────────
+        # If _compute_name / _set_next_sequence still changed the name (for any
+        # reason), we forcefully restore it using a raw SQL UPDATE that bypasses
+        # ALL ORM validation, compute triggers, and constraints.
+        moves_to_fix = [
+            (original, move_id)
+            for move_id, original in locked_names.items()
+            if self.browse(move_id).name != original
+        ]
+        if moves_to_fix:
+            for original, move_id in moves_to_fix:
+                self.env.cr.execute(
+                    "UPDATE account_move SET name = %s WHERE id = %s",
+                    (original, move_id)
+                )
+                # Invalidate ORM cache so UI shows the corrected name.
+                self.browse(move_id).invalidate_recordset(['name'])
+
+        # ── Step 4: Activity timeline entries ─────────────────────────────────
         for move in self.filtered(lambda m: m.move_type == 'out_invoice'):
             sale_orders = move.invoice_line_ids.sale_line_ids.order_id
             for order in sale_orders:
                 self.env['activity.timeline'].create({
                     'quotation_id': order.id,
                     'activity_type': 'invoice',
-                    'description': f'Invoice {move.name} posted.',
+                    'description': 'Invoice %s posted.' % move.name,
                     'status': 'Posted',
                 })
         return res
 
+    # =========================================================================
+    # Invoice Number Preservation
+    # =========================================================================
+    # Strategy overview:
+    #
+    # A. _set_next_sequence  (PRIMARY guard for re-post)
+    #    Core calls move._set_next_sequence() inside _compute_name when it
+    #    decides to mint a new number.  We override it to short-circuit that
+    #    for moves whose id is in 'dw_locked_invoice_names' context.  This
+    #    avoids all ORM cache-timing issues because we never read move.name
+    #    during a compute of name itself.
+    #
+    # B. _compute_name override  (guard for draft/cancel states)
+    #    When state -> draft or cancel, the standard logic can clear name to
+    #    '/' for cross-period sequences.  We exclude already-named,
+    #    previously-posted out_invoices from that path.
+    #
+    # C. button_draft / button_cancel  (snapshot + restore safety-net)
+    # =========================================================================
+
+    def _set_next_sequence(self):
+        """PRIMARY guard for re-post: skip sequence generation when the move
+        name is locked in context.
+
+        action_post() passes 'dw_locked_invoice_names' in context.  When
+        _compute_name calls self._set_next_sequence() on a locked move we
+        restore the original name instead of generating a new one.
+        """
+        locked = self.env.context.get('dw_locked_invoice_names', {})
+        if self.move_type == 'out_invoice' and self.id in locked:
+            original = locked[self.id]
+            if original and original != '/':
+                self.name = original
+                return
+        return super()._set_next_sequence()
+
+    def _dw_posted_name_map(self):
+        """Return {move_id: name} for out_invoice moves with a real name."""
+        return {
+            move.id: move.name
+            for move in self
+            if move.move_type == 'out_invoice'
+            and move.posted_before
+            and move.name
+            and move.name != '/'
+        }
+
+    def _dw_restore_names(self, name_map):
+        """Write back preserved names if _compute_name wiped them."""
+        for move in self:
+            preserved = name_map.get(move.id)
+            if preserved and (not move.name or move.name == '/'):
+                super(AccountMove, move).write({'name': preserved})
+
+    def button_draft(self):
+        """Reset to draft while preserving invoice number for out_invoices."""
+        name_map = self._dw_posted_name_map()
+        result = super().button_draft()
+        self._dw_restore_names(name_map)
+        return result
+
+    def button_cancel(self):
+        """Cancel while preserving invoice number for out_invoices."""
+        name_map = self._dw_posted_name_map()
+        result = super().button_cancel()
+        self._dw_restore_names(name_map)
+        return result
+
+    @api.depends('posted_before', 'state', 'journal_id', 'date', 'move_type', 'payment_id')
+    def _compute_name(self):
+        """Guard draft/cancel: prevent name being cleared to '/' for out_invoice
+        moves that were previously posted.
+
+        In draft/cancel the name field is NOT the one being recomputed so
+        reading move.name here is safe (returns the stored DB value).
+
+        The re-post scenario (state->posted) is handled by _set_next_sequence.
+        """
+        protected = self.filtered(
+            lambda m: (
+                m.move_type == 'out_invoice'
+                and m.posted_before
+                and m.name
+                and m.name != '/'
+                and m.state in ('draft', 'cancel')
+            )
+        )
+        remaining = self - protected
+        if remaining:
+            super(AccountMove, remaining)._compute_name()
+        # Safety net: restore if ORM cache flush wiped the name.
+        for move in protected:
+            if not move.name or move.name == '/':
+                original = move._origin.name
+                if original and original != '/':
+                    super(AccountMove, move).write({'name': original})
 
 
 class AccountMoveLine(models.Model):

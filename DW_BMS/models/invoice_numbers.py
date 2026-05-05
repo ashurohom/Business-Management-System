@@ -78,7 +78,15 @@ class AccountMove(models.Model):
         if self._skip_invoice_type_sequence():
             return
 
+        preserved_names = self.env.context.get('dw_preserved_invoice_names', {})
+
         for move in self.filtered(lambda m: m.move_type == 'out_invoice'):
+            if move.id in preserved_names:
+                preserved_name = preserved_names[move.id]
+                if preserved_name and preserved_name != '/' and move.name != preserved_name:
+                    move.write({'name': preserved_name})
+                continue
+
             if not move.invoice_type:
                 raise UserError("Please select Invoice Type before posting invoice.")
 
@@ -124,6 +132,15 @@ class AccountMove(models.Model):
 
     def action_post(self):
         self._assign_invoice_type_sequence_validation()
-        result = super().action_post()
-        self.filtered(lambda m: m.state == 'posted')._assign_invoice_type_sequence()
+        preserved_names = {
+            move.id: move.name
+            for move in self.filtered(lambda m: m.move_type == 'out_invoice')
+            if move.posted_before and move.name and move.name != '/'
+        }
+        result = super(AccountMove, self.with_context(
+            dw_preserved_invoice_names=preserved_names
+        )).action_post()
+        self.with_context(
+            dw_preserved_invoice_names=preserved_names
+        ).filtered(lambda m: m.state == 'posted')._assign_invoice_type_sequence()
         return result
