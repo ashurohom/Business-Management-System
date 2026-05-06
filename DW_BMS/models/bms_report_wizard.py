@@ -1,5 +1,6 @@
 import base64
 from collections import defaultdict
+from datetime import date, datetime
 from io import BytesIO
 
 import xlsxwriter
@@ -56,6 +57,22 @@ class BmsReportWizard(models.TransientModel):
     def _selection_label(self, field_name, value):
         return dict(self._fields[field_name].selection).get(value)
 
+    def _format_date_value(self, value):
+        if not value:
+            return ""
+        if isinstance(value, datetime):
+            return value.strftime("%d/%m/%Y %H:%M:%S")
+        if isinstance(value, date):
+            return value.strftime("%d/%m/%Y")
+        return str(value)
+
+    def _get_bank_entry_type(self, payment):
+        if payment.payment_type == "inbound":
+            return "Credit"
+        if payment.payment_type == "outbound":
+            return "Debit"
+        return "Transfer"
+
     def _date_domain(self, field_name):
         domain = []
         if self.date_from:
@@ -94,8 +111,8 @@ class BmsReportWizard(models.TransientModel):
             "partner": self.partner_id.display_name or "All",
             "partner_role": self._selection_label("partner_role", self.partner_role),
             "payment_status": self._selection_label("payment_status", self.payment_status),
-            "date_from": self.date_from,
-            "date_to": self.date_to,
+            "date_from": self._format_date_value(self.date_from),
+            "date_to": self._format_date_value(self.date_to),
             "user": self.user_id.display_name or "All",
             "shipping_status": self._selection_label("shipping_status", self.shipping_status),
         }
@@ -147,7 +164,7 @@ class BmsReportWizard(models.TransientModel):
             purchase_lines.append(
                 {
                     "name": order.name,
-                    "date": order.date_order.date() if order.date_order else False,
+                    "date": self._format_date_value(order.date_order.date() if order.date_order else False),
                     "partner": order.partner_id.display_name,
                     "amount": order.amount_total,
                 }
@@ -157,7 +174,7 @@ class BmsReportWizard(models.TransientModel):
             sale_lines.append(
                 {
                     "name": order.name,
-                    "date": order.date_order.date() if order.date_order else False,
+                    "date": self._format_date_value(order.date_order.date() if order.date_order else False),
                     "partner": order.partner_id.display_name,
                     "user": order.user_id.display_name or "",
                     "amount": order.amount_total,
@@ -286,7 +303,7 @@ class BmsReportWizard(models.TransientModel):
             lines.append(
                 {
                     "name": move.name,
-                    "date": move.invoice_date,
+                    "date": self._format_date_value(move.invoice_date),
                     "partner": move.partner_id.display_name,
                     "total": move.amount_total,
                     "paid": paid_amount,
@@ -323,7 +340,7 @@ class BmsReportWizard(models.TransientModel):
             lines.append(
                 {
                     "name": move.name,
-                    "date": move.invoice_date,
+                    "date": self._format_date_value(move.invoice_date),
                     "partner": move.partner_id.display_name,
                     "total": move.amount_total,
                     "paid": paid_amount,
@@ -347,11 +364,12 @@ class BmsReportWizard(models.TransientModel):
             bank_summary[bank_name] += payment.amount
             bank_detail.append(
                 {
-                    "date": payment.date,
+                    "date": self._format_date_value(payment.date),
                     "name": payment.name,
                     "bank": bank_name,
                     "partner": payment.partner_id.display_name,
                     "amount": payment.amount,
+                    "entry_type": self._get_bank_entry_type(payment),
                 }
             )
         return {
@@ -426,7 +444,7 @@ class BmsReportWizard(models.TransientModel):
             delivery_status = self._get_manifest_delivery_status(sale_order)
             manifest_lines.append(
                 {
-                    "invoice_date": invoice.invoice_date,
+                    "invoice_date": self._format_date_value(invoice.invoice_date),
                     "invoice_number": invoice.name,
                     "customer_name": invoice.partner_id.display_name,
                     "contact_number": contact_number,
@@ -467,6 +485,7 @@ class BmsReportWizard(models.TransientModel):
 
         return {
             "generated_on": fields.Datetime.now(),
+            "generated_on_display": self._format_date_value(fields.Datetime.now()),
             "report_type": self.report_type,
             "title": title,
             "filters": self._base_filters(),
@@ -636,9 +655,9 @@ class BmsReportWizard(models.TransientModel):
             row = self._write_table(
                 sheet,
                 row,
-                ["Date", "Payment", "Bank", "Partner", "Amount"],
+                ["Date", "Payment", "Bank", "Partner", "Entry Type", "Amount"],
                 [
-                    [l["date"], l["name"], l["bank"], l["partner"], l["amount"]]
+                    [l["date"], l["name"], l["bank"], l["partner"], l["entry_type"], l["amount"]]
                     for l in data["bank_detail_lines"]
                 ],
                 bold,

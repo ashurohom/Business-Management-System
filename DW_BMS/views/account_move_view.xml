@@ -219,7 +219,7 @@
                 <attribute name="groups">account.group_account_invoice,!DW_BMS.group_packing_team</attribute>
             </xpath>
             <xpath expr="//button[@name='action_reverse']" position="attributes">
-                <attribute name="groups">account.group_account_invoice,!DW_BMS.group_packing_team</attribute>
+                <attribute name="groups">DW_BMS.group_edit_invoice,!DW_BMS.group_packing_team</attribute>
             </xpath>
             <xpath expr="(//button[@name='button_cancel'])[1]" position="attributes">
                 <attribute name="groups">account.group_account_invoice,!DW_BMS.group_packing_team</attribute>
@@ -228,7 +228,7 @@
                 <attribute name="groups">account.group_account_invoice,!DW_BMS.group_packing_team</attribute>
             </xpath>
             <xpath expr="//button[@name='button_draft']" position="attributes">
-                <attribute name="groups">account.group_account_invoice,!DW_BMS.group_packing_team</attribute>
+                <attribute name="groups">DW_BMS.group_edit_invoice,!DW_BMS.group_packing_team</attribute>
             </xpath>
             <xpath expr="//button[@name='button_request_cancel']" position="attributes">
                 <attribute name="groups">account.group_account_invoice,!DW_BMS.group_packing_team</attribute>

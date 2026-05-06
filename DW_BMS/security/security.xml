@@ -58,6 +58,14 @@
     </record>
 
     <!-- ========================= -->
+    <!-- EDIT INVOICE USER -->
+    <!-- ========================= -->
+    <record id="group_edit_invoice" model="res.groups">
+        <field name="name">Edit Invoice</field>
+        <field name="category_id" ref="module_category_dw_bms"/>
+    </record>
+
+    <!-- ========================= -->
     <!-- BMS MANUFACTURING USER -->
     <!-- ========================= -->
     <record id="group_bms_manufacturing" model="res.groups">

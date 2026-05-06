@@ -515,6 +515,7 @@
                                     <th class="text-left">Payment Ref</th>
                                     <th class="text-left">Bank / Journal</th>
                                     <th class="text-left">Partner</th>
+                                    <th class="text-left">Entry Type</th>
                                     <th class="text-right">Amount</th>
                                 </tr>
                             </thead>
@@ -524,6 +525,7 @@
                                     <td class="fw-bold"><span t-esc="line['name']"/></td>
                                     <td><span t-esc="line['bank']"/></td>
                                     <td><span t-esc="line['partner']"/></td>
+                                    <td><span t-esc="line['entry_type']"/></td>
                                     <td class="text-right fw-bold"><span t-esc="line['amount']"/></td>
                                 </tr>
                             </tbody>
@@ -572,7 +574,7 @@
                             <tr>
                                 <td><span t-esc="company.name"/> Confidential</td>
                                 <td class="text-right">
-                                    Generated on <span t-esc="report_data['generated_on'].strftime('%d/%m/%Y') if report_data['generated_on'] else ''"/>
+                                    Generated on <span t-esc="report_data['generated_on_display']"/>
                                 </td>
                             </tr>
                         </table>

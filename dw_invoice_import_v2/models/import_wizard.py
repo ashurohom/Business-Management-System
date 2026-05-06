@@ -81,6 +81,41 @@ class InvoiceImportWizard(models.TransientModel):
             raise UserError("No outgoing operation type found for the invoice company.")
         return picking_type
 
+    def _get_invoice_fiscal_position(self, partner, company):
+        company_state = company.partner_id.state_id or company.state_id
+        partner_state = partner.state_id
+
+        if not company_state or not partner_state:
+            return self.env['account.fiscal.position']
+
+        fiscal_position_names = [
+            'GST Intra State',
+            'Intra State',
+        ] if company_state.id == partner_state.id else [
+            'GST Inter State',
+            'Inter State',
+        ]
+        fiscal_position = self.env['account.fiscal.position'].search([
+            ('name', 'in', fiscal_position_names),
+            ('company_id', '=', company.id),
+        ], limit=1)
+        if fiscal_position:
+            return fiscal_position
+
+        # Fallback to any company fiscal position that auto-detects this state rule.
+        state_domain = [('state_ids', 'in', partner_state.id)]
+        if company_state.id == partner_state.id:
+            state_domain = [('state_ids', 'in', partner_state.id)]
+        else:
+            state_domain = [('state_ids', 'in', partner_state.id)]
+
+        return self.env['account.fiscal.position'].search([
+            ('company_id', '=', company.id),
+            ('auto_apply', '=', True),
+            ('country_id.code', '=', 'IN'),
+            *state_domain,
+        ], limit=1)
+
     def _check_stock_availability(self, product_qty, company):
         stock_products = self.env['product.product'].browse(
             [product_id for product_id, qty in product_qty.items() if qty]
@@ -225,6 +260,7 @@ class InvoiceImportWizard(models.TransientModel):
 
         seq_code = f"dw.invoice.{self.invoice_type}"
         seq = self.env['ir.sequence'].search([('code', '=', seq_code)], limit=1)
+        fiscal_position = self._get_invoice_fiscal_position(self.partner_id, self.env.company)
 
         invoice_vals = {
             'move_type': 'out_invoice',
@@ -232,6 +268,7 @@ class InvoiceImportWizard(models.TransientModel):
             'invoice_date': self.invoice_date,
             'invoice_type': self.invoice_type,
             'dw_shipping_id': self.shipping_id,
+            'fiscal_position_id': fiscal_position.id,
         }
 
         if seq:
@@ -244,11 +281,19 @@ class InvoiceImportWizard(models.TransientModel):
         lines = []
         for product_id, qty in product_qty.items():
             product = products_by_id[product_id]
+            product_taxes = product.taxes_id.filtered(
+                lambda tax: tax.type_tax_use == 'sale' and tax.company_id == invoice.company_id
+            )
+            mapped_taxes = (
+                fiscal_position.map_tax(product_taxes)
+                if fiscal_position
+                else product_taxes
+            )
             lines.append((0, 0, {
                 'product_id': product.id,
                 'quantity': qty,
                 'price_unit': product.lst_price,
-                'tax_ids': [(6, 0, product.taxes_id.ids)],
+                'tax_ids': [(6, 0, mapped_taxes.ids)],
             }))
 
         invoice.write({'invoice_line_ids': lines})
